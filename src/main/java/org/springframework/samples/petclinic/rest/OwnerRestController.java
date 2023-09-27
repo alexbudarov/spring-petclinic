@@ -36,6 +36,7 @@ public class OwnerRestController {
 	@PostMapping
 	@ResponseStatus(HttpStatus.OK)
 	public Owner create(@RequestBody @Valid Owner owner) {
+		owner.setId(null);
 		ownerRepository.save(owner);
 		return owner;
 	}
