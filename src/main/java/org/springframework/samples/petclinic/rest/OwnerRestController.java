@@ -24,6 +24,13 @@ public class OwnerRestController {
 	public Owner findById(@PathVariable Integer id) {
 		return ownerRepository.findById(id);
 	}
+	/*
+	// proper implementation
+    public ResponseEntity<Owner> findById(@PathVariable Integer id) {
+		Owner owner = ownerRepository.findById(id);
+		return ResponseEntity.ofNullable(owner);
+	}
+	 */
 
 	@GetMapping
 	public Page<Owner> findByLastName(@RequestParam(required = false) String lastName, Pageable pageable) {
