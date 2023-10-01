@@ -3,7 +3,7 @@ package org.springframework.samples.petclinic.system;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
-import org.springframework.samples.petclinic.rest.rasupport.RaRangeArgumentResolver;
+import org.springframework.samples.petclinic.rest.rasupport.RaRangeSortArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -32,6 +32,6 @@ class ApplicationWebMvcConfigurer implements WebMvcConfigurer {
 
 	@Override
 	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-		resolvers.add(new RaRangeArgumentResolver());
+		resolvers.add(new RaRangeSortArgumentResolver());
 	}
 }

@@ -6,7 +6,7 @@ export const VetList = () => (
             <TextField source="id"/>
             <TextField source="firstName"/>
             <TextField source="lastName"/>        
-            <FunctionField source="specialties" render={(record: any) => {
+            <FunctionField source="specialties" sortable={false} render={(record: any) => {
                 return (record.specialties || []).map((s: any) => s.name).join(", ")
             }}
             />
