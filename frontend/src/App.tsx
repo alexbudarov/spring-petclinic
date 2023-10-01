@@ -6,6 +6,7 @@ import {
   ShowGuesser,
 } from "react-admin";
 import { dataProvider } from "./dataProvider";
+import { VetList } from "./app/resources/vet/VetList";
 
 export const App = () => (
   <Admin dataProvider={dataProvider}>
@@ -29,9 +30,7 @@ export const App = () => (
     />
     <Resource
       name="vet"
-      list={ListGuesser}
-      edit={EditGuesser}
-      show={ShowGuesser}
+      list={VetList}
     />
     <Resource
       name="visit"
