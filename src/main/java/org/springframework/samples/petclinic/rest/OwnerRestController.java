@@ -8,16 +8,24 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.samples.petclinic.owner.Owner;
 import org.springframework.samples.petclinic.owner.OwnerRepository;
+import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
+import org.springframework.samples.petclinic.rest.rasupport.RaRangeSort;
+import org.springframework.samples.petclinic.vet.Vet;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/rest/owner")
 public class OwnerRestController {
 
 	private final OwnerRepository ownerRepository;
+	private final RaProtocolUtil raProtocolUtil;
 
-	public OwnerRestController(OwnerRepository ownerRepository) {
+	public OwnerRestController(OwnerRepository ownerRepository,
+							   RaProtocolUtil raProtocolUtil) {
 		this.ownerRepository = ownerRepository;
+		this.raProtocolUtil = raProtocolUtil;
 	}
 
 	@GetMapping("/{id}")
@@ -33,11 +41,14 @@ public class OwnerRestController {
 	 */
 
 	@GetMapping
-	public Page<Owner> findByLastName(@RequestParam(required = false) String lastName, Pageable pageable) {
+	public ResponseEntity<List<Owner>> findByLastName(@RequestParam(required = false) String lastName,
+													  RaRangeSort range) {
 		if (lastName == null) {
 			lastName = "";
 		}
-		return ownerRepository.findByLastName(lastName, pageable);
+		Page<Owner> page = ownerRepository.findByLastName(lastName, range.pageable);
+		ResponseEntity<List<Owner>> response = raProtocolUtil.convertToResponseEntity(page, "owner");
+		return response;
 	}
 
 	@PostMapping
