@@ -18,11 +18,6 @@ class ApplicationWebMvcConfigurer implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/rest/**").allowedOrigins(allowedCorsOrigins);
-
-        registry.addMapping("/**")
-                .allowedOrigins("*")
-                .allowedMethods("GET")
-                .maxAge(3600);
     }
 
 	@Override
