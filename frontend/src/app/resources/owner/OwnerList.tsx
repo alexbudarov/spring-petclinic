@@ -1,7 +1,11 @@
-import { Datagrid, FunctionField, List, TextField } from "react-admin"
+import { Datagrid, FunctionField, List, TextField, TextInput } from "react-admin"
+
+const filters = [
+    <TextInput label="Last name" source="lastName" alwaysOn />,
+];
 
 export const OwnerList = () => (
-    <List>
+    <List filters={filters}>
         <Datagrid bulkActionButtons={false}>
             <TextField source="id"/>
             <TextField source="firstName"/>

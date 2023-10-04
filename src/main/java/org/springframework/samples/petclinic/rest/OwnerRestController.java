@@ -2,15 +2,13 @@ package org.springframework.samples.petclinic.rest;
 
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.samples.petclinic.owner.Owner;
 import org.springframework.samples.petclinic.owner.OwnerRepository;
+import org.springframework.samples.petclinic.rest.rasupport.RaFilter;
 import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
 import org.springframework.samples.petclinic.rest.rasupport.RaRangeSort;
-import org.springframework.samples.petclinic.vet.Vet;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,8 +39,9 @@ public class OwnerRestController {
 	 */
 
 	@GetMapping
-	public ResponseEntity<List<Owner>> findByLastName(@RequestParam(required = false) String lastName,
+	public ResponseEntity<List<Owner>> findByLastName(RaFilter filter,
 													  RaRangeSort range) {
+		String lastName = (String) filter.parameters.get("lastName");
 		if (lastName == null) {
 			lastName = "";
 		}
