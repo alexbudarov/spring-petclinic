@@ -1,13 +1,8 @@
-import { Datagrid, FunctionField, List, TextField, TextInput } from "react-admin"
+import { FunctionField, Show, SimpleShowLayout, TextField } from "react-admin";
 
-const filters = [
-    <TextInput label="Last name" source="lastName" alwaysOn />,
-];
-
-export const OwnerList = () => (
-    <List filters={filters}>
-        <Datagrid rowClick="show" bulkActionButtons={false}>
-            <TextField source="id"/>
+export const OwnerShow = () => (
+    <Show>
+        <SimpleShowLayout>
             <TextField source="firstName"/>
             <TextField source="lastName"/>
             <TextField source="address"/>
@@ -17,6 +12,6 @@ export const OwnerList = () => (
                 return (record.pets || []).map((p: any) => p.name).join(", ")
             }}
             />
-        </Datagrid>
-    </List>
+        </SimpleShowLayout>
+    </Show>
 )

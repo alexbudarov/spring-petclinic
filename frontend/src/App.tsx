@@ -8,14 +8,18 @@ import {
 import { dataProvider } from "./dataProvider";
 import { VetList } from "./app/resources/vet/VetList";
 import { OwnerList } from "./app/resources/owner/OwnerList";
+import { OwnerShow } from "./app/resources/owner/OwnerShow";
+import { ownerRecordRepresentation } from "./app/functions/ownerRecordRepresentation";
+import { OwnerEdit } from "./app/resources/owner/OwnerEdit";
 
 export const App = () => (
   <Admin dataProvider={dataProvider}>
     <Resource
       name="owner"
       list={OwnerList}
-      edit={EditGuesser}
-      show={ShowGuesser}
+      edit={OwnerEdit}
+      show={OwnerShow}
+      recordRepresentation={ownerRecordRepresentation}
     />
     <Resource
       name="pet-type"
