@@ -7,7 +7,9 @@ import org.springframework.samples.petclinic.rest.rasupport.RaRangeSortArgumentR
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.resource.PathResourceResolver;
 
 import java.util.List;
 
@@ -29,6 +31,15 @@ class ApplicationWebMvcConfigurer implements WebMvcConfigurer {
 			.allowedMethods("GET")
 			.maxAge(3600);
     }
+
+	@Override
+	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+		registry.addResourceHandler("/resources/**")
+				.addResourceLocations("classpath:/static/resources/")
+				.setCachePeriod(3600)
+				.resourceChain(true)
+				.addResolver(new PathResourceResolver());
+	}
 
 	@Override
 	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
