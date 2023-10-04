@@ -25,11 +25,6 @@ class ApplicationWebMvcConfigurer implements WebMvcConfigurer {
         registry.addMapping("/rest/**")
 			.allowedOrigins(allowedCorsOrigins)
 			.exposedHeaders(RaProtocolUtil.CONTENT_RANGE);
-
-		registry.addMapping("/**")
-			.allowedOrigins("*")
-			.allowedMethods("GET")
-			.maxAge(3600);
     }
 
 	@Override
@@ -39,6 +34,9 @@ class ApplicationWebMvcConfigurer implements WebMvcConfigurer {
 				.setCachePeriod(3600)
 				.resourceChain(true)
 				.addResolver(new PathResourceResolver());
+
+		registry.addResourceHandler("/webjars/**")
+				.addResourceLocations("/webjars/");
 	}
 
 	@Override
