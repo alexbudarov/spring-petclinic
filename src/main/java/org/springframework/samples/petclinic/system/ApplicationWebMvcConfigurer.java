@@ -4,10 +4,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.resource.PathResourceResolver;
 
-//@Configuration
-//@EnableWebMvc
+@Configuration
+@EnableWebMvc
 class ApplicationWebMvcConfigurer implements WebMvcConfigurer {
 
     @Value("${app.cors.allowedOrigins}")
@@ -22,4 +24,17 @@ class ApplicationWebMvcConfigurer implements WebMvcConfigurer {
                 .allowedMethods("GET")
                 .maxAge(3600);
     }
+
+	@Override
+	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+		registry.addResourceHandler("/resources/**")
+				.addResourceLocations("classpath:/static/resources/")
+				.setCachePeriod(3600)
+				.resourceChain(true)
+				.addResolver(new PathResourceResolver());
+
+		registry.addResourceHandler("/webjars/**")
+				.addResourceLocations("/webjars/");
+	}
+
 }
