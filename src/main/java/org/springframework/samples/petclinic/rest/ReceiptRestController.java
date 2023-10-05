@@ -34,6 +34,7 @@ public class ReceiptRestController {
         Optional<Receipt> receiptOptional = receiptRepository.findById(id);
         return ResponseEntity.of(receiptOptional);
     }
+    // doesn't check for non-existing id
 
     @PostMapping
     public Receipt save(@RequestBody @Valid Receipt entity) {
@@ -52,5 +53,13 @@ public class ReceiptRestController {
     // @Transactional
     // entityManager.refresh(receipt);
     // see also https://stackoverflow.com/questions/45491551/refresh-and-fetch-an-entity-after-save-jpa-spring-data-hibernate
+
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        receiptRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+    // doesn't check for non-existing id
 
 }
