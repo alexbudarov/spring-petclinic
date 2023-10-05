@@ -1,4 +1,4 @@
-import { FunctionField, Show, ShowBase, SimpleShowLayout, TextField, Title, WithRecord, useRecordContext } from "react-admin";
+import { FunctionField, RecordContextProvider, Show, ShowBase, SimpleShowLayout, TextField, Title, WithRecord, useRecordContext } from "react-admin";
 import { Card, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { ownerRecordRepresentation } from "../../functions/ownerRecordRepresentation";
 
@@ -6,7 +6,7 @@ export const OwnerShow = () => {
 
   return <>
     <ShowBase>
-      <Grid container spacing={2}>
+      <Grid container spacing={2} sx={{marginTop: "1em"}}>
         <WithRecord render={owner => 
             <Title title={"Owner '" + ownerRecordRepresentation(owner) + "'"} />
               }
@@ -26,11 +26,7 @@ export const OwnerShow = () => {
         </Grid>
         <Grid item xs={8}>
           <Card>
-          <SimpleShowLayout>
-              <FunctionField source="pets" sortable={false} render={(record: any) => {
-                return (record.pets || []).map((p: any) => p.name).join(", ");
-              } } />
-          </SimpleShowLayout>        
+            <PetCards/>
           </Card>
         </Grid>
       </Grid>
@@ -78,3 +74,26 @@ const OwnerFields = () => (
       </Table>
     </TableContainer>
 )
+
+const PetCards = () => {
+  const owner = useRecordContext();
+  const pets = owner?.pets ?? [];
+
+return <>
+    {pets.map((pet: any) => (
+        <RecordContextProvider value={pet}>
+          <PetCard/>
+        </RecordContextProvider>
+    ))}
+  </>
+}
+
+const PetCard = () => {
+  return <>
+  <Card variant="outlined">
+    <SimpleShowLayout>
+      <TextField source="name"/>
+    </SimpleShowLayout>
+  </Card>
+  </>
+}
