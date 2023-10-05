@@ -12,7 +12,7 @@ export const OwnerList = () => (
             <TextField source="lastName"/>
             <TextField source="address"/>
             <TextField source="city"/>
-            <TextField source="telephone"/>            
+            <TextField source="telephone"/>
             <FunctionField source="pets" sortable={false} render={(record: any) => {
                 return (record.pets || []).map((p: any) => p.name).join(", ")
             }}
