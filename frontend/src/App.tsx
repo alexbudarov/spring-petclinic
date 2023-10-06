@@ -11,6 +11,7 @@ import { OwnerList } from "./app/resources/owner/OwnerList";
 import { OwnerShow } from "./app/resources/owner/OwnerShow";
 import { ownerRecordRepresentation } from "./app/functions/ownerRecordRepresentation";
 import { OwnerEdit } from "./app/resources/owner/OwnerEdit";
+import { OwnerCreate } from "./app/resources/owner/OwnerCreate";
 
 export const App = () => (
   <Admin dataProvider={dataProvider}>
@@ -19,6 +20,7 @@ export const App = () => (
       list={OwnerList}
       edit={OwnerEdit}
       show={OwnerShow}
+      create={OwnerCreate}
       recordRepresentation={ownerRecordRepresentation}
     />
     <Resource
