@@ -1,18 +1,19 @@
-import { DateField, FunctionField, RecordContextProvider, Show, ShowBase, SimpleShowLayout, TextField, Title, WithRecord, useRecordContext } from "react-admin";
-import { Card, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { Button, CreateButton, DateField, EditButton, FunctionField, Link, RecordContextProvider, Show, ShowBase, SimpleShowLayout, TextField, Title, WithRecord, useCreatePath, useRecordContext } from "react-admin";
+import { Card, Divider, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { ownerRecordRepresentation } from "../../functions/ownerRecordRepresentation";
+import { Add } from '@mui/icons-material';
 
 export const OwnerShow = () => {
 
   return <>
     <ShowBase>
-      <Grid container spacing={2} sx={{marginTop: "1em"}}>
+      <Grid container spacing={1} sx={{marginTop: "1em"}}>
         <WithRecord render={owner => 
             <Title title={"Owner '" + ownerRecordRepresentation(owner) + "'"} />
               }
          />
         <Grid item xs={8}>
-          <Typography variant="h5">
+          <Typography variant="h6">
               Owner Information
           </Typography>
         </Grid>
@@ -20,14 +21,12 @@ export const OwnerShow = () => {
           <OwnerFields />
         </Grid>
         <Grid item xs={8}>
-          <Typography variant="h5">
+          <Typography variant="h6">
             Pets and Visits
           </Typography>
         </Grid>
         <Grid item xs={8}>
-          <Card>
-            <PetCards/>
-          </Card>
+          <PetCards/>
         </Grid>
       </Grid>
       </ShowBase>
@@ -81,7 +80,7 @@ const PetCards = () => {
 
 return <>
     {pets.map((pet: any) => (
-        <RecordContextProvider value={pet}>
+        <RecordContextProvider value={pet} key={pet.id}>
           <PetCard/>
         </RecordContextProvider>
     ))}
@@ -91,11 +90,76 @@ return <>
 const PetCard = () => {
   return <>
   <Card variant="outlined">
-    <SimpleShowLayout>
-      <TextField source="name"/>
-      <DateField source="birthDate" options={{dateStyle: 'long'}} />
-      <FunctionField source="type" render={(record: any) => `${record.type?.name}`} />
-    </SimpleShowLayout>
+    <Grid container spacing={2}>
+      <Grid item xs={4}>
+      <SimpleShowLayout>
+        <TextField source="name"/>
+        <DateField source="birthDate" options={{dateStyle: 'long'}} />
+        <FunctionField source="type" render={(record: any) => `${record.type?.name}`} />
+      </SimpleShowLayout>
+      </Grid>
+      <Grid item xs={8}>
+        <VisitTable/>
+      </Grid>
+    </Grid>
   </Card>
   </>
 }
+
+const VisitTable = () => {
+  const pet = useRecordContext();
+  const visits = pet?.visits ?? [];
+
+  return <>
+    <TableContainer >
+      <Table size="small">
+        <TableHead>
+          <TableRow>
+            <TableCell>Visit Date</TableCell>
+            <TableCell>Description</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+            {visits.map((visit: any) => (
+              <RecordContextProvider value={visit} key={visit.id}>
+                <TableRow>
+                  <TableCell scope="row">
+                    <TextField source="date"/>
+                  </TableCell>
+                  <TableCell align="left">
+                    <TextField source="description"/>
+                  </TableCell>
+                </TableRow>            
+              </RecordContextProvider>
+            ))}
+            <TableRow>
+              <TableCell scope="row" sx={{border: 0}}>
+                <EditButton resource="pet" record={pet} label="Edit Pet" size="small"/>
+              </TableCell>
+              <TableCell align="left" sx={{border: 0}}>
+                <AddVisitButton pet={pet} />
+              </TableCell>
+            </TableRow>                        
+            </TableBody>
+      </Table>
+    </TableContainer>
+  </>
+}
+
+const AddVisitButton = (pet: any) => {
+  const createPath = useCreatePath();
+  
+  return <>
+    <Button
+      component={Link}
+      to={{
+        pathname: '/visit/create',
+        state: { record: { pet: pet.id } },
+      }}
+      label="Add visit"
+      size="small"
+    >
+      <Add />
+    </Button>
+  </>
+};
