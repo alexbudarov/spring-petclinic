@@ -20,6 +20,14 @@ export const OwnerShow = () => {
         <Grid item xs={8}>
           <OwnerFields />
         </Grid>
+        <Grid item xs={4}/>
+        <Grid item xs={1}>
+          <EditButton label="Edit Owner"/>
+        </Grid>
+        <Grid item xs={1}>
+          <AddPetButton/>
+        </Grid>
+        <Grid item xs={10}/>
         <Grid item xs={8}>
           <Typography variant="h6">
             Pets and Visits
@@ -157,6 +165,24 @@ const AddVisitButton = (pet: any) => {
         state: { record: { pet: pet.id } },
       }}
       label="Add visit"
+      size="small"
+    >
+      <Add />
+    </Button>
+  </>
+};
+
+const AddPetButton = () => {
+  const owner = useRecordContext();
+  
+  return <>
+    <Button
+      component={Link}
+      to={{
+        pathname: '/pet/create',
+        state: { record: { owner: owner?.id } },
+      }}
+      label="Add pet"
       size="small"
     >
       <Add />
