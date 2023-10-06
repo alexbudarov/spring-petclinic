@@ -1,7 +1,6 @@
 import { DateField, FunctionField, RecordContextProvider, Show, ShowBase, SimpleShowLayout, TextField, Title, WithRecord, useRecordContext } from "react-admin";
 import { Card, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { ownerRecordRepresentation } from "../../functions/ownerRecordRepresentation";
-import { transformArrayToDate } from "../../functions/transformArrayToDate";
 
 export const OwnerShow = () => {
 
