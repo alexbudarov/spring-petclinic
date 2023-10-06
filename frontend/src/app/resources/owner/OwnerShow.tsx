@@ -1,6 +1,7 @@
-import { FunctionField, RecordContextProvider, Show, ShowBase, SimpleShowLayout, TextField, Title, WithRecord, useRecordContext } from "react-admin";
+import { DateField, FunctionField, RecordContextProvider, Show, ShowBase, SimpleShowLayout, TextField, Title, WithRecord, useRecordContext } from "react-admin";
 import { Card, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { ownerRecordRepresentation } from "../../functions/ownerRecordRepresentation";
+import { transformArrayToDate } from "../../functions/transformArrayToDate";
 
 export const OwnerShow = () => {
 
@@ -93,6 +94,8 @@ const PetCard = () => {
   <Card variant="outlined">
     <SimpleShowLayout>
       <TextField source="name"/>
+      <DateField source="birthDate" transform={transformArrayToDate} options={{dateStyle: 'long'}} />
+      <FunctionField source="type" render={(record: any) => `${record.type?.name}`} />
     </SimpleShowLayout>
   </Card>
   </>
