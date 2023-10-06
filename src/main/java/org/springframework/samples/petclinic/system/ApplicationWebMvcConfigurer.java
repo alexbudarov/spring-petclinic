@@ -7,15 +7,11 @@ import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
 import org.springframework.samples.petclinic.rest.rasupport.RaRangeSortArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.resource.PathResourceResolver;
 
 import java.util.List;
 
 @Configuration
-@EnableWebMvc
 class ApplicationWebMvcConfigurer implements WebMvcConfigurer {
 
     @Value("${app.cors.allowed-origins}")
@@ -27,18 +23,6 @@ class ApplicationWebMvcConfigurer implements WebMvcConfigurer {
 			.allowedOrigins(allowedCorsOrigins)
 			.exposedHeaders(RaProtocolUtil.CONTENT_RANGE);
     }
-
-	@Override
-	public void addResourceHandlers(ResourceHandlerRegistry registry) {
-		registry.addResourceHandler("/resources/**")
-				.addResourceLocations("classpath:/static/resources/")
-				.setCachePeriod(3600)
-				.resourceChain(true)
-				.addResolver(new PathResourceResolver());
-
-		registry.addResourceHandler("/webjars/**")
-				.addResourceLocations("/webjars/");
-	}
 
 	@Override
 	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {

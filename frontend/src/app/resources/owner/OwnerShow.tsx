@@ -94,7 +94,7 @@ const PetCard = () => {
   <Card variant="outlined">
     <SimpleShowLayout>
       <TextField source="name"/>
-      <DateField source="birthDate" transform={transformArrayToDate} options={{dateStyle: 'long'}} />
+      <DateField source="birthDate" options={{dateStyle: 'long'}} />
       <FunctionField source="type" render={(record: any) => `${record.type?.name}`} />
     </SimpleShowLayout>
   </Card>
