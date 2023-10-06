@@ -43,7 +43,7 @@ const OwnerFields = () => (
                 Name
               </TableCell>
               <TableCell align="left">
-                <WithRecord render={owner => <span>{owner?.firstName + " " + owner?.lastName}</span>} />
+                <FunctionField source="name" render={(record: any) => `${record.firstName} ${record.lastName}`} />
               </TableCell>
             </TableRow>
             <TableRow>
