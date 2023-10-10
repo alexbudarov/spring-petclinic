@@ -2,6 +2,7 @@ package org.springframework.samples.petclinic.system;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.samples.petclinic.rest.rasupport.RaFilterArgumentResolver;
 import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
 import org.springframework.samples.petclinic.rest.rasupport.RaRangeSortArgumentResolver;
@@ -21,6 +22,8 @@ class ApplicationWebMvcConfigurer implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/rest/**")
 			.allowedOrigins(allowedCorsOrigins)
+			.allowedMethods(HttpMethod.GET.name(), HttpMethod.POST.name(),
+				HttpMethod.PUT.name(), HttpMethod.DELETE.name())
 			.exposedHeaders(RaProtocolUtil.CONTENT_RANGE);
     }
 
