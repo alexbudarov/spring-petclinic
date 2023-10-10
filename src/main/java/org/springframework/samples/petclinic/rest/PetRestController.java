@@ -5,79 +5,47 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.owner.Owner;
 import org.springframework.samples.petclinic.owner.OwnerRepository;
 import org.springframework.samples.petclinic.owner.Pet;
+import org.springframework.samples.petclinic.owner.PetRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/rest")
 public class PetRestController {
 
-	private final OwnerRepository ownerRepository;
+	private final PetRepository petRepository;
 
-	public PetRestController(OwnerRepository ownerRepository) {
-		this.ownerRepository = ownerRepository;
+	public PetRestController(PetRepository petRepository) {
+		this.petRepository = petRepository;
 	}
 
-	@GetMapping("/owner/{ownerId}/pet")
-	public ResponseEntity<List<Pet>> petsByOwnerId(@PathVariable Integer ownerId) {
-		Owner owner = ownerRepository.findById(ownerId);
-		if (owner == null) {
-			return ResponseEntity.notFound().build();
-		}
-		return ResponseEntity.ok(owner.getPets());
+	@GetMapping("/pet/{id}")
+	public ResponseEntity<Pet> findById(@PathVariable Integer id) {
+		Optional<Pet> petOptional = petRepository.findById(id);
+		return ResponseEntity.of(petOptional);
 	}
 
-	@GetMapping("/owner/{ownerId}/pet/{petId}")
-	public ResponseEntity<Pet> petById(@PathVariable Integer ownerId, @PathVariable Integer petId) {
-		Owner owner = ownerRepository.findById(ownerId);
-		if (owner == null) {
-			return ResponseEntity.notFound().build();
+	@PostMapping("/pet")
+	public ResponseEntity<Pet> create(@RequestBody @Valid Pet entity) {
+		if (entity.getId() != null) {
+			return ResponseEntity.badRequest().build();
 		}
-		List<Pet> pets = owner.getPets();
-		return pets.stream()
-			.filter(p -> p.getId().equals(petId))
-			.findAny()
-			.map(p -> ResponseEntity.ok(p))
-			.orElse(ResponseEntity.notFound().build());
+		Pet pet = petRepository.save(entity);
+		return ResponseEntity.ok(pet);
 	}
 
-	@PostMapping("/owner/{ownerId}/pet")
-	public ResponseEntity<Pet> createPet(@PathVariable Integer ownerId, @RequestBody @Valid Pet pet) {
-		Owner owner = ownerRepository.findById(ownerId);
-		if (owner == null) {
+	@PutMapping("/pet/{id}")
+	public ResponseEntity<Pet> update(@PathVariable Integer id, @RequestBody @Valid Pet entity) {
+		if (entity.getId() != null && !entity.getId().equals(id)) {
+			return ResponseEntity.badRequest().build();
+		}
+		if (!petRepository.existsById(id)) {
 			return ResponseEntity.notFound().build();
 		}
-
-		pet.setId(null);
-		owner.addPet(pet);
-		ownerRepository.save(owner);
-		owner = ownerRepository.findById(ownerId);
-		return ResponseEntity.ok(owner.getPets().stream()
-			.filter(p -> p.getName().equals(pet.getName()) && p.getType().getId().equals(pet.getType().getId()))
-			.findAny().orElseThrow()
-		);
-	}
-
-	@PutMapping("/owner/{ownerId}/pet/{petId}")
-	public ResponseEntity<Pet> createPet(@PathVariable Integer ownerId, @PathVariable Integer petId,
-										 @RequestBody @Valid Pet pet) {
-		Owner owner = ownerRepository.findById(ownerId);
-		if (owner == null) {
-			return ResponseEntity.notFound().build();
-		}
-
-		Pet existingPet = owner.getPet(petId);
-		if (existingPet == null) {
-			return ResponseEntity.notFound().build();
-		}
-		existingPet.setName(pet.getName());
-		existingPet.setType(pet.getType());
-		existingPet.setBirthDate(pet.getBirthDate());
-
-		ownerRepository.save(owner);
-		owner = ownerRepository.findById(ownerId);
-		return ResponseEntity.ok(owner.getPet(petId));
+		entity.setId(id);
+		Pet pet = petRepository.save(entity);
+		return ResponseEntity.ok(pet);
 	}
 }
-
