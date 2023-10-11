@@ -16,6 +16,7 @@
 package org.springframework.samples.petclinic.owner;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -79,4 +80,7 @@ public interface OwnerRepository extends Repository<Owner, Integer> {
 	@Transactional(readOnly = true)
 	Page<Owner> findAll(Pageable pageable);
 
+	@Query("SELECT distinct owner FROM Owner owner join owner.pets p where p.id = :petId")
+	@Transactional(readOnly = true)
+	Optional<Owner> findByPet(Integer petId);
 }
