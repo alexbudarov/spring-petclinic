@@ -12,6 +12,8 @@ import { OwnerShow } from "./app/resources/owner/OwnerShow";
 import { ownerRecordRepresentation } from "./app/functions/ownerRecordRepresentation";
 import { OwnerEdit } from "./app/resources/owner/OwnerEdit";
 import { OwnerCreate } from "./app/resources/owner/OwnerCreate";
+import { PetCreate } from "./app/resources/pet/PetCreate";
+import { PetEdit } from "./app/resources/pet/PetEdit";
 
 export const App = () => (
   <Admin dataProvider={dataProvider}>
@@ -28,12 +30,14 @@ export const App = () => (
       list={ListGuesser}
       edit={EditGuesser}
       show={ShowGuesser}
+      recordRepresentation="name"
     />
     <Resource
       name="pet"
       list={ListGuesser}
-      edit={EditGuesser}
+      edit={PetEdit}
       show={ShowGuesser}
+      create={PetCreate}
     />
     <Resource
       name="vet"

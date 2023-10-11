@@ -11,10 +11,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 public class RaFilterArgumentResolver implements HandlerMethodArgumentResolver {
 
@@ -53,13 +50,29 @@ public class RaFilterArgumentResolver implements HandlerMethodArgumentResolver {
             Map.Entry<String, JsonNode> entry = it.next();
             JsonNode value = entry.getValue();
             if (value.isValueNode()) {
-                filterValues.put(entry.getKey(),
-                        value.isTextual() ? value.asText() : (
-                                value.isNumber() ? value.asLong() : (value.isBoolean() ? value.asBoolean() : null)
-                        )
-                );
+                filterValues.put(entry.getKey(), extractScalar(value));
+            } else if (value.isArray()) {
+                filterValues.put(entry.getKey(), extractArray(value));
             }
         }
         return filterValues;
+    }
+
+    private Object extractScalar(JsonNode value) {
+        return value.isTextual() ? value.asText() : (
+                // todo properly handle long / int
+                value.isNumber() ? value.asInt() : (value.isBoolean() ? value.asBoolean() : null)
+        );
+    }
+
+    private Object[] extractArray(JsonNode arrayNode) {
+        List<Object> values = new ArrayList<>();
+        for (Iterator<JsonNode> it = arrayNode.elements(); it.hasNext(); ) {
+            JsonNode arrayItem = it.next();
+            if (arrayItem.isValueNode()) {
+                values.add(extractScalar(arrayItem));
+            }
+        }
+        return values.toArray();
     }
 }

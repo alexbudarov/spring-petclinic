@@ -39,8 +39,14 @@ public class OwnerRestController {
 	 */
 
 	@GetMapping
-	public ResponseEntity<List<Owner>> findByLastName(RaFilter filter,
-													  RaRangeSort range) {
+	public ResponseEntity<List<Owner>> ownerList(RaFilter filter,
+												 RaRangeSort range) {
+		Object idFilterParam = filter.parameters.get("id");
+		if (idFilterParam instanceof Object[]) {
+			Page<Owner> entities = ownerRepository.findByIdIn((Object[]) idFilterParam, range.pageable);
+			return raProtocolUtil.convertToResponseEntity(entities, "owner");
+		}
+
 		String lastName = (String) filter.parameters.get("lastName");
 		if (lastName == null) {
 			lastName = "";

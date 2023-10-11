@@ -33,4 +33,19 @@ public class RaProtocolUtil {
 		return response;
 	}
 
+	public <T> ResponseEntity<List<T>> convertToResponseEntity(List<T> list, String resourceName) {
+		String contentRange = String.format(
+				"%s %d-%d/%d",
+				resourceName,
+				0,
+				list.size(),
+				list.size()
+		);
+
+		ResponseEntity<List<T>> response = ResponseEntity.status(HttpStatus.OK)
+				.header(CONTENT_RANGE, contentRange)
+				.body(list);
+		return response;
+	}
+
 }

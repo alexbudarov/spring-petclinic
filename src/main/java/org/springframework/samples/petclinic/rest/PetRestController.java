@@ -28,13 +28,13 @@ public class PetRestController {
 	}
 
 	private PetDto toPetDto(Pet p) {
-		return PetDto.toDto(p, loadOwnerWithNames(p));
+		return PetDto.toDto(p, loadOwnerId(p));
 	}
 
 	@Nullable
-	private OwnerWithNames loadOwnerWithNames(Pet p) {
+	private Integer loadOwnerId(Pet p) {
 		Optional<Owner> owner = ownerRepository.findByPet(p.getId());
-		return owner.map(OwnerWithNames::toDto).orElse(null);
+		return owner.map(Owner::getId).orElse(null);
 	}
 
 	@PostMapping("/pet")
@@ -46,7 +46,7 @@ public class PetRestController {
 		pet = petRepository.save(pet);
 
 		// save association with owner
-		Owner owner = petDto.owner() != null ? petDto.owner().toEntity() : null;
+		Owner owner = petDto.ownerId() != null ? ownerRepository.findById(petDto.ownerId()) : null;
 		if (owner != null) {
 			owner = ownerRepository.findById(owner.getId());
 			owner.getPets().add(pet);
@@ -71,7 +71,7 @@ public class PetRestController {
 		pet = petRepository.save(pet);
 
 		// handler owner change
-		Owner owner = petDto.owner() != null ? petDto.owner().toEntity() : null;
+		Owner owner = petDto.ownerId() != null ? ownerRepository.findById(petDto.ownerId()) : null;
 		if (oldOwner != null && owner == null) {
 			oldOwner.getPets().remove(pet);
 			ownerRepository.save(oldOwner);

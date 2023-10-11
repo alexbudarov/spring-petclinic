@@ -97,8 +97,12 @@ public class RaRangeSortArgumentResolver implements HandlerMethodArgumentResolve
 	}
 
 	private static PageRequest createDefaultPageRequest(Sort sort) {
-		Sort.Order order = sort.stream().iterator().next();
-		// use default page size
-		return PageRequest.of(0, DEFAULT_PAGE_SIZE, order.getDirection(), order.getProperty());
+		if (sort.isEmpty()) {
+			return PageRequest.of(0, DEFAULT_PAGE_SIZE);
+		} else {
+			Sort.Order order = sort.stream().iterator().next();
+			// use default page size
+			return PageRequest.of(0, DEFAULT_PAGE_SIZE, order.getDirection(), order.getProperty());
+		}
 	}
 }
