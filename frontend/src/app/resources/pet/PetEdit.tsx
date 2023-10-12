@@ -1,4 +1,4 @@
-import { DateInput, Edit, Labeled, ReferenceField, ReferenceInput, SimpleForm, TextInput } from "react-admin";
+import { AutocompleteInput, DateInput, Edit, Labeled, ReferenceField, ReferenceInput, SimpleForm, TextInput, required } from "react-admin";
 import { redirectFromPetToOwner } from "./redirectFromPetToOwner";
 
 export const PetEdit = () => (
@@ -9,7 +9,9 @@ export const PetEdit = () => (
       </Labeled>
       <TextInput source="name" required autoFocus/>
       <DateInput source="birthDate" required/>
-      <ReferenceInput source="typeId" reference="pet-type" required/>
+      <ReferenceInput source="typeId" reference="pet-type">
+            <AutocompleteInput validate={required()} />
+        </ReferenceInput>
     </SimpleForm>
   </Edit>
 )

@@ -1,11 +1,13 @@
 package org.springframework.samples.petclinic.owner;
 
+import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDate;
 
 /**
  * DTO for {@link Pet}
  */
-public record PetDto(Integer id, String name, LocalDate birthDate, Integer typeId, Integer ownerId) {
+public record PetDto(Integer id, String name, LocalDate birthDate, @NotNull Integer typeId, Integer ownerId) {
 
     public static PetDto toDto(Pet pet, Integer ownerId) {
         return new PetDto(pet.getId(), pet.getName(), pet.getBirthDate(),
