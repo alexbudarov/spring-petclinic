@@ -61,13 +61,20 @@ public class PetRestController {
 		if (petDto.id() != null && !petDto.id().equals(id)) {
 			return ResponseEntity.badRequest().build();
 		}
-		if (!petRepository.existsById(id)) {
+		Pet pet = petRepository.findById(id).orElse(null);
+		if (pet == null) {
 			return ResponseEntity.notFound().build();
 		}
 		Owner oldOwner = ownerRepository.findByPet(id).orElse(null);
 
-		Pet pet = petDto.toEntity();
-		pet.setId(id);
+		Pet updatedPet = petDto.toEntity();
+
+		// to avoid problem with cascading visits
+		// map
+		pet.setName(updatedPet.getName());
+		pet.setBirthDate(updatedPet.getBirthDate());
+		pet.setType(updatedPet.getType());
+
 		pet = petRepository.save(pet);
 
 		// handler owner change
