@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 public class RaProtocolUtil {
@@ -19,11 +21,10 @@ public class RaProtocolUtil {
 	 *  according to the "ra-data-simple-rest" conventions.
 	 */
 	public <T> ResponseEntity<List<T>> convertToResponseEntity(Page<T> page, String resourceName) {
-		String contentRange = String.format(
-			"%s %d-%d/%d",
+		String contentRange = formatContentRange(
 			resourceName,
 			page.getPageable().getOffset(),
-			page.getPageable().getOffset() + page.getNumberOfElements(),
+			page.getPageable().getOffset() + page.getNumberOfElements() - 1,
 			page.getTotalElements()
 		);
 
@@ -33,12 +34,29 @@ public class RaProtocolUtil {
 		return response;
 	}
 
+	public <T, D> ResponseEntity<List<D>> convertToResponseEntity(Page<T> page, Function<T, D> mapper, String resourceName) {
+		String contentRange = formatContentRange(
+				resourceName,
+				page.getPageable().getOffset(),
+				page.getPageable().getOffset() + page.getNumberOfElements() - 1,
+				page.getTotalElements()
+		);
+
+		ResponseEntity<List<D>> response = ResponseEntity.status(HttpStatus.OK)
+				.header(CONTENT_RANGE, contentRange)
+				.body(
+						page.getContent().stream()
+						.map(mapper)
+						.collect(Collectors.toList())
+				);
+		return response;
+	}
+
 	public <T> ResponseEntity<List<T>> convertToResponseEntity(List<T> list, String resourceName) {
-		String contentRange = String.format(
-				"%s %d-%d/%d",
+		String contentRange = formatContentRange(
 				resourceName,
 				0,
-				list.size(),
+				list.size() - 1,
 				list.size()
 		);
 
@@ -46,6 +64,16 @@ public class RaProtocolUtil {
 				.header(CONTENT_RANGE, contentRange)
 				.body(list);
 		return response;
+	}
+
+	private String formatContentRange(String resourceName, long rangeStart, long rangeEnd, long total) {
+		return String.format(
+				"%s %d-%d/%d",
+				resourceName,
+				rangeStart,
+				rangeEnd,
+				total
+		);
 	}
 
 }

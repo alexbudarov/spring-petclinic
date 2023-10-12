@@ -1,51 +1,74 @@
 package org.springframework.samples.petclinic.rest;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.samples.petclinic.owner.*;
+import org.springframework.samples.petclinic.rest.rasupport.RaFilter;
+import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
+import org.springframework.samples.petclinic.rest.rasupport.RaRangeSort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 @RestController
 @RequestMapping("/rest")
 public class VisitRestController {
 
 	private final VisitRepository visitRepository;
-	private final OwnerRepository ownerRepository;
 	private final PetRepository petRepository;
+	private final RaProtocolUtil raProtocolUtil;
 
 	public VisitRestController(VisitRepository visitRepository,
-							   OwnerRepository ownerRepository,
-							   PetRepository petRepository) {
+							   PetRepository petRepository,
+							   RaProtocolUtil raProtocolUtil) {
 		this.visitRepository = visitRepository;
-		this.ownerRepository = ownerRepository;
 		this.petRepository = petRepository;
+		this.raProtocolUtil = raProtocolUtil;
 	}
 
-	@GetMapping("/owner/{ownerId}/pet/{petId}/visit")
-	public List<Visit> findByOwnerAndPet(@PathVariable int ownerId, @PathVariable int petId) {
-		return visitRepository.findByOwnerAndPet(ownerId, petId);
-	}
-
-	@PostMapping("/owner/{ownerId}/pet/{petId}/visit")
-	public ResponseEntity<Visit> save(@PathVariable int ownerId, @PathVariable int petId,
-									  @RequestBody @Valid Visit entity) {
-		Owner owner = ownerRepository.findById(ownerId);
-		if (owner == null) {
-			return ResponseEntity.notFound().build();
+	@PostMapping("/visit")
+	public ResponseEntity<VisitDto> save(@RequestBody @Valid VisitDto dto) {
+		if (dto.id() != null || dto.petId() == null) {
+			return ResponseEntity.badRequest().build();
 		}
-
-		Pet pet = owner.getPet(petId);
+		Pet pet = petRepository.findById(dto.petId()).orElse(null);
 		if (pet == null) {
-			return ResponseEntity.notFound().build();
+			return ResponseEntity.badRequest().build();
 		}
 
-		Visit savedVisit = visitRepository.save(entity);
+		Visit visit = dto.toEntity();
+		Visit savedVisit = visitRepository.save(visit);
+
 		pet.addVisit(savedVisit);
 		petRepository.save(pet);
 
-		return ResponseEntity.ok(savedVisit);
+		return ResponseEntity.ok(VisitDto.toDto(savedVisit, pet.getId()));
+	}
+
+	@GetMapping("/visit")
+	public ResponseEntity<List<VisitDto>> visitList(RaFilter filter, RaRangeSort rangeSort) {
+		Integer petId = (Integer) filter.parameters.get("petId");
+		if (petId != null) {
+			List<VisitDto> list = visitRepository.findByPet(petId)
+					.stream()
+					.map(v -> VisitDto.toDto(v, petId))
+					.collect(toList());
+
+			return raProtocolUtil.convertToResponseEntity(list, "visit");
+		}
+		Page<Visit> page = visitRepository.findAll(rangeSort.pageable);
+		return raProtocolUtil.convertToResponseEntity(page,
+				v -> VisitDto.toDto(v, loadPetId(v)),
+				"visit"
+		);
+	}
+
+	@Nullable
+	private Integer loadPetId(Visit visit) {
+		return petRepository.loadPetByVisit(visit.getId());
 	}
 }
-
