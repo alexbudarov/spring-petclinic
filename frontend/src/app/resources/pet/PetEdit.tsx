@@ -1,20 +1,15 @@
-import { DateInput, Edit, RedirectionSideEffect, ReferenceField, ReferenceInput, SimpleForm, TextInput } from "react-admin";
+import { DateInput, Edit, Labeled, ReferenceField, ReferenceInput, SimpleForm, TextInput } from "react-admin";
+import { redirectFromPetToOwner } from "./redirectFromPetToOwner";
 
 export const PetEdit = () => (
-  <Edit redirect={redirectAfterSave} mutationMode="pessimistic">
+  <Edit redirect={redirectFromPetToOwner} mutationMode="pessimistic">
     <SimpleForm>
-      <ReferenceField source="ownerId" reference="owner"/>
+      <Labeled label="Owner">
+        <ReferenceField source="ownerId" reference="owner"/>
+      </Labeled>
       <TextInput source="name" required autoFocus/>
       <DateInput source="birthDate" required/>
       <ReferenceInput source="typeId" reference="pet-type" required/>
     </SimpleForm>
   </Edit>
 )
-
-const redirectAfterSave: RedirectionSideEffect = (resource, id, data) => {
-  const ownerId = data?.ownerId
-  if (ownerId) {
-    return 'owner/' + ownerId + '/show';
-  }
-  return 'owner'
-}

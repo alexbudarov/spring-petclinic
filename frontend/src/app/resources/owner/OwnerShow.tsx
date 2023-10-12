@@ -155,8 +155,6 @@ const VisitTable = () => {
 }
 
 const AddVisitButton = (pet: any) => {
-  const createPath = useCreatePath();
-  
   return <>
     <Button
       component={Link}
@@ -174,13 +172,14 @@ const AddVisitButton = (pet: any) => {
 
 const AddPetButton = () => {
   const owner = useRecordContext();
+  const createPath = useCreatePath();
   
   return <>
     <Button
       component={Link}
       to={{
-        pathname: '/pet/create',
-        state: { record: { owner: owner?.id } },
+        pathname: createPath({resource: 'pet', type: 'create'}),
+        state: { record: { ownerId: owner?.id } },
       }}
       label="Add pet"
       size="small"

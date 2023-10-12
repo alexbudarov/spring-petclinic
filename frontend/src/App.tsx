@@ -34,9 +34,7 @@ export const App = () => (
     />
     <Resource
       name="pet"
-      list={ListGuesser}
       edit={PetEdit}
-      show={ShowGuesser}
       create={PetCreate}
     />
     <Resource
