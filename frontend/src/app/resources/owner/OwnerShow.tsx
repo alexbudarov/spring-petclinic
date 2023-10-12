@@ -1,4 +1,4 @@
-import { Button, CreateButton, DateField, EditButton, FunctionField, Link, RecordContextProvider, Show, ShowBase, SimpleShowLayout, TextField, Title, WithRecord, useCreatePath, useRecordContext } from "react-admin";
+import { Button, CreateButton, DateField, EditButton, FunctionField, Link, RaRecord, RecordContextProvider, Show, ShowBase, SimpleShowLayout, TextField, Title, WithRecord, useCreatePath, useRecordContext } from "react-admin";
 import { Card, Divider, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { ownerRecordRepresentation } from "../../functions/ownerRecordRepresentation";
 import { Add } from '@mui/icons-material';
@@ -132,7 +132,7 @@ const VisitTable = () => {
               <RecordContextProvider value={visit} key={visit.id}>
                 <TableRow>
                   <TableCell scope="row">
-                    <TextField source="date"/>
+                    <DateField source="date" options={{dateStyle: 'medium'}}/>
                   </TableCell>
                   <TableCell align="left">
                     <TextField source="description"/>
@@ -154,13 +154,15 @@ const VisitTable = () => {
   </>
 }
 
-const AddVisitButton = (pet: any) => {
+const AddVisitButton = ({pet}: {pet: RaRecord}) => {
+  const createPath = useCreatePath();
+
   return <>
     <Button
       component={Link}
       to={{
-        pathname: '/visit/create',
-        state: { record: { pet: pet.id } },
+        pathname: createPath({resource: 'visit', type: 'create'}),
+        state: { record: { petId: pet.id } },
       }}
       label="Add visit"
       size="small"

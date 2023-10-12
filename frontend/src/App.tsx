@@ -14,6 +14,7 @@ import { OwnerEdit } from "./app/resources/owner/OwnerEdit";
 import { OwnerCreate } from "./app/resources/owner/OwnerCreate";
 import { PetCreate } from "./app/resources/pet/PetCreate";
 import { PetEdit } from "./app/resources/pet/PetEdit";
+import { VisitCreate } from "./app/resources/visit/VisitCreate";
 
 export const App = () => (
   <Admin dataProvider={dataProvider}>
@@ -43,9 +44,8 @@ export const App = () => (
     />
     <Resource
       name="visit"
+      create={VisitCreate}
       list={ListGuesser}
-      edit={EditGuesser}
-      show={ShowGuesser}
     />
   </Admin>
 );
