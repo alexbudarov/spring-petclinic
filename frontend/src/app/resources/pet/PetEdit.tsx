@@ -7,7 +7,6 @@ export const PetEdit = () => (
       <TextInput source="name" required autoFocus/>
       <DateInput source="birthDate" required/>
       <ReferenceInput source="typeId" reference="pet-type" required/>
-      {/* <AutocompleteInput optionText="name" /> */}
     </SimpleForm>
   </Edit>
 )
