@@ -89,13 +89,13 @@ const PetCards = () => {
 return <>
     {pets.map((pet: any) => (
         <RecordContextProvider value={pet} key={pet.id}>
-          <PetCard/>
+          <PetCard owner={owner}/>
         </RecordContextProvider>
     ))}
   </>
 }
 
-const PetCard = () => {
+const PetCard = ({owner}: {owner: RaRecord}) => {
   return <>
   <Card variant="outlined">
     <Grid container spacing={2}>
@@ -107,14 +107,14 @@ const PetCard = () => {
       </SimpleShowLayout>
       </Grid>
       <Grid item xs={8}>
-        <VisitTable/>
+        <VisitTable owner={owner}/>
       </Grid>
     </Grid>
   </Card>
   </>
 }
 
-const VisitTable = () => {
+const VisitTable = ({owner}: {owner: RaRecord}) => {
   const pet = useRecordContext();
   const visits = pet?.visits ?? [];
 
@@ -145,7 +145,7 @@ const VisitTable = () => {
                 <EditButton resource="pet" record={pet} label="Edit Pet" size="small"/>
               </TableCell>
               <TableCell align="left" sx={{border: 0}}>
-                <AddVisitButton pet={pet} />
+                <AddVisitButton pet={pet} owner={owner}/>
               </TableCell>
             </TableRow>                        
             </TableBody>
@@ -154,8 +154,7 @@ const VisitTable = () => {
   </>
 }
 
-const AddVisitButton = ({pet}: {pet: RaRecord}) => {
-  const owner = useRecordContext();
+const AddVisitButton = ({pet, owner}: {pet: RaRecord, owner: RaRecord}) => {
   const createPath = useCreatePath();
 
   return <>
@@ -163,7 +162,7 @@ const AddVisitButton = ({pet}: {pet: RaRecord}) => {
       component={Link}
       to={{
         pathname: createPath({resource: 'visit', type: 'create'}),
-        search: '?owner=' + owner?.id,
+        search: '?owner=' + owner.id,
         state: { record: { petId: pet.id } },
       }}
       label="Add visit"
