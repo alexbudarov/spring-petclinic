@@ -28,9 +28,6 @@ export const App = () => (
     />
     <Resource
       name="pet-type"
-      list={ListGuesser}
-      edit={EditGuesser}
-      show={ShowGuesser}
       recordRepresentation="name"
     />
     <Resource
