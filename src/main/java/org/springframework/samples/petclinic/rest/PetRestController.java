@@ -2,29 +2,51 @@ package org.springframework.samples.petclinic.rest;
 
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.owner.*;
+import org.springframework.samples.petclinic.rest.rasupport.RaFilter;
+import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
+import org.springframework.samples.petclinic.rest.rasupport.RaRangeSort;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/rest")
+@RequestMapping("/rest/pet")
 public class PetRestController {
 
 	private final PetRepository petRepository;
 	private final OwnerRepository ownerRepository;
+	private final RaProtocolUtil raProtocolUtil;
 
 	public PetRestController(PetRepository petRepository,
-							 OwnerRepository ownerRepository) {
+							 OwnerRepository ownerRepository,
+							 RaProtocolUtil raProtocolUtil) {
 		this.petRepository = petRepository;
 		this.ownerRepository = ownerRepository;
+		this.raProtocolUtil = raProtocolUtil;
 	}
 
-	@GetMapping("/pet/{id}")
+	@GetMapping("/{id}")
 	public ResponseEntity<PetDto> findById(@PathVariable Integer id) {
 		Optional<Pet> petOptional = petRepository.findById(id);
 		return ResponseEntity.of(petOptional.map(this::toPetDto));
+	}
+
+	@GetMapping
+	public ResponseEntity<List<PetDto>> petList(RaFilter filter,
+												RaRangeSort range) {
+		Object idFilterParam = filter.parameters.get("id");
+		if (idFilterParam instanceof Object[]) {
+			Page<Pet> entities = petRepository.findByIdIn((Object[]) idFilterParam, range.pageable);
+			return raProtocolUtil.convertToResponseEntity(entities, this::toPetDto, "pet");
+		}
+
+		Page<Pet> page = petRepository.findAll(range.pageable);
+		var response = raProtocolUtil.convertToResponseEntity(page, this::toPetDto, "pet");
+		return response;
 	}
 
 	private PetDto toPetDto(Pet p) {
@@ -37,7 +59,7 @@ public class PetRestController {
 		return owner.map(Owner::getId).orElse(null);
 	}
 
-	@PostMapping("/pet")
+	@PostMapping
 	public ResponseEntity<PetDto> create(@RequestBody @Valid PetDto petDto) {
 		if (petDto.id() != null) {
 			return ResponseEntity.badRequest().build();
@@ -56,7 +78,7 @@ public class PetRestController {
 		return ResponseEntity.ok(toPetDto(pet));
 	}
 
-	@PutMapping("/pet/{id}")
+	@PutMapping("/{id}")
 	public ResponseEntity<PetDto> update(@PathVariable Integer id, @RequestBody @Valid PetDto petDto) {
 		if (petDto.id() != null && !petDto.id().equals(id)) {
 			return ResponseEntity.badRequest().build();

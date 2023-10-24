@@ -15,6 +15,7 @@ import { OwnerCreate } from "./app/resources/owner/OwnerCreate";
 import { PetCreate } from "./app/resources/pet/PetCreate";
 import { PetEdit } from "./app/resources/pet/PetEdit";
 import { VisitCreate } from "./app/resources/visit/VisitCreate";
+import { VisitList } from "./app/resources/visit/VisitList";
 
 export const App = () => (
   <Admin dataProvider={dataProvider}>
@@ -34,6 +35,7 @@ export const App = () => (
       name="pet"
       edit={PetEdit}
       create={PetCreate}
+      recordRepresentation="name"
     />
     <Resource
       name="vet"
@@ -42,7 +44,7 @@ export const App = () => (
     <Resource
       name="visit"
       create={VisitCreate}
-      list={ListGuesser}
+      list={VisitList}
     />
   </Admin>
 );
