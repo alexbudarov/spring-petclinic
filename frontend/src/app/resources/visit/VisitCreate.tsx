@@ -1,9 +1,21 @@
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material"
-import { Create, DateField, DateInput, Labeled, RecordContextProvider, ReferenceField, SaveButton, SimpleForm, TextField, TextInput, Toolbar, useGetList, useGetOne, useRecordContext } from "react-admin"
+import { useCallback } from "react";
+import { Create, DateField, DateInput, RecordContextProvider, ReferenceField, SaveButton, SimpleForm, TextField, TextInput, Toolbar, useGetList, useGetOne, useRecordContext } from "react-admin"
+import { useLocation } from "react-router-dom";
 
 export const VisitCreate = () => {
+    const location = useLocation();
+    const ownerId = new URLSearchParams(location.search).get("owner");
+
+    const redirectToOwner = useCallback((resource: any, id: any, data: any) => {
+        if (ownerId) {
+          return 'owner/' + ownerId + '/show';
+        }
+        return ''
+    }, [ownerId]);
+
     return <>
-        <Create redirect="list">
+        <Create redirect={redirectToOwner}>
             <Typography variant="subtitle1" sx={{marginLeft: '1em', fontWeight: 'bold'}}>Pet</Typography>
             <PetInfoTable />
             <SimpleForm toolbar={<CustomToolbar/>}>
