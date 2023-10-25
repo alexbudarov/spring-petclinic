@@ -14,7 +14,7 @@ export const VisitList = () => (
         <Datagrid bulkActionButtons={false}>
             <DateField source="date" options={{dateStyle: 'medium'}} />
             <TextField source="description"/>
-            <ReferenceField source="petId" reference="pet"/>
+            <ReferenceField source="petId" reference="pet" sortable={false}/>
         </Datagrid>
     </List>
 )

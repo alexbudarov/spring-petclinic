@@ -74,7 +74,8 @@ const PreviousVisitsTable = () => {
     const { data, total, isLoading, error } = useGetList(
         'visit',
         { 
-            filter: {petId: petId}
+            filter: {petId: petId},
+            sort: {field: 'date', order: 'ASC'}
         }
     );
 
