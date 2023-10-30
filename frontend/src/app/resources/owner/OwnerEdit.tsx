@@ -1,13 +1,13 @@
 import { Edit, SimpleForm, TextInput } from "react-admin";
 
 export const OwnerEdit = () => (
-    <Edit redirect="show">
+    <Edit redirect="show" mutationMode="pessimistic">
         <SimpleForm>
-            <TextInput source="firstName"/>
-            <TextInput source="lastName"/>
-            <TextInput source="address"/>
-            <TextInput source="city"/>
-            <TextInput source="telephone"/>
+            <TextInput source="firstName" required />
+            <TextInput source="lastName" required />
+            <TextInput source="address" required />
+            <TextInput source="city" required />
+            <TextInput source="telephone" required />
         </SimpleForm>
     </Edit>
 )
