@@ -48,8 +48,6 @@ export const VetList = () => {
           <FilterForm filters={filters} />
           <Card>
             <Datagrid 
-                isLoading={isLoading}
-                sort={{ field: 'id', order: "ASC" }}
                 bulkActionButtons={false}>
               <TextField source="firstName" sortable={false}/>
               <TextField source="lastName" sortable={false}/>
