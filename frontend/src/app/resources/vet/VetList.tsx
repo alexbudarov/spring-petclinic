@@ -1,19 +1,25 @@
 import { Card, Typography } from "@mui/material";
 import { useState } from "react";
-import { AutocompleteInput, Datagrid, FunctionField, List, ListContextProvider, ReferenceInput, TextField, Title, useDataProvider } from "react-admin"
+import { AutocompleteInput, ChipField, Datagrid, FunctionField, List, ListContextProvider, ReferenceInput, ReferenceManyField, SingleFieldList, SortPayload, TextField, Title, useDataProvider } from "react-admin"
 import { useQuery } from 'react-query';
 import { useForm, FormProvider } from 'react-hook-form';
+import { CustomDataProvider } from "../../../dataProvider";
 
 
 export const VetList = () => {
-    const dataProvider = useDataProvider();
+    const dataProvider = useDataProvider<CustomDataProvider>();
     const filterForm = useForm();
     const specialtyId = filterForm.watch("specialtyId");
 
     const { data: vets, isLoading } = useQuery(
         ['specialty', 'vetsBySpecialties', { ids: specialtyId ? [specialtyId]: [] }], 
         () => {
-          return dataProvider.vetsBySpecialties(specialtyId ? [specialtyId]: [])
+          if (specialtyId) {
+            return dataProvider.vetsBySpecialties(specialtyId ? [specialtyId]: [])
+          } else {
+            const params = {filter: {}, pagination: {page: 1, perPage: 100}, sort: {field: 'id', order: 'ASC'} as SortPayload};
+            return dataProvider.getList('vet', params).then(a => a.data);
+          }
         }
     );
 
@@ -35,10 +41,11 @@ export const VetList = () => {
               bulkActionButtons={false}>
                 <TextField source="firstName" sortable={false}/>
                 <TextField source="lastName" sortable={false}/>
-                <FunctionField source="specialties" sortable={false} render={(record: any) => {
-                    return (record.specialties || []).map((s: any) => s.name).join(", ")
-                }}
-                />
+                <ReferenceManyField label="Specialties" reference="specialty" target="vetId">
+                <SingleFieldList linkType={false}>
+                    <ChipField source="name" />
+                </SingleFieldList>
+                </ReferenceManyField>
             </Datagrid>
         </Card>
       </div>

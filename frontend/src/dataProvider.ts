@@ -8,7 +8,11 @@ const inheritedDataProvider = simpleRestProvider(
 const apiUrl = import.meta.env.VITE_SIMPLE_REST_URL;
 const httpClient = fetchUtils.fetchJson;
 
-export const dataProvider = {
+export interface CustomDataProvider extends DataProvider {
+    vetsBySpecialties: (ids: number[]) => Promise<RaRecord[]>;
+}
+
+export const dataProvider: CustomDataProvider = {
     ...inheritedDataProvider,
 
     vetsBySpecialties: (ids: number[]): Promise<RaRecord[]> => {
