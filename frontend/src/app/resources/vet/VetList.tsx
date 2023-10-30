@@ -1,50 +1,98 @@
 import { Card } from "@mui/material";
-import { ChipField, Datagrid, ReferenceArrayInput, ReferenceManyField, SingleFieldList, SortPayload, TextField, Title, useDataProvider } from "react-admin"
+import { AutocompleteArrayInput, ChipField, Datagrid, FilterForm, GetListParams, ListContextProvider, ListControllerResult, ReferenceArrayInput, ReferenceManyField, SingleFieldList, SortPayload, TextField, Title, useDataProvider } from "react-admin"
 import { useQuery } from 'react-query';
-import { useForm, FormProvider } from 'react-hook-form';
 import { CustomDataProvider } from "../../../dataProvider";
+import { useState } from "react";
 
 
 export const VetList = () => {
     const dataProvider = useDataProvider<CustomDataProvider>();
-    const filterForm = useForm();
-    const specialtyIds = filterForm.watch("specialtyIds");
 
-    const { data: vets, isLoading } = useQuery(
+    const [filterValues, setFilterValues] = useState<any>({});
+    const specialtyIds = filterValues.specialtyIds as number[];
+
+    const { data: vets, isLoading, refetch } = useQuery(
         ['specialty', 'vetsBySpecialties', { ids: specialtyIds}], 
         () => {
           if (specialtyIds && specialtyIds.length > 0) {
             return dataProvider.vetsBySpecialties(specialtyIds)
           } else {
-            const params = {filter: {}, pagination: {page: 1, perPage: 100}, sort: {field: 'id', order: 'ASC'} as SortPayload};
-            return dataProvider.getList('vet', params).then(a => a.data);
+            return dataProvider.getList('vet', defaultGetListParams).then(a => a.data);
           }
         }
     );
 
+    const filters = [
+      <ReferenceArrayInput         
+        source="specialtyIds"         
+        reference="specialty"
+        alwaysOn
+        >
+            <AutocompleteArrayInput label="Specialties"/>
+        </ReferenceArrayInput>
+    ];
+
     return <>
-      <div>
-        <Title title="Veterinarian list" />
-        <FormProvider {...filterForm}>
-          <ReferenceArrayInput 
-            source="specialtyIds" 
-            reference="specialty"/>
-        </FormProvider>
-        <Card>
+      <ListContextProvider value={{
+                ...defaultListControllerResult,
+                data: vets || [],
+                total: vets?.length || 0,
+                filterValues: filterValues,
+                setFilters: setFilterValues,
+                isLoading: isLoading,
+                refetch: refetch,
+                resource: 'vet',
+            }}>
+        <div>
+          <Title title="Veterinarians" />
+          <FilterForm filters={filters} />
+          <Card>
             <Datagrid 
-              data={vets || []}
-              isLoading={isLoading}
-              sort={{ field: 'id', order: "ASC" }}
-              bulkActionButtons={false}>
-                <TextField source="firstName" sortable={false}/>
-                <TextField source="lastName" sortable={false}/>
-                <ReferenceManyField label="Specialties" reference="specialty" target="vetId">
+                isLoading={isLoading}
+                sort={{ field: 'id', order: "ASC" }}
+                bulkActionButtons={false}>
+              <TextField source="firstName" sortable={false}/>
+              <TextField source="lastName" sortable={false}/>
+              <ReferenceManyField label="Specialties" reference="specialty" target="vetId">
                 <SingleFieldList linkType={false}>
-                    <ChipField source="name" />
+                  <ChipField source="name" />
                 </SingleFieldList>
-                </ReferenceManyField>
+              </ReferenceManyField>
             </Datagrid>
-        </Card>
-      </div>
+          </Card>
+        </div>
+      </ListContextProvider>
     </>
+}
+
+const defaultGetListParams: GetListParams = {
+    filter: {}, 
+    pagination: {page: 1, perPage: 100}, 
+    sort: {field: 'id', order: 'ASC'} as SortPayload
+};
+
+const defaultListControllerResult: ListControllerResult = {
+    sort: { field: 'id', order: "ASC" },
+    data: [],
+    total: 0,
+    filterValues: [],
+    setFilters: () => {},
+    isLoading: false,
+    isFetching: false,
+    displayedFilters: [],
+    hideFilter: (f) => {},
+    onSelect: (ids) => {},
+    onToggleItem: (id) => {},
+    onUnselectItems: () => {},
+    page: 1,
+    perPage: 100,
+    refetch: () => {},
+    resource: '',
+    selectedIds: [],
+    setPage: (p) => {},
+    setPerPage: (pp) => {},
+    setSort: (s) => {},
+    showFilter: (fv, dv) => {},
+    hasNextPage: false,
+    hasPreviousPage: false
 }
