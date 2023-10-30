@@ -34,6 +34,7 @@ public class SpecialtyRestController {
             return raProtocolUtil.convertToResponseEntity(page, "specialty");
         }
 
+        // getManyReference()
         Integer vetId = (Integer) filter.parameters.get("vetId");
         if (vetId != null) {
             Page<Specialty> page = specialtyRepository.findByVetId(vetId, range.pageable);
