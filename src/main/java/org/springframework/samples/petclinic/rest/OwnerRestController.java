@@ -32,16 +32,10 @@ public class OwnerRestController {
 	}
 
 	@GetMapping("/{id}")
-	public Owner findById(@PathVariable Integer id) {
-		return ownerRepository.findById(id);
+	public ResponseEntity<OwnerDto> findById(@PathVariable Integer id) {
+		Owner ownerOrNull = ownerRepository.findById(id);
+		return ResponseEntity.ofNullable(ownerMapper.toDto(ownerOrNull));
 	}
-	/*
-	// proper implementation
-    public ResponseEntity<Owner> findById(@PathVariable Integer id) {
-		Owner owner = ownerRepository.findById(id);
-		return ResponseEntity.ofNullable(owner);
-	}
-	 */
 
 	@GetMapping
 	public ResponseEntity<List<OwnerDto>> ownerList(RaFilter filter,

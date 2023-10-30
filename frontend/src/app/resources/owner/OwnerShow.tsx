@@ -1,10 +1,9 @@
-import { Button, CreateButton, DateField, EditButton, FunctionField, Link, RaRecord, RecordContextProvider, Show, ShowBase, SimpleShowLayout, TextField, Title, WithRecord, useCreatePath, useRecordContext } from "react-admin";
-import { Card, Divider, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { Button, DateField, EditButton, FunctionField, Link, RaRecord, RecordContextProvider, ReferenceField, ShowBase, SimpleShowLayout, TextField, Title, WithRecord, useCreatePath, useGetManyReference, useRecordContext } from "react-admin";
+import { Card, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { ownerRecordRepresentation } from "../../functions/ownerRecordRepresentation";
 import { Add } from '@mui/icons-material';
 
 export const OwnerShow = () => {
-
   return <>
     <ShowBase>
       <Grid container spacing={1} sx={{marginTop: "1em"}}>
@@ -34,7 +33,7 @@ export const OwnerShow = () => {
           </Typography>
         </Grid>
         <Grid item xs={8}>
-          <PetCards/>
+          <PetCardsSection/>
         </Grid>
       </Grid>
       </ShowBase>
@@ -82,12 +81,24 @@ const OwnerFields = () => (
     </TableContainer>
 )
 
-const PetCards = () => {
+const PetCardsSection = () => {  
   const owner = useRecordContext();
-  const pets = owner?.pets ?? [];
+  return <>
+    {owner && <PetCards owner={owner} />}
+  </>
+}
+
+const PetCards = ({owner}: {owner: RaRecord}) => {  
+  const {data: pets} = useGetManyReference('pet',
+    {
+      target: 'ownerId', 
+      id: owner.id,
+      sort: {field: 'name', order: 'ASC'}
+    }
+  );
 
 return <>
-    {pets.map((pet: any) => (
+    {(pets || []).map((pet: any) => (
         <RecordContextProvider value={pet} key={pet.id}>
           <PetCard owner={owner}/>
         </RecordContextProvider>
@@ -103,7 +114,7 @@ const PetCard = ({owner}: {owner: RaRecord}) => {
       <SimpleShowLayout>
         <TextField source="name"/>
         <DateField source="birthDate" options={{dateStyle: 'long'}} />
-        <FunctionField source="type" render={(record: any) => `${record.type?.name}`} />
+        <ReferenceField source="typeId" reference="pet-type"/>
       </SimpleShowLayout>
       </Grid>
       <Grid item xs={8}>
@@ -116,7 +127,15 @@ const PetCard = ({owner}: {owner: RaRecord}) => {
 
 const VisitTable = ({owner}: {owner: RaRecord}) => {
   const pet = useRecordContext();
-  const visits = pet?.visits ?? [];
+
+  const {data: visits} = useGetManyReference(
+    'visit',
+    {
+      target: 'petId',
+      id: pet?.id || 0,
+      sort: {field: 'date', order: 'ASC'}
+    }
+  );
 
   return <>
     <TableContainer >
@@ -128,7 +147,7 @@ const VisitTable = ({owner}: {owner: RaRecord}) => {
           </TableRow>
         </TableHead>
         <TableBody>
-            {visits.map((visit: any) => (
+            {(visits || []).map((visit: any) => (
               <RecordContextProvider value={visit} key={visit.id}>
                 <TableRow>
                   <TableCell scope="row">

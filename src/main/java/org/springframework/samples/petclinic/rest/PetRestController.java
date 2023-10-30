@@ -44,6 +44,12 @@ public class PetRestController {
 			return raProtocolUtil.convertToResponseEntity(entities, this::toPetDto, "pet");
 		}
 
+		Integer ownerId = (Integer) filter.parameters.get("ownerId");
+		if (ownerId != null) {
+			Page<Pet> entities = petRepository.loadByOwnerId(ownerId, range.pageable);
+			return raProtocolUtil.convertToResponseEntity(entities, this::toPetDto, "pet");
+		}
+
 		Page<Pet> page = petRepository.findAll(range.pageable);
 		var response = raProtocolUtil.convertToResponseEntity(page, this::toPetDto, "pet");
 		return response;
