@@ -9,9 +9,12 @@ import java.util.Optional;
 public class MapperUtil {
 
     private final OwnerRepository ownerRepository;
+    private final PetRepository petRepository;
 
-    public MapperUtil(OwnerRepository ownerRepository) {
+    public MapperUtil(OwnerRepository ownerRepository,
+                      PetRepository petRepository) {
         this.ownerRepository = ownerRepository;
+        this.petRepository = petRepository;
     }
 
     // customization: handle additional field in PetDto
@@ -37,5 +40,14 @@ public class MapperUtil {
     // normal implementation for associations
     public Integer typeId(PetType type) {
         return type != null ? type.getId() : null;
+    }
+
+    // customization: handle additional field in PetDto
+    @Named("Visit#petId")
+    public Integer petId(Integer visitId) {
+        if (visitId == null) {
+            return null;
+        }
+        return petRepository.loadPetByVisit(visitId);
     }
 }

@@ -7,7 +7,6 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.samples.petclinic.owner.*;
 import org.springframework.samples.petclinic.rest.rasupport.RaFilter;
 import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
@@ -26,17 +25,20 @@ public class VisitRestController {
 	private final VisitRepository visitRepository;
 	private final PetRepository petRepository;
 	private final RaProtocolUtil raProtocolUtil;
+	private final VisitMapper visitMapper;
 
 	public VisitRestController(VisitRepository visitRepository,
 							   PetRepository petRepository,
-							   RaProtocolUtil raProtocolUtil) {
+							   RaProtocolUtil raProtocolUtil,
+							   VisitMapper visitMapper) {
 		this.visitRepository = visitRepository;
 		this.petRepository = petRepository;
 		this.raProtocolUtil = raProtocolUtil;
+		this.visitMapper = visitMapper;
 	}
 
 	@PostMapping("/visit")
-	public ResponseEntity<VisitDto> save(@RequestBody @Valid VisitDto dto) {
+	public ResponseEntity<VisitDto> create(@RequestBody @Valid VisitDto dto) {
 		if (dto.id() != null || dto.petId() == null) {
 			return ResponseEntity.badRequest().build();
 		}
@@ -45,13 +47,13 @@ public class VisitRestController {
 			return ResponseEntity.badRequest().build();
 		}
 
-		Visit visit = dto.toEntity();
+		Visit visit = visitMapper.toEntity(dto);
 		Visit savedVisit = visitRepository.save(visit);
 
 		pet.addVisit(savedVisit);
 		petRepository.save(pet);
 
-		return ResponseEntity.ok(VisitDto.toDto(savedVisit, pet.getId()));
+		return ResponseEntity.ok(visitMapper.toDto(savedVisit));
 	}
 
 	@GetMapping("/visit")
@@ -59,7 +61,7 @@ public class VisitRestController {
 		Specification<Visit> specification = convertToSpecification(filter);
 		Page<Visit> page = visitRepository.findAll(specification, rangeSort.pageable);
 		return raProtocolUtil.convertToResponseEntity(page,
-				v -> VisitDto.toDto(v, loadPetId(v)),
+				visitMapper::toDto,
 				"visit"
 		);
 	}
@@ -95,10 +97,5 @@ public class VisitRestController {
 			}
 			return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
 		};
-	}
-
-	@Nullable
-	private Integer loadPetId(Visit visit) {
-		return petRepository.loadPetByVisit(visit.getId());
 	}
 }
