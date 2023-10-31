@@ -71,7 +71,6 @@ public class OwnerRestController {
 		}
 		Owner owner = ownerRepository.findById(id);
 		ownerMapper.update(ownerDto, owner);
-		owner.setId(id);
 		ownerRepository.save(owner);
 
 		OwnerDto updatedDto = ownerMapper.toDto(ownerRepository.findById(id));

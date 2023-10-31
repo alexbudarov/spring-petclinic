@@ -12,6 +12,7 @@ public interface OwnerMapper {
     @Mapping(target = "petIds", expression = "java(petsToPetIds(owner.getPets()))")
     OwnerDto toDto(Owner owner);
 
+    @Mapping(target = "id", ignore = true)
     Owner update(OwnerDto ownerDto, @MappingTarget Owner owner);
 
     default List<Integer> petsToPetIds(List<Pet> pets) {
