@@ -1,9 +1,7 @@
 package org.springframework.samples.petclinic.rest;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.samples.petclinic.owner.OwnerRepository;
-import org.springframework.samples.petclinic.owner.PetType;
-import org.springframework.samples.petclinic.owner.PetTypeRepository;
+import org.springframework.samples.petclinic.owner.*;
 import org.springframework.samples.petclinic.rest.rasupport.RaFilter;
 import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,26 +17,35 @@ public class PetTypeRestController {
     private final OwnerRepository ownerRepository;
     private final RaProtocolUtil raProtocolUtil;
     private final PetTypeRepository petTypeRepository;
+    private final PetTypeMapper petTypeMapper;
 
     public PetTypeRestController(OwnerRepository ownerRepository,
                                  RaProtocolUtil raProtocolUtil,
-                                 PetTypeRepository petTypeRepository) {
+                                 PetTypeRepository petTypeRepository,
+                                 PetTypeMapper petTypeMapper) {
         this.ownerRepository = ownerRepository;
         this.raProtocolUtil = raProtocolUtil;
         this.petTypeRepository = petTypeRepository;
+        this.petTypeMapper = petTypeMapper;
     }
 
     @GetMapping
-    public ResponseEntity<List<PetType>> findPetTypes(RaFilter filter) {
+    public ResponseEntity<List<PetTypeDto>> findPetTypes(RaFilter filter) {
         Object idFilterParam = filter.parameters.get("id");
         if (idFilterParam instanceof Object[]) {
-            List<PetType> list = petTypeRepository.findByIdIn((Object[]) idFilterParam);
+            List<PetTypeDto> list = petTypeRepository.findByIdIn((Object[]) idFilterParam)
+                    .stream()
+                    .map(petTypeMapper::toDto)
+                    .toList();
             return raProtocolUtil.convertToResponseEntity(list, "pet-type");
         }
 
-        List<PetType> petTypes = ownerRepository.findPetTypes();
+        List<PetTypeDto> petTypes = ownerRepository.findPetTypes()
+                .stream()
+                .map(petTypeMapper::toDto)
+                .toList();
 
-        ResponseEntity<List<PetType>> response = raProtocolUtil.convertToResponseEntity(petTypes, "pet-type");
+        var response = raProtocolUtil.convertToResponseEntity(petTypes, "pet-type");
         return response;
     }
 }
