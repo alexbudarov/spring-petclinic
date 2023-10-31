@@ -20,49 +20,40 @@ public class PetRestController {
 	private final PetRepository petRepository;
 	private final OwnerRepository ownerRepository;
 	private final RaProtocolUtil raProtocolUtil;
+	private final PetMapper petMapper;
 
 	public PetRestController(PetRepository petRepository,
 							 OwnerRepository ownerRepository,
-							 RaProtocolUtil raProtocolUtil) {
+							 RaProtocolUtil raProtocolUtil,
+							 PetMapper petMapper) {
 		this.petRepository = petRepository;
 		this.ownerRepository = ownerRepository;
 		this.raProtocolUtil = raProtocolUtil;
+		this.petMapper = petMapper;
 	}
 
 	@GetMapping("/{id}")
 	public ResponseEntity<PetDto> findById(@PathVariable Integer id) {
 		Optional<Pet> petOptional = petRepository.findById(id);
-		return ResponseEntity.of(petOptional.map(this::toPetDto));
+		return ResponseEntity.of(petOptional.map(petMapper::toDto));
 	}
 
 	@GetMapping
 	public ResponseEntity<List<PetDto>> petList(RaFilter filter,
 												RaRangeSort range) {
 		Object idFilterParam = filter.parameters.get("id");
-		if (idFilterParam instanceof Object[]) {
-			Page<Pet> entities = petRepository.findByIdIn((Object[]) idFilterParam, range.pageable);
-			return raProtocolUtil.convertToResponseEntity(entities, this::toPetDto, "pet");
-		}
-
 		Integer ownerId = (Integer) filter.parameters.get("ownerId");
-		if (ownerId != null) {
-			Page<Pet> entities = petRepository.loadByOwnerId(ownerId, range.pageable);
-			return raProtocolUtil.convertToResponseEntity(entities, this::toPetDto, "pet");
+
+		Page<Pet> page;
+		if (idFilterParam instanceof Object[]) {
+			page = petRepository.findByIdIn((Object[]) idFilterParam, range.pageable);
+		} else if (ownerId != null) {
+			page = petRepository.loadByOwnerId(ownerId, range.pageable);
+		} else {
+			page = petRepository.findAll(range.pageable);
 		}
-
-		Page<Pet> page = petRepository.findAll(range.pageable);
-		var response = raProtocolUtil.convertToResponseEntity(page, this::toPetDto, "pet");
+		var response = raProtocolUtil.convertToResponseEntity(page, petMapper::toDto, "pet");
 		return response;
-	}
-
-	private PetDto toPetDto(Pet p) {
-		return PetDto.toDto(p, loadOwnerId(p));
-	}
-
-	@Nullable
-	private Integer loadOwnerId(Pet p) {
-		Optional<Owner> owner = ownerRepository.findByPet(p.getId());
-		return owner.map(Owner::getId).orElse(null);
 	}
 
 	@PostMapping
@@ -70,7 +61,7 @@ public class PetRestController {
 		if (petDto.id() != null) {
 			return ResponseEntity.badRequest().build();
 		}
-		Pet pet = petDto.toEntity();
+		Pet pet = petMapper.toEntity(petDto);
 		pet = petRepository.save(pet);
 
 		// save association with owner
@@ -81,7 +72,7 @@ public class PetRestController {
 			ownerRepository.save(owner);
 		}
 
-		return ResponseEntity.ok(toPetDto(pet));
+		return ResponseEntity.ok(petMapper.toDto(pet));
 	}
 
 	@PutMapping("/{id}")
@@ -95,14 +86,7 @@ public class PetRestController {
 		}
 		Owner oldOwner = ownerRepository.findByPet(id).orElse(null);
 
-		Pet updatedPet = petDto.toEntity();
-
-		// to avoid problem with cascading visits
-		// map
-		pet.setName(updatedPet.getName());
-		pet.setBirthDate(updatedPet.getBirthDate());
-		pet.setType(updatedPet.getType());
-
+		petMapper.update(petDto, pet);
 		pet = petRepository.save(pet);
 
 		// handler owner change
@@ -116,6 +100,6 @@ public class PetRestController {
 			ownerRepository.save(owner);
 		}
 
-		return ResponseEntity.ok(toPetDto(pet));
+		return ResponseEntity.ok(petMapper.toDto(pet));
 	}
 }
