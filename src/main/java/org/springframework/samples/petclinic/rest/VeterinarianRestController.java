@@ -32,16 +32,15 @@ public class VeterinarianRestController {
 	}
 
     @GetMapping
-    public ResponseEntity<List<Vet>> findAll(RaFilter filter, RaRangeSort range) {
+    public ResponseEntity<List<VetDto>> findAll(RaFilter filter, RaRangeSort range) {
 		Object idFilterParam = filter.parameters.get("id");
 		if (idFilterParam instanceof Object[]) {
 			Page<Vet> page = vetRepository.findByIdIn((Object[]) idFilterParam, range.pageable);
-			return raProtocolUtil.convertToResponseEntity(page, "vet");
+			return raProtocolUtil.convertToResponseEntity(page, vetMapper::toDto, "vet");
 		}
 
 		Page<Vet> page = vetRepository.findAll(range.pageable);
-
-		ResponseEntity<List<Vet>> response = raProtocolUtil.convertToResponseEntity(page, "vet");
+		var response = raProtocolUtil.convertToResponseEntity(page, vetMapper::toDto, "vet");
 		return response;
     }
 

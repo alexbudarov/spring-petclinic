@@ -7,5 +7,5 @@ import java.io.Serializable;
 /**
  * DTO for {@link Vet}
  */
-public record VetDto(Integer id, @NotBlank String firstName, @NotBlank String lastName) implements Serializable {
+public record VetDto(Integer id, @NotBlank String firstName, @NotBlank String lastName) {
 }
