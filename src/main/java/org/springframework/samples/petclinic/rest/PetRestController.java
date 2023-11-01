@@ -1,13 +1,12 @@
 package org.springframework.samples.petclinic.rest;
 
-import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.owner.*;
-import org.springframework.samples.petclinic.rest.rasupport.RaFilter;
 import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
 import org.springframework.samples.petclinic.rest.rasupport.RaRangeSort;
+import org.springframework.samples.petclinic.rest.rasupport.ReactAdminFilter;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,16 +38,12 @@ public class PetRestController {
 	}
 
 	@GetMapping
-	public ResponseEntity<List<PetDto>> petList(RaFilter filter,
-												RaRangeSort range) {
-		Object idFilterParam = filter.parameters.get("id");
-		Integer ownerId = (Integer) filter.parameters.get("ownerId");
-
+	public ResponseEntity<List<PetDto>> petList(@ReactAdminFilter PetFilter filter, RaRangeSort range) {
 		Page<Pet> page;
-		if (idFilterParam instanceof Object[]) {
-			page = petRepository.findByIdIn((Object[]) idFilterParam, range.pageable);
-		} else if (ownerId != null) {
-			page = petRepository.loadByOwnerId(ownerId, range.pageable);
+		if (filter.id() != null) {
+			page = petRepository.findByIdIn(filter.id(), range.pageable);
+		} else if (filter.ownerId() != null) {
+			page = petRepository.loadByOwnerId(filter.ownerId(), range.pageable);
 		} else {
 			page = petRepository.findAll(range.pageable);
 		}
@@ -102,4 +97,6 @@ public class PetRestController {
 
 		return ResponseEntity.ok(petMapper.toDto(pet));
 	}
+
+	public record PetFilter(Integer[] id, Integer ownerId) {}
 }
