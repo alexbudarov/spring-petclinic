@@ -11,6 +11,7 @@ import org.springframework.samples.petclinic.owner.OwnerRepository;
 import org.springframework.samples.petclinic.rest.rasupport.RaFilter;
 import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
 import org.springframework.samples.petclinic.rest.rasupport.RaRangeSort;
+import org.springframework.samples.petclinic.rest.rasupport.ReactAdminFilter;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,21 +39,17 @@ public class OwnerRestController {
 	}
 
 	@GetMapping
-	public ResponseEntity<List<OwnerDto>> ownerList(RaFilter filter,
+	public ResponseEntity<List<OwnerDto>> ownerList(@ReactAdminFilter OwnerListFilter filter,
 													RaRangeSort range) {
-		Object idFilterParam = filter.parameters.get("id");
-		if (idFilterParam instanceof Object[]) {
-			Page<Owner> entities = ownerRepository.findByIdIn((Object[]) idFilterParam, range.pageable);
-			return raProtocolUtil.convertToResponseEntity(entities, ownerMapper::toDto, "owner");
+		Page<Owner> page;
+		if (filter.id() != null) {
+			page = ownerRepository.findByIdIn(filter.id(), range.pageable);
+		} else if (filter.lastName() != null) {
+			page = ownerRepository.findByLastName(filter.lastName(), range.pageable);
+		} else {
+			page = ownerRepository.findAll(range.pageable);
 		}
-
-		String lastName = (String) filter.parameters.get("lastName");
-		if (lastName == null) {
-			lastName = "";
-		}
-		Page<Owner> page = ownerRepository.findByLastName(lastName, range.pageable);
-		var response = raProtocolUtil.convertToResponseEntity(page, ownerMapper::toDto, "owner");
-		return response;
+		return raProtocolUtil.convertToResponseEntity(page, ownerMapper::toDto, "owner");
 	}
 
 	@PostMapping
@@ -75,5 +72,8 @@ public class OwnerRestController {
 
 		OwnerDto updatedDto = ownerMapper.toDto(ownerRepository.findById(id));
 		return ResponseEntity.ok(updatedDto);
+	}
+
+	public record OwnerListFilter(Integer[] id, String lastName) {
 	}
 }

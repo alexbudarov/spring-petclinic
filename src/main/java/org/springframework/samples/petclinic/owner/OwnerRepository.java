@@ -85,6 +85,6 @@ public interface OwnerRepository extends Repository<Owner, Integer> {
 	@Transactional(readOnly = true)
 	Optional<Owner> findByPet(Integer petId);
 
-	Page<Owner> findByIdIn(Object[] ids, Pageable pageable);
+	Page<Owner> findByIdIn(Integer[] ids, Pageable pageable);
 
 }
