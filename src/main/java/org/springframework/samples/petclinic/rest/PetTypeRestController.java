@@ -2,8 +2,8 @@ package org.springframework.samples.petclinic.rest;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.owner.*;
-import org.springframework.samples.petclinic.rest.rasupport.RaFilter;
 import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
+import org.springframework.samples.petclinic.rest.rasupport.RaFilter;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,10 +30,9 @@ public class PetTypeRestController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PetTypeDto>> findPetTypes(RaFilter filter) {
-        Object idFilterParam = filter.parameters.get("id");
-        if (idFilterParam instanceof Object[]) {
-            List<PetTypeDto> list = petTypeRepository.findByIdIn((Object[]) idFilterParam)
+    public ResponseEntity<List<PetTypeDto>> findPetTypes(@RaFilter PetTypeListFilter filter) {
+        if (filter.id() != null) {
+            List<PetTypeDto> list = petTypeRepository.findByIdIn(filter.id())
                     .stream()
                     .map(petTypeMapper::toDto)
                     .toList();
@@ -47,6 +46,9 @@ public class PetTypeRestController {
 
         var response = raProtocolUtil.convertToResponseEntity(petTypes, "pet-type");
         return response;
+    }
+
+    public record PetTypeListFilter(Integer[] id) {
     }
 }
 

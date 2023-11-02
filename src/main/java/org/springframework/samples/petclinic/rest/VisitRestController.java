@@ -8,15 +8,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.owner.*;
-import org.springframework.samples.petclinic.rest.rasupport.RaFilter;
 import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
 import org.springframework.samples.petclinic.rest.rasupport.RaRangeSort;
+import org.springframework.samples.petclinic.rest.rasupport.RaFilter;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/rest")
@@ -57,7 +56,7 @@ public class VisitRestController {
 	}
 
 	@GetMapping("/visit")
-	public ResponseEntity<List<VisitDto>> visitList(RaFilter filter, RaRangeSort rangeSort) {
+	public ResponseEntity<List<VisitDto>> visitList(@RaFilter VisitListFilter filter, RaRangeSort rangeSort) {
 		Specification<Visit> specification = convertToSpecification(filter);
 		Page<Visit> page = visitRepository.findAll(specification, rangeSort.pageable);
 		return raProtocolUtil.convertToResponseEntity(page,
@@ -66,36 +65,32 @@ public class VisitRestController {
 		);
 	}
 
-	private Specification<Visit> convertToSpecification(RaFilter filter) {
+	private Specification<Visit> convertToSpecification(VisitListFilter filter) {
 		return (root, query, criteriaBuilder) -> {
 			List<Predicate> predicates = new ArrayList<>();
-			Map<String, Object> parameters = filter.parameters;
-			if (!parameters.isEmpty()) {
-				if (parameters.get("description") != null) {
-					predicates.add(criteriaBuilder.like(
-							criteriaBuilder.lower(root.get("description")),
-							"%" + ((String) parameters.get("description")).toLowerCase() + "%")
-					);
-				}
-				Object dateBefore = parameters.get("dateBefore");
-				if (dateBefore != null) {
-					LocalDate localDate = LocalDate.parse((String) dateBefore);
-					predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("date"), localDate));
-				}
-				Object dateAfter = parameters.get("dateAfter");
-				if (dateAfter != null) {
-					LocalDate localDate = LocalDate.parse((String) dateAfter);
-					predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("date"), localDate));
-				}
-				if (parameters.get("petId") != null) {
-					From<Pet, Pet> petFrom = query.from(Pet.class);
-					Join<Pet, Visit> visitsJoin = petFrom.join("visits");
+			if (filter.description() != null) {
+				predicates.add(criteriaBuilder.like(
+						criteriaBuilder.lower(root.get("description")),
+						"%" + (filter.description()).toLowerCase() + "%")
+				);
+			}
+			if (filter.dateBefore() != null) {
+				predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("date"), filter.dateBefore()));
+			}
+			if (filter.dateAfter() != null) {
+				predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("date"), filter.dateAfter()));
+			}
+			if (filter.petId() != null) {
+				From<Pet, Pet> petFrom = query.from(Pet.class);
+				Join<Pet, Visit> visitsJoin = petFrom.join("visits");
 
-					predicates.add(criteriaBuilder.equal(petFrom.get("id"), parameters.get("petId")));
-					predicates.add(criteriaBuilder.equal(visitsJoin, root));
-				}
+				predicates.add(criteriaBuilder.equal(petFrom.get("id"), filter.petId()));
+				predicates.add(criteriaBuilder.equal(visitsJoin, root));
 			}
 			return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
 		};
+	}
+
+	public record VisitListFilter(String description, LocalDate dateBefore, LocalDate dateAfter, Integer petId) {
 	}
 }

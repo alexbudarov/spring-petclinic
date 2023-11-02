@@ -1,12 +1,14 @@
 package org.springframework.samples.petclinic.rest.rasupport;
 
-import java.util.Collections;
-import java.util.Map;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-public class RaFilter {
-    public final Map<String, Object> parameters;
-
-    public RaFilter(Map<String, Object> parameters) {
-        this.parameters = Collections.unmodifiableMap(parameters);
-    }
+/**
+ * Marks the filter argument of getList() operation.
+ * The argument will be resolved using conventions of the React Admin ra-data-simple-rest data provider.
+ *
+ * @see RaFilterArgumentResolver
+ */
+@Retention(RetentionPolicy.RUNTIME)
+public @interface RaFilter {
 }

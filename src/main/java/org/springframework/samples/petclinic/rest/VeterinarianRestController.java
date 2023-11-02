@@ -2,9 +2,9 @@ package org.springframework.samples.petclinic.rest;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.samples.petclinic.rest.rasupport.RaFilter;
 import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
 import org.springframework.samples.petclinic.rest.rasupport.RaRangeSort;
+import org.springframework.samples.petclinic.rest.rasupport.RaFilter;
 import org.springframework.samples.petclinic.vet.Vet;
 import org.springframework.samples.petclinic.vet.VetDto;
 import org.springframework.samples.petclinic.vet.VetMapper;
@@ -32,10 +32,9 @@ public class VeterinarianRestController {
 	}
 
     @GetMapping
-    public ResponseEntity<List<VetDto>> findAll(RaFilter filter, RaRangeSort range) {
-		Object idFilterParam = filter.parameters.get("id");
-		if (idFilterParam instanceof Object[]) {
-			Page<Vet> page = vetRepository.findByIdIn((Object[]) idFilterParam, range.pageable);
+    public ResponseEntity<List<VetDto>> findAll(@RaFilter VetListFilter filter, RaRangeSort range) {
+		if (filter.id() != null) { // not used atm in the current UI
+			Page<Vet> page = vetRepository.findByIdIn(filter.id(), range.pageable);
 			return raProtocolUtil.convertToResponseEntity(page, vetMapper::toDto, "vet");
 		}
 
@@ -51,6 +50,9 @@ public class VeterinarianRestController {
 				.map(vetMapper::toDto)
 				.collect(Collectors.toList());
 		return vetDtos;
+	}
+
+	public record VetListFilter(Integer[] id) {
 	}
 }
 

@@ -15,5 +15,5 @@ public interface PetRepository extends JpaRepository<Pet, Integer> {
     @Query("select p from Pet p, Owner o where o.id = :ownerId and p member of o.pets")
     Page<Pet> loadByOwnerId(int ownerId, Pageable pageable);
 
-	Page<Pet> findByIdIn(Object[] ids, Pageable pageable);
+	Page<Pet> findByIdIn(Integer[] ids, Pageable pageable);
 }

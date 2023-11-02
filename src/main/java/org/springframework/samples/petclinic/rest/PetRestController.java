@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.owner.*;
 import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
 import org.springframework.samples.petclinic.rest.rasupport.RaRangeSort;
-import org.springframework.samples.petclinic.rest.rasupport.ReactAdminFilter;
+import org.springframework.samples.petclinic.rest.rasupport.RaFilter;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,7 +38,7 @@ public class PetRestController {
 	}
 
 	@GetMapping
-	public ResponseEntity<List<PetDto>> petList(@ReactAdminFilter PetFilter filter, RaRangeSort range) {
+	public ResponseEntity<List<PetDto>> petList(@RaFilter PetFilter filter, RaRangeSort range) {
 		Page<Pet> page;
 		if (filter.id() != null) {
 			page = petRepository.findByIdIn(filter.id(), range.pageable);

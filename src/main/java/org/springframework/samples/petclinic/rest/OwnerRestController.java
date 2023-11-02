@@ -8,10 +8,9 @@ import org.springframework.samples.petclinic.owner.Owner;
 import org.springframework.samples.petclinic.owner.OwnerDto;
 import org.springframework.samples.petclinic.owner.OwnerMapper;
 import org.springframework.samples.petclinic.owner.OwnerRepository;
-import org.springframework.samples.petclinic.rest.rasupport.RaFilter;
 import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
 import org.springframework.samples.petclinic.rest.rasupport.RaRangeSort;
-import org.springframework.samples.petclinic.rest.rasupport.ReactAdminFilter;
+import org.springframework.samples.petclinic.rest.rasupport.RaFilter;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,7 +38,7 @@ public class OwnerRestController {
 	}
 
 	@GetMapping
-	public ResponseEntity<List<OwnerDto>> ownerList(@ReactAdminFilter OwnerListFilter filter,
+	public ResponseEntity<List<OwnerDto>> ownerList(@RaFilter OwnerListFilter filter,
 													RaRangeSort range) {
 		Page<Owner> page;
 		if (filter.id() != null) {
