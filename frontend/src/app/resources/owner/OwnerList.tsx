@@ -1,7 +1,10 @@
-import { Datagrid, List, ReferenceArrayField, TextField, TextInput } from "react-admin"
+import { AutocompleteInput, Datagrid, List, ReferenceArrayField, ReferenceInput, TextField, TextInput } from "react-admin"
 
 const filters = [
     <TextInput label="Last name" source="lastName" alwaysOn />,
+    <ReferenceInput label="Pet type" source="petTypeId" reference="pet-type" alwaysOn>
+        <AutocompleteInput />
+    </ReferenceInput>
 ];
 
 export const OwnerList = () => (

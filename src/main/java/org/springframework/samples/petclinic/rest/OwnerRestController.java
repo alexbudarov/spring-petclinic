@@ -1,19 +1,20 @@
 package org.springframework.samples.petclinic.rest;
 
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.samples.petclinic.owner.Owner;
-import org.springframework.samples.petclinic.owner.OwnerDto;
-import org.springframework.samples.petclinic.owner.OwnerMapper;
-import org.springframework.samples.petclinic.owner.OwnerRepository;
+import org.springframework.samples.petclinic.owner.*;
 import org.springframework.samples.petclinic.rest.rasupport.RaFilter;
 import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
 import org.springframework.samples.petclinic.rest.rasupport.RaRange;
 import org.springframework.samples.petclinic.rest.rasupport.RaSort;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -41,14 +42,10 @@ public class OwnerRestController {
 	@GetMapping
 	public ResponseEntity<List<OwnerDto>> ownerList(@RaFilter OwnerListFilter filter,
 													RaRange range, RaSort sort) {
-		Page<Owner> page;
-		if (filter.id() != null) {
-			page = ownerRepository.findByIdIn(filter.id(), range.toPageable(sort));
-		} else if (filter.lastName() != null) {
-			page = ownerRepository.findByLastName(filter.lastName(), range.toPageable(sort));
-		} else {
-			page = ownerRepository.findAll(range.toPageable(sort));
-		}
+
+		Specification<Owner> specification = convertToSpecification(filter);
+		Page<Owner> page = ownerRepository.findAll(specification, range.toPageable(sort));
+
 		return raProtocolUtil.convertToResponseEntity(page, ownerMapper::toDto, "owner");
 	}
 
@@ -74,6 +71,35 @@ public class OwnerRestController {
 		return ResponseEntity.ok(updatedDto);
 	}
 
-	public record OwnerListFilter(Integer[] id, String lastName) {
+	private Specification<Owner> convertToSpecification(OwnerListFilter filter) {
+		return (root, query, criteriaBuilder) -> {
+			List<Predicate> predicates = new ArrayList<>();
+
+			// getMany()
+			if (filter.id() != null) {
+				predicates.add(root.get("id").in((Object[]) filter.id()));
+			}
+
+			// filter by lastName contains ignore case
+			if (filter.lastName() != null) {
+				predicates.add(criteriaBuilder.like(
+						criteriaBuilder.lower(root.get("lastName")),
+						"%" + filter.lastName().toLowerCase() + "%"
+				));
+			}
+
+			// filter by custom condition
+			if (filter.petTypeId() != null) {
+				Join<Owner, Pet> petJoin = root.join("pets");
+				predicates.add(
+						criteriaBuilder.equal(petJoin.get("type").get("id"), filter.petTypeId())
+				);
+			}
+
+			return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+		};
+	}
+
+	public record OwnerListFilter(Integer[] id, String lastName, Integer petTypeId) {
 	}
 }

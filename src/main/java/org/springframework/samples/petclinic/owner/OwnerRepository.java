@@ -21,6 +21,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
@@ -37,7 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Sam Brannen
  * @author Michael Isvy
  */
-public interface OwnerRepository extends Repository<Owner, Integer> {
+public interface OwnerRepository extends Repository<Owner, Integer>, JpaSpecificationExecutor<Owner> {
 
 	/**
 	 * Retrieve all {@link PetType}s from the data store.
@@ -84,7 +85,4 @@ public interface OwnerRepository extends Repository<Owner, Integer> {
 	@Query("SELECT distinct owner FROM Owner owner join owner.pets p where p.id = :petId")
 	@Transactional(readOnly = true)
 	Optional<Owner> findByPet(Integer petId);
-
-	Page<Owner> findByIdIn(Integer[] ids, Pageable pageable);
-
 }
