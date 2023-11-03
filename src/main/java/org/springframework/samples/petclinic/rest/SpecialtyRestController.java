@@ -6,10 +6,7 @@ import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
-import org.springframework.samples.petclinic.rest.rasupport.RaFilter;
-import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
-import org.springframework.samples.petclinic.rest.rasupport.RaRange;
-import org.springframework.samples.petclinic.rest.rasupport.RaSort;
+import org.springframework.samples.petclinic.rest.rasupport.*;
 import org.springframework.samples.petclinic.vet.Specialty;
 import org.springframework.samples.petclinic.vet.SpecialtyRepository;
 import org.springframework.samples.petclinic.vet.Vet;
@@ -75,7 +72,9 @@ public class SpecialtyRestController {
     }
 
     public record SpecialtyListFilter(
+            @SpecFilterCondition(operator = SpecFilterOperator.IN)
             Integer[] id,
+            // custom
             Integer vetId
     ) {
     }

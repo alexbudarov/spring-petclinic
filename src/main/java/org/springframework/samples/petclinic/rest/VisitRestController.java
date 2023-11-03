@@ -89,6 +89,17 @@ public class VisitRestController {
 		};
 	}
 
-	public record VisitListFilter(String description, LocalDate dateBefore, LocalDate dateAfter, Integer petId) {
+	public record VisitListFilter(
+			@SpecFilterCondition(operator = SpecFilterOperator.CONTAINS, ignoreCase = true)
+			String description,
+
+			@SpecFilterCondition(property = "date", operator = SpecFilterOperator.LESS_OR_EQUALS)
+			LocalDate dateBefore,
+
+			@SpecFilterCondition(property = "date", operator = SpecFilterOperator.GREATER_OR_EQUALS)
+			LocalDate dateAfter,
+
+			// custom
+			Integer petId) {
 	}
 }

@@ -8,10 +8,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.owner.*;
-import org.springframework.samples.petclinic.rest.rasupport.RaFilter;
-import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
-import org.springframework.samples.petclinic.rest.rasupport.RaRange;
-import org.springframework.samples.petclinic.rest.rasupport.RaSort;
+import org.springframework.samples.petclinic.rest.rasupport.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -100,6 +97,17 @@ public class OwnerRestController {
 		};
 	}
 
-	public record OwnerListFilter(Integer[] id, String lastName, Integer petTypeId) {
+	public record OwnerListFilter(
+		@SpecFilterCondition(operator = SpecFilterOperator.IN)
+		Integer[] id,
+
+		@SpecFilterCondition(operator = SpecFilterOperator.CONTAINS, ignoreCase = true)
+		String lastName,
+
+		@SpecFilterCondition(property = "pets.type.id", operator = SpecFilterOperator.EQUALS)
+		Integer petTypeId
+	) {
 	}
+
 }
+
