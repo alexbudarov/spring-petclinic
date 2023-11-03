@@ -2,9 +2,7 @@ package org.springframework.samples.petclinic.rest;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
-import org.springframework.samples.petclinic.rest.rasupport.RaRangeSort;
-import org.springframework.samples.petclinic.rest.rasupport.RaFilter;
+import org.springframework.samples.petclinic.rest.rasupport.*;
 import org.springframework.samples.petclinic.vet.Specialty;
 import org.springframework.samples.petclinic.vet.SpecialtyRepository;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,19 +25,19 @@ public class SpecialtyRestController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Specialty>> findAll(@RaFilter SpecialtyListFilter filter, RaRangeSort range) {
+    public ResponseEntity<List<Specialty>> findAll(@RaFilter SpecialtyListFilter filter, RaRange range, RaSort sort) {
         if (filter.id() != null) {
-            Page<Specialty> page = specialtyRepository.findByIdIn(filter.id(), range.pageable);
+            Page<Specialty> page = specialtyRepository.findByIdIn(filter.id(), range.toPageable(sort));
             return raProtocolUtil.convertToResponseEntity(page, "specialty");
         }
 
         // getManyReference()
         if (filter.vetId() != null) {
-            Page<Specialty> page = specialtyRepository.findByVetId(filter.vetId(), range.pageable);
+            Page<Specialty> page = specialtyRepository.findByVetId(filter.vetId(), range.toPageable(sort));
             return raProtocolUtil.convertToResponseEntity(page, "specialty");
         }
 
-        Page<Specialty> page = specialtyRepository.findAll(range.pageable);
+        Page<Specialty> page = specialtyRepository.findAll(range.toPageable(sort));
         var response = raProtocolUtil.convertToResponseEntity(page, "specialty");
         return response;
     }

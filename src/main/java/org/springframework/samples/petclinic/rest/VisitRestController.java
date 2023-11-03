@@ -8,9 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.owner.*;
-import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
-import org.springframework.samples.petclinic.rest.rasupport.RaRangeSort;
-import org.springframework.samples.petclinic.rest.rasupport.RaFilter;
+import org.springframework.samples.petclinic.rest.rasupport.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -56,9 +54,9 @@ public class VisitRestController {
 	}
 
 	@GetMapping("/visit")
-	public ResponseEntity<List<VisitDto>> visitList(@RaFilter VisitListFilter filter, RaRangeSort rangeSort) {
+	public ResponseEntity<List<VisitDto>> visitList(@RaFilter VisitListFilter filter, RaRange range, RaSort sort) {
 		Specification<Visit> specification = convertToSpecification(filter);
-		Page<Visit> page = visitRepository.findAll(specification, rangeSort.pageable);
+		Page<Visit> page = visitRepository.findAll(specification, range.toPageable(sort));
 		return raProtocolUtil.convertToResponseEntity(page,
 				visitMapper::toDto,
 				"visit"

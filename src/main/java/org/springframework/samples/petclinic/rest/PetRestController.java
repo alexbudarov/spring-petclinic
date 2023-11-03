@@ -1,14 +1,14 @@
 package org.springframework.samples.petclinic.rest;
 
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.owner.*;
-import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
-import org.springframework.samples.petclinic.rest.rasupport.RaRangeSort;
-import org.springframework.samples.petclinic.rest.rasupport.RaFilter;
+import org.springframework.samples.petclinic.rest.rasupport.*;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,16 +38,41 @@ public class PetRestController {
 	}
 
 	@GetMapping
-	public ResponseEntity<List<PetDto>> petList(@RaFilter PetFilter filter, RaRangeSort range) {
-		Page<Pet> page;
-		if (filter.id() != null) {
-			page = petRepository.findByIdIn(filter.id(), range.pageable);
-		} else if (filter.ownerId() != null) {
-			page = petRepository.loadByOwnerId(filter.ownerId(), range.pageable);
-		} else {
-			page = petRepository.findAll(range.pageable);
+	public ResponseEntity<List<PetDto>> petList(@RaFilter PetFilter filter,
+												RaSort sort) { // only sort, as example
+		/* custom logic */
+		if (!sort.isSpecified()) { // default sorting
+			sort = new RaSort("name", Sort.Direction.ASC, true);
 		}
-		var response = raProtocolUtil.convertToResponseEntity(page, petMapper::toDto, "pet");
+		Sort.Direction directionByNameLength = "namelength".equals(sort.getProperty()) ? sort.getDirection() : null;
+		if ("namelength".equals(sort.getProperty())) {
+			sort = RaSort.empty();
+		}
+		/* end of custom logic */
+
+		List<Pet> list;
+		if (filter.id() != null) {
+			list = petRepository.findByIdIn(filter.id(), sort.toSort());
+		} else if (filter.ownerId() != null) {
+			list = petRepository.loadByOwnerId(filter.ownerId(), sort.toSort());
+		} else {
+			list = petRepository.findAll(sort.toSort());
+		}
+
+		/* custom logic */
+		if (directionByNameLength != null) { // sort by length of name
+			list = new ArrayList<>(list);
+			list.sort(Comparator.comparing(p -> {
+				int nameLength = p.getName().length();
+				return directionByNameLength.isAscending() ? nameLength : -nameLength;
+            }));
+		}
+		/* end of custom logic */
+
+		var response = raProtocolUtil.convertToResponseEntity(
+				list.stream().map(petMapper::toDto).toList(),
+				"pet"
+		);
 		return response;
 	}
 

@@ -1,10 +1,11 @@
 package org.springframework.samples.petclinic.owner;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.Nullable;
+
+import java.util.List;
 
 public interface PetRepository extends JpaRepository<Pet, Integer> {
 
@@ -13,7 +14,7 @@ public interface PetRepository extends JpaRepository<Pet, Integer> {
     Integer loadPetByVisit(int visitId);
 
     @Query("select p from Pet p, Owner o where o.id = :ownerId and p member of o.pets")
-    Page<Pet> loadByOwnerId(int ownerId, Pageable pageable);
+    List<Pet> loadByOwnerId(int ownerId, Sort sort);
 
-	Page<Pet> findByIdIn(Integer[] ids, Pageable pageable);
+	List<Pet> findByIdIn(Integer[] ids, Sort sort);
 }

@@ -4,7 +4,7 @@ const filters = [
     <TextInput label="Description" source="description" />,
     <DateInput label="Date after" source="dateAfter" />,
     <DateInput label="Date before" source="dateBefore" />,
-    <ReferenceInput label="Pet" source="petId" reference="pet">
+    <ReferenceInput label="Pet" source="petId" reference="pet" sort={{ field: 'namelength', order: 'ASC' }}>
         <AutocompleteInput />
     </ReferenceInput>
 ];
