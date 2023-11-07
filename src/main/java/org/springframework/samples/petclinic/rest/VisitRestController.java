@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -23,15 +24,18 @@ public class VisitRestController {
 	private final PetRepository petRepository;
 	private final RaProtocolUtil raProtocolUtil;
 	private final VisitMapper visitMapper;
+	private final SpecificationFilterConverter specificationFilterConverter;
 
 	public VisitRestController(VisitRepository visitRepository,
 							   PetRepository petRepository,
 							   RaProtocolUtil raProtocolUtil,
-							   VisitMapper visitMapper) {
+							   VisitMapper visitMapper,
+							   SpecificationFilterConverter specificationFilterConverter) {
 		this.visitRepository = visitRepository;
 		this.petRepository = petRepository;
 		this.raProtocolUtil = raProtocolUtil;
 		this.visitMapper = visitMapper;
+		this.specificationFilterConverter = specificationFilterConverter;
 	}
 
 	@PostMapping("/visit")
@@ -64,6 +68,22 @@ public class VisitRestController {
 	}
 
 	private Specification<Visit> convertToSpecification(VisitListFilter filter) {
+		Specification<Visit> specification = specificationFilterConverter.convert(filter, Visit.class);
+
+		// add custom conditions
+		if (filter.petId() != null) {
+			specification = specification.and((root, query, criteriaBuilder) -> {
+				From<Pet, Pet> petFrom = query.from(Pet.class);
+				return criteriaBuilder.and(
+						criteriaBuilder.equal(petFrom.get("id"), filter.petId()),
+						criteriaBuilder.isMember(root, petFrom.<Collection<Visit>>get("visits"))
+				);
+			});
+		}
+		return specification;
+	}
+
+	/*private Specification<Visit> convertToSpecification(VisitListFilter filter) {
 		return (root, query, criteriaBuilder) -> {
 			List<Predicate> predicates = new ArrayList<>();
 			if (filter.description() != null) {
@@ -87,7 +107,7 @@ public class VisitRestController {
 			}
 			return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
 		};
-	}
+	}*/
 
 	public record VisitListFilter(
 			@SpecFilterCondition(operator = SpecFilterOperator.CONTAINS, ignoreCase = true)

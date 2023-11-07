@@ -12,10 +12,9 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 @Component
 public class RaFilterArgumentResolver implements HandlerMethodArgumentResolver {
 
-    /* Keep JSON mapper settings isolated from the rest of Spring MVC */
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
-    public void setObjectMapper(ObjectMapper objectMapper) {
+    public RaFilterArgumentResolver(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 

@@ -1,7 +1,6 @@
 package org.springframework.samples.petclinic.rest;
 
 import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
@@ -11,7 +10,6 @@ import org.springframework.samples.petclinic.owner.*;
 import org.springframework.samples.petclinic.rest.rasupport.*;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -21,13 +19,16 @@ public class OwnerRestController {
 	private final OwnerRepository ownerRepository;
 	private final RaProtocolUtil raProtocolUtil;
 	private final OwnerMapper ownerMapper;
+	private final SpecificationFilterConverter specificationFilterConverter;
 
 	public OwnerRestController(OwnerRepository ownerRepository,
 							   RaProtocolUtil raProtocolUtil,
-							   OwnerMapper ownerMapper) {
+							   OwnerMapper ownerMapper,
+							   SpecificationFilterConverter specificationFilterConverter) {
 		this.ownerRepository = ownerRepository;
 		this.raProtocolUtil = raProtocolUtil;
 		this.ownerMapper = ownerMapper;
+		this.specificationFilterConverter = specificationFilterConverter;
 	}
 
 	@GetMapping("/{id}")
@@ -69,6 +70,19 @@ public class OwnerRestController {
 	}
 
 	private Specification<Owner> convertToSpecification(OwnerListFilter filter) {
+		Specification<Owner> specification = specificationFilterConverter.convert(filter, Owner.class);
+
+		// add custom conditions
+		if (filter.petTypeId() != null) {
+			specification = specification.and((root, query, criteriaBuilder) -> {
+				Join<Owner, Pet> petJoin = root.join("pets");
+				return criteriaBuilder.equal(petJoin.get("type").get("id"), filter.petTypeId());
+			});
+		}
+		return specification;
+	}
+
+	/*private Specification<Owner> convertToSpecification(OwnerListFilter filter) {
 		return (root, query, criteriaBuilder) -> {
 			List<Predicate> predicates = new ArrayList<>();
 
@@ -95,7 +109,7 @@ public class OwnerRestController {
 
 			return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
 		};
-	}
+	}*/
 
 	public record OwnerListFilter(
 		@SpecFilterCondition(operator = SpecFilterOperator.IN)
@@ -104,7 +118,8 @@ public class OwnerRestController {
 		@SpecFilterCondition(operator = SpecFilterOperator.CONTAINS, ignoreCase = true)
 		String lastName,
 
-		@SpecFilterCondition(property = "pets.type.id", operator = SpecFilterOperator.EQUALS)
+		// todo support nested property
+		//  @SpecFilterCondition(property = "pets.type.id", operator = SpecFilterOperator.EQUALS)
 		Integer petTypeId
 	) {
 	}
