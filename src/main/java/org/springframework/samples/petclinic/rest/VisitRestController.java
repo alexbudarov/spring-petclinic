@@ -1,8 +1,6 @@
 package org.springframework.samples.petclinic.rest;
 
 import jakarta.persistence.criteria.From;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
@@ -12,7 +10,6 @@ import org.springframework.samples.petclinic.rest.rasupport.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -56,6 +53,25 @@ public class VisitRestController {
 		petRepository.save(pet);
 
 		return ResponseEntity.ok(visitMapper.toDto(savedVisit));
+	}
+
+	// todo proper implementation of patch mechanics
+	@PutMapping("/{id}")
+	public ResponseEntity<VisitDto> update(@PathVariable Integer id, @RequestBody @Valid InputVisitDto visitDto) {
+		if (visitDto.id() != null && !visitDto.id().equals(id)) {
+			return ResponseEntity.badRequest().build();
+		}
+		Visit visit = visitRepository.findById(id).orElse(null);
+		if (visit == null) {
+			return ResponseEntity.notFound().build();
+		}
+
+		visitMapper.partialUpdate(visitDto, visit);
+		visit = visitRepository.save(visit);
+
+		// don't handle VisitDto#petId change, this is a custom field
+
+		return ResponseEntity.ok(visitMapper.toDto(visit));
 	}
 
 	@DeleteMapping("/{id}")
