@@ -1,16 +1,19 @@
 package org.springframework.samples.petclinic.rest;
 
-import jakarta.persistence.criteria.Join;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.samples.petclinic.owner.*;
+import org.springframework.samples.petclinic.owner.Owner;
+import org.springframework.samples.petclinic.owner.OwnerDto;
+import org.springframework.samples.petclinic.owner.OwnerMapper;
+import org.springframework.samples.petclinic.owner.OwnerRepository;
 import org.springframework.samples.petclinic.rest.rasupport.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/rest/owner")
@@ -67,6 +70,17 @@ public class OwnerRestController {
 
 		OwnerDto updatedDto = ownerMapper.toDto(ownerRepository.findById(id));
 		return ResponseEntity.ok(updatedDto);
+	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<OwnerDto> delete(@PathVariable Integer id) {
+		Optional<OwnerDto> visitDto = Optional.ofNullable(ownerRepository.findById(id))
+				.map(ownerMapper::toDto);
+
+		if (visitDto.isPresent()) {
+			ownerRepository.deleteById(id);
+		}
+		return ResponseEntity.of(visitDto);
 	}
 
 	private Specification<Owner> convertToSpecification(OwnerListFilter filter) {

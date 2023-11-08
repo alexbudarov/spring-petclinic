@@ -85,4 +85,6 @@ public interface OwnerRepository extends Repository<Owner, Integer>, JpaSpecific
 	@Query("SELECT distinct owner FROM Owner owner join owner.pets p where p.id = :petId")
 	@Transactional(readOnly = true)
 	Optional<Owner> findByPet(Integer petId);
+
+	void deleteById(Integer id);
 }

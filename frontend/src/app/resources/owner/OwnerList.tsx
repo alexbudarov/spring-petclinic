@@ -1,4 +1,4 @@
-import { AutocompleteInput, Datagrid, List, ReferenceArrayField, ReferenceInput, TextField, TextInput } from "react-admin"
+import { AutocompleteInput, BulkDeleteButton, Datagrid, List, ReferenceArrayField, ReferenceInput, TextField, TextInput } from "react-admin"
 
 const filters = [
     <TextInput label="Last name" source="lastName" alwaysOn />,
@@ -9,7 +9,7 @@ const filters = [
 
 export const OwnerList = () => (
     <List filters={filters}>
-        <Datagrid rowClick="show" bulkActionButtons={false}>
+        <Datagrid rowClick="show" bulkActionButtons={<BulkDeleteButton mutationMode="pessimistic"/>}>
             <TextField source="firstName"/>
             <TextField source="lastName"/>
             <TextField source="address"/>
