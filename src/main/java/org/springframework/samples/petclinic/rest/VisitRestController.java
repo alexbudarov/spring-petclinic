@@ -55,19 +55,38 @@ public class VisitRestController {
 		return ResponseEntity.ok(visitMapper.toDto(savedVisit));
 	}
 
-	// todo proper implementation of patch mechanics
 	@PutMapping("/{id}")
-	public ResponseEntity<VisitDto> update(@PathVariable Integer id, @RequestBody @Valid InputVisitDto visitDto) {
-		if (visitDto.id() != null && !visitDto.id().equals(id)) {
-			return ResponseEntity.badRequest().build();
-		}
-		Visit visit = visitRepository.findById(id).orElse(null);
+	public ResponseEntity<VisitDto> update(@PathVariable Integer id, @RequestBody String visitDtoPatch) {
+		// no DTO:
+		// 1) load entity by id
+		// 2) read and assign using: ObjectMapper#readerForUpdating()
+		// 3) save via repository
+
+		// DTO (or quasi DTO)
+		// DTO means attribute conversion or cutting of some fields
+		// 1.1) load entity
+		// 1.2) convert entity -> DTO (MapStruct)
+		// 1.3) patch DTO from request body (Jackson)
+		//    .1) by updating mutable object,
+		//    .2) or cloning immutable one
+		// 1.4) update() entity from DTO (MapStruct)
+		// 1.5) save entity
+
+
+		Visit visit = visitRepository.findById(id).orElse(null); // 1.1
 		if (visit == null) {
 			return ResponseEntity.notFound().build();
 		}
 
-		visitMapper.partialUpdate(visitDto, visit);
-		visit = visitRepository.save(visit);
+		VisitDto visitDto = visitMapper.toDto(visit); // 1.2
+		raProtocolUtil.patch(visitDtoPatch, visitDto); // 1.3
+
+		if (visitDto.getId() != null && !visitDto.getId().equals(id)) {
+			return ResponseEntity.badRequest().build();
+		}
+
+		visitMapper.update(visitDto, visit); // 1.4
+		visit = visitRepository.save(visit); // 1.5
 
 		// don't handle VisitDto#petId change, this is a custom field
 

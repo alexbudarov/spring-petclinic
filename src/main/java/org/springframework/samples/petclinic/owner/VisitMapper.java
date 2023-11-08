@@ -10,6 +10,5 @@ public interface VisitMapper {
     @Mapping(source = "id", target = "petId", qualifiedByName = "Visit#petId") // customization
     VisitDto toDto(Visit visit);
 
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void partialUpdate(InputVisitDto visitDto, @MappingTarget Visit visit);
+    void update(VisitDto visitDto, @MappingTarget Visit visit);
 }
