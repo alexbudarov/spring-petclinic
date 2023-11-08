@@ -15,9 +15,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
-@RequestMapping("/rest")
+@RequestMapping("/rest/visit")
 public class VisitRestController {
 
 	private final VisitRepository visitRepository;
@@ -38,7 +39,7 @@ public class VisitRestController {
 		this.specificationFilterConverter = specificationFilterConverter;
 	}
 
-	@PostMapping("/visit")
+	@PostMapping
 	public ResponseEntity<VisitDto> create(@RequestBody @Valid VisitDto dto) {
 		if (dto.id() != null || dto.petId() == null) {
 			return ResponseEntity.badRequest().build();
@@ -57,7 +58,18 @@ public class VisitRestController {
 		return ResponseEntity.ok(visitMapper.toDto(savedVisit));
 	}
 
-	@GetMapping("/visit")
+	@DeleteMapping("/{id}")
+	public ResponseEntity<VisitDto> delete(@PathVariable Integer id) {
+		Optional<VisitDto> visitDto = visitRepository.findById(id).map(visitMapper::toDto);
+
+		if (visitDto.isPresent()) {
+			visitRepository.deleteById(id);
+		}
+
+		return ResponseEntity.of(visitDto);
+	}
+
+	@GetMapping
 	public ResponseEntity<List<VisitDto>> visitList(@RaFilter VisitListFilter filter, RaRange range, RaSort sort) {
 		Specification<Visit> specification = convertToSpecification(filter);
 		Page<Visit> page = visitRepository.findAll(specification, range.toPageable(sort));

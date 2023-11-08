@@ -1,4 +1,4 @@
-import { AutocompleteInput, Datagrid, DateField, DateInput, List, ReferenceField, ReferenceInput, TextField, TextInput } from "react-admin"
+import { AutocompleteInput, Datagrid, DateField, DateInput, DeleteButton, List, ReferenceField, ReferenceInput, TextField, TextInput } from "react-admin"
 
 const filters = [
     <TextInput label="Description" source="description" />,
@@ -15,6 +15,7 @@ export const VisitList = () => (
             <DateField source="date" options={{dateStyle: 'medium'}} />
             <TextField source="description"/>
             <ReferenceField source="petId" reference="pet" sortable={false}/>
+            <DeleteButton/>
         </Datagrid>
     </List>
 )
