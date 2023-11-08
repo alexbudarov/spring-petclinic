@@ -1,9 +1,6 @@
 package org.springframework.samples.petclinic.rest.rasupport;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
@@ -11,15 +8,18 @@ import org.springframework.util.ReflectionUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.regex.Pattern;
 
 @Component
 public class SpecificationFilterConverter {
+
+    private static final Pattern DOT_PATTERN = Pattern.compile("\\.");
 
     /**
      * Convert static filter object to JPA specification.
      * Use {@link SpecFilterCondition} annotations as declaration of filter conditions.
      */
-    public <T> Specification<T> convert(Object filter, Class<T> entityClass) {
+    public <T> Specification<T> convert(Object filter) {
         Map<Field, SpecFilterCondition> conditions = getDeclaredConditions(filter.getClass());
         List<PredicateFactory> predicateFactories = new ArrayList<>();
         for (Map.Entry<Field, SpecFilterCondition> entry: conditions.entrySet()) {
@@ -49,7 +49,6 @@ public class SpecificationFilterConverter {
         return res;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     private Optional<PredicateFactory> convertToPredicate(Field field, SpecFilterCondition condition, Object filter) {
         field.setAccessible(true);
         Object filterValue = ReflectionUtils.getField(field, filter);
@@ -57,66 +56,92 @@ public class SpecificationFilterConverter {
             return Optional.empty();
         }
 
-        String propertyName = !condition.property().isEmpty() ? condition.property() : field.getName();
+        String property = !condition.property().isEmpty() ? condition.property() : field.getName();
+        String[] propertyParts;
+        if (property.contains(".")) { // compound
+            propertyParts = DOT_PATTERN.split(property);
+        } else {
+            propertyParts = new String[] {property};
+        }
 
-        PredicateFactory res =  (r, cb) -> {
+        PredicateFactory res = (root, criteriaBuilder) -> {
             SpecFilterOperator op = condition.operator();
-            Expression<?> leftArg = r.get(propertyName);
+            Expression<?> leftArg = buildLeftArgPath(condition, root, propertyParts);
             Object rightArg = filterValue;
 
-            // handler lowerCase option
+            // handle lowerCase option
             if (op == SpecFilterOperator.EQUALS || op == SpecFilterOperator.NOT_EQUALS || op == SpecFilterOperator.CONTAINS
                     || op == SpecFilterOperator.STARTS_WITH || op == SpecFilterOperator.ENDS_WITH) {
                 if (condition.ignoreCase() && filterValue instanceof String) {
-                    leftArg = cb.lower(r.get(propertyName));
+                    leftArg = criteriaBuilder.lower((Expression<String>) leftArg);
                     rightArg = ((String) filterValue).toLowerCase();
                 }
             }
 
-            switch (op) {
-                case EQUALS -> {
-                    return cb.equal(leftArg, rightArg);
-                }
-                case NOT_EQUALS -> {
-                    return cb.notEqual(leftArg, rightArg);
-                }
-                case CONTAINS -> {
-                    return cb.like((Expression<String>) leftArg, "%" + rightArg + "%");
-                }
-                case STARTS_WITH -> {
-                    return cb.like((Expression<String>) leftArg, rightArg + "%");
-                }
-                case ENDS_WITH -> {
-                    return cb.like((Expression<String>) leftArg, "%" + rightArg);
-                }
-                case LESS -> {
-                    return cb.lessThan((Expression<? extends Comparable>) leftArg, (Comparable) rightArg);
-                }
-                case LESS_OR_EQUALS -> {
-                    return cb.lessThanOrEqualTo((Expression<? extends Comparable>) leftArg, (Comparable) rightArg);
-                }
-                case GREATER -> {
-                    return cb.greaterThan((Expression<? extends Comparable>) leftArg, (Comparable) rightArg);
-                }
-                case GREATER_OR_EQUALS -> {
-                    return cb.greaterThanOrEqualTo((Expression<? extends Comparable>) leftArg, (Comparable) rightArg);
-                }
-                case IN -> {
-                    return leftArg.in((Object[]) rightArg);
-                }
-                case NOT_IN -> {
-                    return cb.not(leftArg.in((Object[]) rightArg));
-                }
-                case IS_SET -> {
-                    return Boolean.TRUE.equals(rightArg) ? leftArg.isNotNull() : leftArg.isNull();
-                }
-                case IS_NOT_SET -> {
-                    return Boolean.TRUE.equals(rightArg) ? leftArg.isNull() : leftArg.isNotNull();
-                }
-                default -> throw new UnsupportedOperationException("Not supported yet: " + op);
-            }
+            Predicate leaf = getPredicateByCondition(criteriaBuilder, op, leftArg, rightArg);
+            return leaf;
         };
         return Optional.of(res);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static Predicate getPredicateByCondition(CriteriaBuilder cb, SpecFilterOperator op,
+                                                     Expression<?> leftArg, Object rightArg) {
+        Predicate leaf;
+        switch (op) {
+            case EQUALS -> {
+                leaf = cb.equal(leftArg, rightArg);
+            }
+            case NOT_EQUALS -> {
+                leaf = cb.notEqual(leftArg, rightArg);
+            }
+            case CONTAINS -> {
+                leaf = cb.like((Expression<String>) leftArg, "%" + rightArg + "%");
+            }
+            case STARTS_WITH -> {
+                leaf = cb.like((Expression<String>) leftArg, rightArg + "%");
+            }
+            case ENDS_WITH -> {
+                leaf = cb.like((Expression<String>) leftArg, "%" + rightArg);
+            }
+            case LESS -> {
+                leaf = cb.lessThan((Expression<? extends Comparable>) leftArg, (Comparable) rightArg);
+            }
+            case LESS_OR_EQUALS -> {
+                leaf = cb.lessThanOrEqualTo((Expression<? extends Comparable>) leftArg, (Comparable) rightArg);
+            }
+            case GREATER -> {
+                leaf = cb.greaterThan((Expression<? extends Comparable>) leftArg, (Comparable) rightArg);
+            }
+            case GREATER_OR_EQUALS -> {
+                leaf = cb.greaterThanOrEqualTo((Expression<? extends Comparable>) leftArg, (Comparable) rightArg);
+            }
+            case IN -> {
+                leaf = leftArg.in((Object[]) rightArg);
+            }
+            case NOT_IN -> {
+                leaf = cb.not(leftArg.in((Object[]) rightArg));
+            }
+            case IS_SET -> {
+                leaf = Boolean.TRUE.equals(rightArg) ? leftArg.isNotNull() : leftArg.isNull();
+            }
+            case IS_NOT_SET -> {
+                leaf = Boolean.TRUE.equals(rightArg) ? leftArg.isNull() : leftArg.isNotNull();
+            }
+            default -> throw new UnsupportedOperationException("Not supported yet: " + op);
+        }
+        return leaf;
+    }
+
+    // build chain call like:
+    //   root.join("collectionAttr").get("associationAttr").get("property")
+    private static Expression<?> buildLeftArgPath(SpecFilterCondition condition, Root<?> root, String[] propertyParts) {
+        Path<?> leftArgPath = condition.joinCollection().isEmpty() ? root : root.join(condition.joinCollection());
+        for (String propertyPart : propertyParts) {
+            leftArgPath = leftArgPath.get(propertyPart);
+        }
+
+        return leftArgPath;
     }
 
     @FunctionalInterface

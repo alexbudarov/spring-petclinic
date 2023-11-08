@@ -68,7 +68,7 @@ public class VisitRestController {
 	}
 
 	private Specification<Visit> convertToSpecification(VisitListFilter filter) {
-		Specification<Visit> specification = specificationFilterConverter.convert(filter, Visit.class);
+		Specification<Visit> specification = specificationFilterConverter.convert(filter);
 
 		// add custom conditions
 		if (filter.petId() != null) {

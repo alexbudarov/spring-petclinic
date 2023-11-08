@@ -70,15 +70,7 @@ public class OwnerRestController {
 	}
 
 	private Specification<Owner> convertToSpecification(OwnerListFilter filter) {
-		Specification<Owner> specification = specificationFilterConverter.convert(filter, Owner.class);
-
-		// add custom conditions
-		if (filter.petTypeId() != null) {
-			specification = specification.and((root, query, criteriaBuilder) -> {
-				Join<Owner, Pet> petJoin = root.join("pets");
-				return criteriaBuilder.equal(petJoin.get("type").get("id"), filter.petTypeId());
-			});
-		}
+		Specification<Owner> specification = specificationFilterConverter.convert(filter);
 		return specification;
 	}
 
@@ -118,8 +110,7 @@ public class OwnerRestController {
 		@SpecFilterCondition(operator = SpecFilterOperator.CONTAINS, ignoreCase = true)
 		String lastName,
 
-		// todo support nested property
-		//  @SpecFilterCondition(property = "pets.type.id", operator = SpecFilterOperator.EQUALS)
+		@SpecFilterCondition(joinCollection = "pets", property = "type.id", operator = SpecFilterOperator.EQUALS)
 		Integer petTypeId
 	) {
 	}
