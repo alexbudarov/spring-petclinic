@@ -1,0 +1,110 @@
+[
+  {
+    "name": "owner",
+    "attributes": [
+      {"name": "id", "type": "number"},
+      {"name": "firstName", "type": "string", "required": true},
+      {"name": "lastName", "type": "string", "required": true},
+      {"name": "address", "type": "string", "required": true},
+      {"name": "city", "type": "string", "required": true},
+      {"name": "telephone", "type": "string", "required": true},
+      {"name": "petIds", "type": "reference", "array":  true}
+    ],
+    "operations": ["getList", "getOne", "getMany", "getManyReference", "create", "update", "updateMany", "delete", "deleteMany"],
+    "listCapabilities": {
+      "filter": [
+        {"name": "id", "type": "number", "array": true},
+        {"name": "lastName", "type": "string"},
+        {"name": "petTypeId", "type": "number"}
+      ],
+      "pagination": true,
+      "sort": true
+    }
+  },
+  {
+    "name": "pet",
+    "attributes": [
+      {"name": "id", "type": "number"},
+      {"name": "name", "type": "string", "required": true},
+      {"name": "birthDate", "type": "date", "required": true},
+      {"name": "typeId", "type": "reference", "required": true},
+      {"name": "ownerId", "type": "reference", "required": true}
+    ],
+    "operations": ["getList", "getOne", "getMany", "getManyReference", "create", "update", "updateMany"],
+    "listCapabilities": {
+      "filter": [
+        {"name": "id", "type": "number", "array": true},
+        {"name": "ownerId", "type": "number"}
+      ],
+      "pagination": false,
+      "sort": true
+    }
+  },
+  {
+    "name": "pet-type",
+    "attributes": [
+      {"name": "id", "type": "number"},
+      {"name": "name", "type": "string"}
+    ],
+    "operations": ["getList", "getMany", "getManyReference"],
+    "listCapabilities": {
+      "filter": [
+        {"name": "id", "type": "number", "array": true}
+      ],
+      "pagination": false,
+      "sort": false
+    }
+  },
+  {
+    "name": "specialty",
+    "attributes": [
+      {"name": "id", "type": "number"},
+      {"name": "name", "type": "string"}
+    ],
+    "operations": ["getList", "getMany", "getManyReference"],
+    "listCapabilities": {
+      "filter": [
+        {"name": "id", "type": "number", "array": true},
+        {"name": "vetId", "type": "number"}
+      ],
+      "pagination": true,
+      "sort": true
+    }
+  },
+  {
+    "name": "vet",
+    "attributes": [
+      {"name": "id", "type": "number"},
+      {"name": "firstName", "type": "string", "required": true},
+      {"name": "lastName", "type": "string", "required": true}
+    ],
+    "operations": ["getList", "getMany", "getManyReference"],
+    "listCapabilities": {
+      "filter": [
+        {"name": "id", "type": "number", "array": true}
+      ],
+      "pagination": true,
+      "sort": true
+    }
+  },
+  {
+    "name": "visit",
+    "attributes": [
+      {"name": "id", "type": "number"},
+      {"name": "date", "type": "date"},
+      {"name": "description", "type": "string", "required": true},
+      {"name": "petId", "type": "reference"}
+    ],
+    "operations": ["getList", "getMany", "getManyReference", "create", "update", "updateMany", "delete", "deleteMany"],
+    "listCapabilities": {
+      "filter": [
+        {"name": "description", "type": "string"},
+        {"name": "dateBefore", "type": "date"},
+        {"name": "dateAfter", "type": "date"},
+        {"name": "petId", "type": "number"}
+      ],
+      "pagination": true,
+      "sort": true
+    }
+  }
+]
