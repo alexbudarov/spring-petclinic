@@ -1,7 +1,5 @@
 package org.springframework.samples.petclinic.rest.rasupport;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -15,13 +13,7 @@ import java.util.stream.Collectors;
 @Component
 public class RaProtocolUtil {
 
-	private final ObjectMapper objectMapper;
-
 	public static final String CONTENT_RANGE = HttpHeaders.CONTENT_RANGE;
-
-	public RaProtocolUtil(ObjectMapper objectMapper) {
-		this.objectMapper = objectMapper;
-	}
 
 	/*
 	 * Fills response for getList() operation
@@ -83,13 +75,4 @@ public class RaProtocolUtil {
 				total
 		);
 	}
-
-	public <T> void patch(String patchJson, T target) {
-		try {
-			objectMapper.readerForUpdating(target).readValue(patchJson);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
 }

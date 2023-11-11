@@ -20,15 +20,18 @@ public class OwnerRestController {
 	private final RaProtocolUtil raProtocolUtil;
 	private final OwnerMapper ownerMapper;
 	private final SpecificationFilterConverter specificationFilterConverter;
+	private final RaPatchUtil raPatchUtil;
 
 	public OwnerRestController(OwnerRepository ownerRepository,
 							   RaProtocolUtil raProtocolUtil,
 							   OwnerMapper ownerMapper,
-							   SpecificationFilterConverter specificationFilterConverter) {
+							   SpecificationFilterConverter specificationFilterConverter,
+							   RaPatchUtil raPatchUtil) {
 		this.ownerRepository = ownerRepository;
 		this.raProtocolUtil = raProtocolUtil;
 		this.ownerMapper = ownerMapper;
 		this.specificationFilterConverter = specificationFilterConverter;
+		this.raPatchUtil = raPatchUtil;
 	}
 
 	@GetMapping("/{id}")
@@ -64,7 +67,7 @@ public class OwnerRestController {
 		}
 
 		OwnerDto ownerDto = ownerMapper.toDto(owner);
-		raProtocolUtil.patch(ownerDtoPatch, ownerDto);
+		ownerDto = raPatchUtil.patch(ownerDto, ownerDtoPatch);
 		// todo validate ownerDto
 		if (ownerDto.id() != null && !ownerDto.id().equals(id)) {
 			return ResponseEntity.badRequest().build();

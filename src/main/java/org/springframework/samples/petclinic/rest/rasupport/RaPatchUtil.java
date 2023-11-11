@@ -1,23 +1,18 @@
 package org.springframework.samples.petclinic.rest.rasupport;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.deser.BeanDeserializer;
+import com.fasterxml.jackson.databind.deser.DefaultDeserializationContext;
 import com.fasterxml.jackson.databind.deser.SettableBeanProperty;
 import com.fasterxml.jackson.databind.deser.ValueInstantiator;
-import com.fasterxml.jackson.databind.deser.impl.BeanPropertyMap;
-import com.fasterxml.jackson.databind.deser.impl.PropertyBasedCreator;
-import com.fasterxml.jackson.databind.deser.impl.PropertyValueBuffer;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.introspect.ClassIntrospector;
+import com.google.errorprone.annotations.CheckReturnValue;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -29,8 +24,18 @@ public class RaPatchUtil {
         this.objectMapper = objectMapper;
     }
 
+	/**
+	 * Patches passed object with properties from passed json.
+	 * May modify existing object or create a shallow copy.
+	 *
+	 * @param patchJson request body JSON containing fields to update
+	 * @param target target object (bean) that should be patched
+	 * @return the same modified or another created object with patched properties
+	 * @param <T> object class
+	 */
     @SuppressWarnings("unchecked")
-    public <T> T patch(String patchJson, T target) {
+	@CheckReturnValue
+    public <T> T patch(T target, String patchJson) {
         // 1. deserialize json into DTO_2
         // 2. deserialize json into Set of patched property names
         // 3. gather Map of properties - take from target
@@ -65,17 +70,17 @@ public class RaPatchUtil {
 
         // 4.
         for (String patchedPropertyName: patchedPropertyNames) {
-            Object patchedValue = beanProperties.stream()
-                    .filter(p -> p.getName().equals(patchedPropertyName) && p.hasGetter())
-                    .findAny()
-                    .map(def -> def.getGetter().getValue(patchObject))
-                    .orElseThrow();
+			BeanPropertyDefinition propertyDefinition = beanProperties.stream()
+				.filter(p -> p.getName().equals(patchedPropertyName) && p.hasGetter())
+				.findAny()
+				.orElseThrow(() -> new IllegalStateException("Can't find getter for property " + patchedPropertyName));
+
+			Object patchedValue =  propertyDefinition.getGetter().getValue(patchObject);
             allPropertyValues.put(patchedPropertyName, patchedValue);
         }
 
         // 5.
-        T patchedObject = constructBean(allPropertyValues, beanDescription);
-
+        T patchedObject = (T) constructBean(allPropertyValues, beanDescription);
         return patchedObject;
     }
 
@@ -88,40 +93,66 @@ public class RaPatchUtil {
     }
 
     private boolean canBePatchedInPlace(BeanDescription beanDescription) {
-        // Consider the bean - able to be patched in place
-        // if it does NOT contain properties
-        //   that CAN be set via constructor, but NOT via setter.
-        // If the property doesn't have neither constructor nor setter - than it is read-only and doesn't interest us.
+        // Prefer to fill bean values through constructor parameters and setters.
+		//
+		// The bean can be patched in place if it does NOT contain properties
+        //   that cannot be set via setter, but can be set via field or constructor.
+		if (beanDescription.isRecordType()) {
+			return false;
+		}
         return beanDescription.findProperties().stream()
-                .noneMatch(p -> p.hasConstructorParameter() && !p.hasSetter());
+                .noneMatch(p -> (p.hasConstructorParameter() || p.hasField()) && !p.hasSetter());
     }
 
-    private <T> T constructBean(Map<String, Object> propertyValues, BeanDescription beanDescription)  {
+    private Object constructBean(Map<String, Object> propertyValues, BeanDescription beanDescription)  {
         try {
-            JsonParser parser = objectMapper.createParser("{}");// dummy
-
-            DeserializationContext ctxt = objectMapper.getDeserializationContext();
-            BeanDeserializer deser = (BeanDeserializer) ctxt.findRootValueDeserializer(beanDescription.getType());
+			DefaultDeserializationContext defaultContext = (DefaultDeserializationContext) objectMapper.getDeserializationContext();
+			DeserializationContext ctxt = defaultContext.createInstance(objectMapper.getDeserializationConfig(), null, null);
+			BeanDeserializer deser = (BeanDeserializer) ctxt.findRootValueDeserializer(beanDescription.getType());
 
             ValueInstantiator valueInstantiator = deser.getValueInstantiator();
             SettableBeanProperty[] creatorProps = valueInstantiator.getFromObjectArguments(ctxt.getConfig());
 
-            BeanPropertyMap beanProperties = null; // todo
-            PropertyBasedCreator creator = PropertyBasedCreator.construct(ctxt, valueInstantiator, creatorProps, beanProperties);
+			if (creatorProps.length == 0) {
+				throw new IllegalArgumentException("Bean " + beanDescription.getBeanClass() + " doesn't have appropriate constructor");
+			}
 
-            PropertyValueBuffer buffer = creator.startBuilding(parser, ctxt, null);
+			Object[] args = new Object[creatorProps.length];
+			for (int i = 0; i < args.length; i++) {
+				String propertyName = creatorProps[i].getName();
+				args[i] = propertyValues.get(propertyName);
+			}
 
-            // todo final SettableBeanProperty creatorProp = creator.findCreatorProperty(propName);
-            // todo buffer.assignParameter(creatorProp, value)
-            // todo buffer.bufferProperty(prop, _deserializeWithErrorWrapping(p, ctxt, prop));
-            T bean = (T) creator.build(ctxt, buffer);
-            return bean;
+			// create bean with preferred constructor
+			Object bean = valueInstantiator.createFromObjectWith(ctxt, args);
+			fillNonConstructorProperties(propertyValues, beanDescription, creatorProps, bean);
+			return bean;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private BeanDescription getBeanDescription(Class<?> targetClass) {
+	private void fillNonConstructorProperties(Map<String, Object> propertyValues, BeanDescription beanDescription,
+											  SettableBeanProperty[] creatorProps, Object bean) {
+		Set<String> constructorPropertyNames = Arrays.stream(creatorProps)
+			.map(p -> p.getName())
+			.collect(Collectors.toSet());
+
+		List<BeanPropertyDefinition> allBeanProperties = beanDescription.findProperties();
+
+		for (Map.Entry<String, Object> property: propertyValues.entrySet()) {
+			String propertyName = property.getKey();
+			if (constructorPropertyNames.contains(propertyName)) {
+				continue;
+			}
+			allBeanProperties.stream()
+				.filter(p -> p.getName().equals(propertyName) && (p.hasSetter() || p.hasField()))
+				.findAny()
+				.ifPresent(def -> def.getNonConstructorMutator().setValue(bean, property.getValue()));
+		}
+	}
+
+	private BeanDescription getBeanDescription(Class<?> targetClass) {
         DeserializationConfig config = objectMapper.getDeserializationConfig();
         ClassIntrospector introspector = config.getClassIntrospector();
         BeanDescription description = introspector.forDeserialization(config, objectMapper.constructType(targetClass),
@@ -146,12 +177,14 @@ public class RaPatchUtil {
     }
 
     private <T> Map<String, Object> extractPropertyValues(T bean, List<BeanPropertyDefinition> beanProperties) {
-        return beanProperties.stream()
-                .filter(def -> def.hasGetter())
-                .collect(Collectors.toMap(
-                        def -> def.getName(),
-                        def -> def.getGetter().getValue(bean)
-                ));
+		Map<String, Object> map = new HashMap<>();
+		beanProperties.stream()
+			.filter(def -> def.hasGetter())
+			.forEach(def -> {
+				Object value = def.getGetter().getValue(bean); // can be null, so can't use Collectors.toMap()
+				map.put(def.getName(), value);
+			});
+		return map;
     }
 
 }

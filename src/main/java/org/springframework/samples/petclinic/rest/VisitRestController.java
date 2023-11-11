@@ -23,17 +23,20 @@ public class VisitRestController {
 	private final RaProtocolUtil raProtocolUtil;
 	private final VisitMapper visitMapper;
 	private final SpecificationFilterConverter specificationFilterConverter;
+	private final RaPatchUtil raPatchUtil;
 
 	public VisitRestController(VisitRepository visitRepository,
 							   PetRepository petRepository,
 							   RaProtocolUtil raProtocolUtil,
 							   VisitMapper visitMapper,
-							   SpecificationFilterConverter specificationFilterConverter) {
+							   SpecificationFilterConverter specificationFilterConverter,
+							   RaPatchUtil raPatchUtil) {
 		this.visitRepository = visitRepository;
 		this.petRepository = petRepository;
 		this.raProtocolUtil = raProtocolUtil;
 		this.visitMapper = visitMapper;
 		this.specificationFilterConverter = specificationFilterConverter;
+		this.raPatchUtil = raPatchUtil;
 	}
 
 	@PostMapping
@@ -79,9 +82,9 @@ public class VisitRestController {
 		}
 
 		VisitDto visitDto = visitMapper.toDto(visit); // 1.2
-		raProtocolUtil.patch(visitDtoPatch, visitDto); // 1.3
+		visitDto = raPatchUtil.patch(visitDto, visitDtoPatch); // 1.3
 
-		if (visitDto.getId() != null && !visitDto.getId().equals(id)) {
+		if (visitDto.id() != null && !visitDto.id().equals(id)) {
 			return ResponseEntity.badRequest().build();
 		}
 
