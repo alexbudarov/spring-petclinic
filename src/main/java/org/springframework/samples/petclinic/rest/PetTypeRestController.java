@@ -36,7 +36,7 @@ public class PetTypeRestController {
                     .stream()
                     .map(petTypeMapper::toDto)
                     .toList();
-            return raProtocolUtil.convertToResponseEntity(list, "pet-type");
+            return raProtocolUtil.convertToResponseEntity(list);
         }
 
         List<PetTypeDto> petTypes = ownerRepository.findPetTypes()
@@ -44,7 +44,7 @@ public class PetTypeRestController {
                 .map(petTypeMapper::toDto)
                 .toList();
 
-        var response = raProtocolUtil.convertToResponseEntity(petTypes, "pet-type");
+        var response = raProtocolUtil.convertToResponseEntity(petTypes);
         return response;
     }
 

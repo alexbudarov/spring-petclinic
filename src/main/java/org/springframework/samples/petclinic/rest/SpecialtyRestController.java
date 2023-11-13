@@ -44,7 +44,7 @@ public class SpecialtyRestController {
 
         Specification<Specialty> specification = convertToSpecification(filter);
         Page<Specialty> page = specialtyRepository.findAll(specification, range.toPageable(sort));
-        var response = raProtocolUtil.convertToResponseEntity(page, "specialty");
+        var response = raProtocolUtil.convertToResponseEntity(page);
         return response;
     }
 

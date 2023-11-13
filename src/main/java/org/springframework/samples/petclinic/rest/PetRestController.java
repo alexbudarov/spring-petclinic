@@ -73,8 +73,7 @@ public class PetRestController {
 		/* end of custom logic */
 
 		var response = raProtocolUtil.convertToResponseEntity(
-				list.stream().map(petMapper::toDto).toList(),
-				"pet"
+				list.stream().map(petMapper::toDto).toList()
 		);
 		return response;
 	}

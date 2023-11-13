@@ -33,11 +33,11 @@ public class VeterinarianRestController {
     public ResponseEntity<List<VetDto>> findAll(@RaFilter VetListFilter filter, RaRange range, RaSort sort) {
 		if (filter.id() != null) { // not used atm in the current UI
 			Page<Vet> page = vetRepository.findByIdIn(filter.id(), range.toPageable(sort));
-			return raProtocolUtil.convertToResponseEntity(page, vetMapper::toDto, "vet");
+			return raProtocolUtil.convertToResponseEntity(page, vetMapper::toDto);
 		}
 
 		Page<Vet> page = vetRepository.findAll(range.toPageable(sort));
-		var response = raProtocolUtil.convertToResponseEntity(page, vetMapper::toDto, "vet");
+		var response = raProtocolUtil.convertToResponseEntity(page, vetMapper::toDto);
 		return response;
     }
 

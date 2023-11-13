@@ -20,9 +20,8 @@ public class RaProtocolUtil {
 	 *  with paging support
 	 *  according to the "ra-data-simple-rest" conventions.
 	 */
-	public <T> ResponseEntity<List<T>> convertToResponseEntity(Page<T> page, String resourceName) {
+	public <T> ResponseEntity<List<T>> convertToResponseEntity(Page<T> page) {
 		String contentRange = formatContentRange(
-			resourceName,
 			page.getPageable().getOffset(),
 			page.getPageable().getOffset() + page.getNumberOfElements() - 1,
 			page.getTotalElements()
@@ -34,9 +33,8 @@ public class RaProtocolUtil {
 		return response;
 	}
 
-	public <T, D> ResponseEntity<List<D>> convertToResponseEntity(Page<T> page, Function<T, D> mapper, String resourceName) {
+	public <T, D> ResponseEntity<List<D>> convertToResponseEntity(Page<T> page, Function<T, D> mapper) {
 		String contentRange = formatContentRange(
-				resourceName,
 				page.getPageable().getOffset(),
 				page.getPageable().getOffset() + page.getNumberOfElements() - 1,
 				page.getTotalElements()
@@ -52,9 +50,8 @@ public class RaProtocolUtil {
 		return response;
 	}
 
-	public <T> ResponseEntity<List<T>> convertToResponseEntity(List<T> list, String resourceName) {
+	public <T> ResponseEntity<List<T>> convertToResponseEntity(List<T> list) {
 		String contentRange = formatContentRange(
-				resourceName,
 				0,
 				list.size() - 1,
 				list.size()
@@ -66,7 +63,8 @@ public class RaProtocolUtil {
 		return response;
 	}
 
-	private String formatContentRange(String resourceName, long rangeStart, long rangeEnd, long total) {
+	private String formatContentRange(long rangeStart, long rangeEnd, long total) {
+		String resourceName = "unused"; // this value isn't used by the ra-data-simple-rest implementation
 		return String.format(
 				"%s %d-%d/%d",
 				resourceName,

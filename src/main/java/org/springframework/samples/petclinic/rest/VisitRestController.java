@@ -112,8 +112,7 @@ public class VisitRestController {
 		Specification<Visit> specification = convertToSpecification(filter);
 		Page<Visit> page = visitRepository.findAll(specification, range.toPageable(sort));
 		return raProtocolUtil.convertToResponseEntity(page,
-				visitMapper::toDto,
-				"visit"
+				visitMapper::toDto
 		);
 	}
 

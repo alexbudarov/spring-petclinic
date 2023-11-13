@@ -47,7 +47,7 @@ public class OwnerRestController {
 		Specification<Owner> specification = convertToSpecification(filter);
 		Page<Owner> page = ownerRepository.findAll(specification, range.toPageable(sort));
 
-		return raProtocolUtil.convertToResponseEntity(page, ownerMapper::toDto, "owner");
+		return raProtocolUtil.convertToResponseEntity(page, ownerMapper::toDto);
 	}
 
 	@PostMapping
