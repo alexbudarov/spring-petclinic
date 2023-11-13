@@ -5,10 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.samples.petclinic.owner.Owner;
-import org.springframework.samples.petclinic.owner.OwnerDto;
-import org.springframework.samples.petclinic.owner.OwnerMapper;
-import org.springframework.samples.petclinic.owner.OwnerRepository;
+import org.springframework.samples.petclinic.owner.*;
 import org.springframework.samples.petclinic.rest.rasupport.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,15 +20,18 @@ public class OwnerRestController {
 	private final RaProtocolUtil raProtocolUtil;
 	private final OwnerMapper ownerMapper;
 	private final SpecificationFilterConverter specificationFilterConverter;
+	private final RaPatchUtil raPatchUtil;
 
 	public OwnerRestController(OwnerRepository ownerRepository,
 							   RaProtocolUtil raProtocolUtil,
 							   OwnerMapper ownerMapper,
-							   SpecificationFilterConverter specificationFilterConverter) {
+							   SpecificationFilterConverter specificationFilterConverter,
+							   RaPatchUtil raPatchUtil) {
 		this.ownerRepository = ownerRepository;
 		this.raProtocolUtil = raProtocolUtil;
 		this.ownerMapper = ownerMapper;
 		this.specificationFilterConverter = specificationFilterConverter;
+		this.raPatchUtil = raPatchUtil;
 	}
 
 	@GetMapping("/{id}")
@@ -60,11 +60,19 @@ public class OwnerRestController {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<OwnerDto> update(@PathVariable Integer id, @RequestBody @Valid OwnerDto ownerDto) {
+	public ResponseEntity<OwnerDto> update(@PathVariable Integer id, @RequestBody String ownerDtoPatch) {
+		Owner owner = ownerRepository.findById(id);
+		if (owner == null) {
+			return ResponseEntity.notFound().build();
+		}
+
+		OwnerDto ownerDto = ownerMapper.toDto(owner);
+		ownerDto = raPatchUtil.patch(ownerDto, ownerDtoPatch);
+		// todo validate ownerDto
 		if (ownerDto.id() != null && !ownerDto.id().equals(id)) {
 			return ResponseEntity.badRequest().build();
 		}
-		Owner owner = ownerRepository.findById(id);
+
 		ownerMapper.update(ownerDto, owner);
 		ownerRepository.save(owner);
 

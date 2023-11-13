@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { AutocompleteInput, BulkUpdateButton, Datagrid, DateField, DateInput, DeleteButton, List, ReferenceField, ReferenceInput, TextField, TextInput } from "react-admin"
 
 const filters = [
@@ -10,14 +11,32 @@ const filters = [
 ];
 
 const BulkActionButtons = () => (
-    <BulkUpdateButton label="Postpone Tomorrow" 
-        mutationMode="pessimistic" 
-        confirmTitle="Postpone Visits"
-        confirmContent="Selected visits will be postponed till tomorrow."
-        data={{
-            date: getTomorrow()
-        }}
-    />
+    <Fragment>
+        <BulkUpdateButton label="Postpone Tomorrow" 
+            mutationMode="pessimistic" 
+            confirmTitle="Postpone Visits"
+            confirmContent="Selected visits will be postponed till tomorrow."
+            data={{
+                date: getTomorrow()
+            }}
+        />
+        <BulkUpdateButton label="Clear Date" 
+            mutationMode="pessimistic" 
+            confirmTitle="Clear Date"
+            confirmContent="Date for selected visits will be cleared"
+            data={{
+                date: null
+            }}
+        />
+        <BulkUpdateButton label="Change description" 
+            mutationMode="pessimistic" 
+            confirmTitle="Change Description"
+            confirmContent="Description for selected visits will be changed"
+            data={{
+                description: ("Description " + new Date().toTimeString())
+            }}
+        />
+    </Fragment>
 )
 
 function getTomorrow(): Date {
@@ -29,6 +48,7 @@ function getTomorrow(): Date {
 export const VisitList = () => (
     <List filters={filters}>
         <Datagrid bulkActionButtons={<BulkActionButtons />}>
+            <TextField source="id" />
             <DateField source="date" options={{dateStyle: 'medium'}} />
             <TextField source="description"/>
             <ReferenceField source="petId" reference="pet" sortable={false}/>

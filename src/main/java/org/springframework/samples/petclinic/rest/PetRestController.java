@@ -20,15 +20,18 @@ public class PetRestController {
 	private final OwnerRepository ownerRepository;
 	private final RaProtocolUtil raProtocolUtil;
 	private final PetMapper petMapper;
+	private final RaPatchUtil raPatchUtil;
 
 	public PetRestController(PetRepository petRepository,
 							 OwnerRepository ownerRepository,
 							 RaProtocolUtil raProtocolUtil,
-							 PetMapper petMapper) {
+							 PetMapper petMapper,
+							 RaPatchUtil raPatchUtil) {
 		this.petRepository = petRepository;
 		this.ownerRepository = ownerRepository;
 		this.raProtocolUtil = raProtocolUtil;
 		this.petMapper = petMapper;
+		this.raPatchUtil = raPatchUtil;
 	}
 
 	@GetMapping("/{id}")
@@ -96,20 +99,25 @@ public class PetRestController {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<PetDto> update(@PathVariable Integer id, @RequestBody @Valid PetDto petDto) {
-		if (petDto.id() != null && !petDto.id().equals(id)) {
-			return ResponseEntity.badRequest().build();
-		}
+	public ResponseEntity<PetDto> update(@PathVariable Integer id, @RequestBody String petDtoPatch) {
 		Pet pet = petRepository.findById(id).orElse(null);
 		if (pet == null) {
 			return ResponseEntity.notFound().build();
 		}
 		Owner oldOwner = ownerRepository.findByPet(id).orElse(null);
 
+		PetDto petDto = petMapper.toDto(pet);
+		petDto = raPatchUtil.patch(petDto, petDtoPatch);
+		// todo validate
+
+		if (petDto.id() != null && !petDto.id().equals(id)) {
+			return ResponseEntity.badRequest().build();
+		}
+
 		petMapper.update(petDto, pet);
 		pet = petRepository.save(pet);
 
-		// handler owner change
+		// handle owner change
 		Owner owner = petDto.ownerId() != null ? ownerRepository.findById(petDto.ownerId()) : null;
 		if (oldOwner != null && owner == null) {
 			oldOwner.getPets().remove(pet);
