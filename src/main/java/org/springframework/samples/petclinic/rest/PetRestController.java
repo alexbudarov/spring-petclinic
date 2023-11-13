@@ -107,8 +107,7 @@ public class PetRestController {
 		Owner oldOwner = ownerRepository.findByPet(id).orElse(null);
 
 		PetDto petDto = petMapper.toDto(pet);
-		petDto = raPatchUtil.patch(petDto, petDtoPatch);
-		// todo validate
+		petDto = raPatchUtil.patchAndValidate(petDto, petDtoPatch);
 
 		if (petDto.id() != null && !petDto.id().equals(id)) {
 			return ResponseEntity.badRequest().build();

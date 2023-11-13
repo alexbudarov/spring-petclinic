@@ -82,7 +82,7 @@ public class VisitRestController {
 		}
 
 		VisitDto visitDto = visitMapper.toDto(visit); // 1.2
-		visitDto = raPatchUtil.patch(visitDto, visitDtoPatch); // 1.3
+		visitDto = raPatchUtil.patchAndValidate(visitDto, visitDtoPatch); // 1.3
 
 		if (visitDto.id() != null && !visitDto.id().equals(id)) {
 			return ResponseEntity.badRequest().build();

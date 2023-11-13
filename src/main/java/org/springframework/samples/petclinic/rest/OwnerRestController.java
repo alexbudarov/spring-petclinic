@@ -67,8 +67,7 @@ public class OwnerRestController {
 		}
 
 		OwnerDto ownerDto = ownerMapper.toDto(owner);
-		ownerDto = raPatchUtil.patch(ownerDto, ownerDtoPatch);
-		// todo validate ownerDto
+		ownerDto = raPatchUtil.patchAndValidate(ownerDto, ownerDtoPatch);
 		if (ownerDto.id() != null && !ownerDto.id().equals(id)) {
 			return ResponseEntity.badRequest().build();
 		}

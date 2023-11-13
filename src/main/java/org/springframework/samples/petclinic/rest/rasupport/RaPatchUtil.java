@@ -10,6 +10,9 @@ import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.introspect.ClassIntrospector;
 import com.google.errorprone.annotations.CheckReturnValue;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.DataBinder;
+import org.springframework.validation.Validator;
 
 import java.io.IOException;
 import java.util.*;
@@ -19,10 +22,30 @@ import java.util.stream.Collectors;
 public class RaPatchUtil {
 
     private final ObjectMapper objectMapper;
+	private final Validator validator;
 
-    public RaPatchUtil(ObjectMapper objectMapper) {
+	public RaPatchUtil(ObjectMapper objectMapper,
+					   Validator validator) {
         this.objectMapper = objectMapper;
-    }
+		this.validator = validator;
+	}
+
+	/**
+	 * Patches passed object with properties from passed json.
+	 * May modify existing object or create a shallow copy.
+	 * Then validates patched object using globally configured validator.
+	 *
+	 * @param patchJson request body JSON containing fields to update
+	 * @param target target object (bean) that should be patched
+	 * @return the same modified or another created object with patched properties
+	 * @param <T> object class
+	 */
+	@CheckReturnValue
+	public <T> T patchAndValidate(T target, String patchJson) {
+		T patchedTarget = patch(target, patchJson);
+		validate(patchedTarget);
+		return patchedTarget;
+	}
 
 	/**
 	 * Patches passed object with properties from passed json.
@@ -186,5 +209,19 @@ public class RaPatchUtil {
 			});
 		return map;
     }
+
+	/**
+	 * Validate patched object using globally configured {@link Validator}.
+	 * @param target object to validate using bean validation rules
+	 */
+	public void validate(Object target) {
+		DataBinder dataBinder = new DataBinder(target);
+		dataBinder.setValidator(validator);
+		dataBinder.validate();
+		BindingResult bindResult = dataBinder.getBindingResult();
+		if (bindResult.hasErrors()) {
+			throw new PatchValidationException(bindResult);
+		}
+	}
 
 }
