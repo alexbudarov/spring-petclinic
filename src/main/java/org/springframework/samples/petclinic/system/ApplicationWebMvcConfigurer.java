@@ -16,8 +16,8 @@ import java.util.List;
 @Configuration
 class ApplicationWebMvcConfigurer implements WebMvcConfigurer {
 
-	@Value("${app.cors.allowed-origins}")
-	private String allowedCorsOrigins;
+	/*@Value("${app.cors.allowed-origins}")
+	private String allowedCorsOrigins;*/
 
 	private final RaFilterArgumentResolver raFilterArgumentResolver;
 	private final RaRangeArgumentResolver raRangeArgumentResolver;
@@ -30,14 +30,14 @@ class ApplicationWebMvcConfigurer implements WebMvcConfigurer {
 		this.raSortArgumentResolver = raSortArgumentResolver;
 	}
 
-	@Override
+	/*@Override
 	public void addCorsMappings(CorsRegistry registry) {
 		registry.addMapping("/rest/**")
 				.allowedOrigins(allowedCorsOrigins)
 				.allowedMethods(HttpMethod.GET.name(), HttpMethod.POST.name(),
 						HttpMethod.PUT.name(), HttpMethod.DELETE.name())
 				.exposedHeaders(RaProtocolUtil.CONTENT_RANGE);
-	}
+	}*/
 
 	@Override
 	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {

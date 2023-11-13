@@ -9,6 +9,11 @@ export default defineConfig({
     },
     server: {
         host: true,
+        proxy: {
+            '/rest': {
+                target: 'http://localhost:8080'
+            }
+        }
     },
     base: './',
 });
