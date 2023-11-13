@@ -82,7 +82,7 @@ public class RaPatchUtil {
         try {
             patchObject = (T) objectMapper.readValue(patchJson, target.getClass());
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+			throw new JsonConversionException("Failed to parse patch JSON", e);
         }
 
         // 2.
@@ -111,7 +111,7 @@ public class RaPatchUtil {
         try {
             objectMapper.readerForUpdating(target).readValue(patchJson);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+			throw new JsonConversionException("Failed to parse patch JSON", e);
         }
     }
 
@@ -151,7 +151,7 @@ public class RaPatchUtil {
 			fillNonConstructorProperties(propertyValues, beanDescription, creatorProps, bean);
 			return bean;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Unexpected error when constructing patched bean", e);
         }
     }
 
@@ -188,7 +188,7 @@ public class RaPatchUtil {
         try {
             jsonNode = objectMapper.readTree(patchJson);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new JsonConversionException("Failed to parse patch JSON", e);
         }
 
         Set<String> propertyNames = new HashSet<>();

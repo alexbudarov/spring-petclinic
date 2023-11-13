@@ -2,10 +2,9 @@ package org.springframework.samples.petclinic.rest.rasupport;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -14,8 +13,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 @Component
 public class RaRangeArgumentResolver implements HandlerMethodArgumentResolver {
-    private final static Logger log = LoggerFactory.getLogger(RaRangeArgumentResolver.class);
-
     @Value("${ra.range.defaultPageSize:100}")
     private int defaultPageSize;
 
@@ -27,8 +24,8 @@ public class RaRangeArgumentResolver implements HandlerMethodArgumentResolver {
     }
 
     @Override
-    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-                                  NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+    public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
+                                  NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) {
         if (!RaRange.class.equals(parameter.getParameterType())) {
             return null;
         }
@@ -43,14 +40,11 @@ public class RaRangeArgumentResolver implements HandlerMethodArgumentResolver {
         try {
             integers = objectMapper.readValue(range, Integer[].class);
         } catch (JsonProcessingException e) {
-            // todo decide, throw bad request or silently handle
-            log.debug("Invalid range format: " + range, e);
-            return RaRange.empty(defaultPageSize);
+			throw new JsonConversionException("Invalid range format: " + range, e);
         }
 
         if (integers.length != 2) {
-            log.debug("Invalid range format: " + range);
-            return RaRange.empty(defaultPageSize);
+			throw new JsonConversionException("Invalid range format, must be array of two integers: " + range);
         }
 
         int rangeStart = integers[0];

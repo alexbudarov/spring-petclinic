@@ -2,8 +2,6 @@ package org.springframework.samples.petclinic.rest.rasupport;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
@@ -14,8 +12,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 @Component
 public class RaSortArgumentResolver implements HandlerMethodArgumentResolver {
-    private final static Logger log = LoggerFactory.getLogger(RaSortArgumentResolver.class);
-
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -40,14 +36,11 @@ public class RaSortArgumentResolver implements HandlerMethodArgumentResolver {
         try {
             strings = objectMapper.readValue(sort, String[].class);
         } catch (JsonProcessingException e) {
-            // todo decide, throw bad request or silently handle
-            log.debug("Invalid sort format", e);
-            return RaSort.empty();
+			throw new JsonConversionException("Invalid sort format: " + sort, e);
         }
 
         if (strings.length != 2) {
-            log.debug("Invalid sort format: " + sort);
-            return RaSort.empty();
+			throw new JsonConversionException("Invalid range format, must be two strings: " + sort);
         }
 
         String field = strings[0];

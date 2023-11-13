@@ -3,6 +3,7 @@ package org.springframework.samples.petclinic.rest.rasupport;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -24,8 +25,8 @@ public class RaFilterArgumentResolver implements HandlerMethodArgumentResolver {
     }
 
     @Override
-    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-                                  NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+    public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
+                                  NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) {
         Class<?> parameterClass = parameter.getParameterType();
 
         String filterParam = webRequest.getParameter("filter");
@@ -42,7 +43,7 @@ public class RaFilterArgumentResolver implements HandlerMethodArgumentResolver {
             Object result = objectMapper.readValue(filter, parameterClass);
             return result;
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Invalid filter format", e);
+            throw new JsonConversionException("Invalid filter format: " + filter, e);
         }
     }
 }
