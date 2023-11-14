@@ -31,12 +31,12 @@ public class PetTypeRestController {
 
     @GetMapping
     public ResponseEntity<List<PetTypeDto>> findPetTypes(@RaFilter PetTypeListFilter filter) {
-        if (filter.id() != null) {
+        if (filter.id() != null) { // getMany
             List<PetTypeDto> list = petTypeRepository.findByIdIn(filter.id())
                     .stream()
                     .map(petTypeMapper::toDto)
                     .toList();
-            return raProtocolUtil.convertToResponseEntity(list);
+            return ResponseEntity.ok(list);
         }
 
         List<PetTypeDto> petTypes = ownerRepository.findPetTypes()

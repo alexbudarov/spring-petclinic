@@ -16,5 +16,5 @@ public interface PetRepository extends JpaRepository<Pet, Integer> {
     @Query("select p from Pet p, Owner o where o.id = :ownerId and p member of o.pets")
     List<Pet> loadByOwnerId(int ownerId, Sort sort);
 
-	List<Pet> findByIdIn(Integer[] ids, Sort sort);
+	List<Pet> findByIdIn(Integer[] ids);
 }

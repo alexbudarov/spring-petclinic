@@ -5,7 +5,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.samples.petclinic.owner.*;
+import org.springframework.samples.petclinic.owner.Owner;
+import org.springframework.samples.petclinic.owner.OwnerDto;
+import org.springframework.samples.petclinic.owner.OwnerMapper;
+import org.springframework.samples.petclinic.owner.OwnerRepository;
 import org.springframework.samples.petclinic.rest.rasupport.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,6 +47,12 @@ public class OwnerRestController {
 	public ResponseEntity<List<OwnerDto>> ownerList(@RaFilter OwnerListFilter filter,
 													RaRange range, RaSort sort) {
 
+		if (filter.id() != null) { // getMany
+			var dtoList = ownerRepository.findByIdIn(filter.id())
+					.stream().map(ownerMapper::toDto)
+					.toList();
+			return ResponseEntity.ok(dtoList);
+		}
 		Specification<Owner> specification = convertToSpecification(filter);
 		Page<Owner> page = ownerRepository.findAll(specification, range.toPageable(sort));
 
@@ -125,7 +134,6 @@ public class OwnerRestController {
 	}*/
 
 	public record OwnerListFilter(
-		@SpecFilterCondition(operator = SpecFilterOperator.IN)
 		Integer[] id,
 
 		@SpecFilterCondition(operator = SpecFilterOperator.CONTAINS, ignoreCase = true)

@@ -87,4 +87,6 @@ public interface OwnerRepository extends Repository<Owner, Integer>, JpaSpecific
 	Optional<Owner> findByPet(Integer petId);
 
 	void deleteById(Integer id);
+
+	List<Owner> findByIdIn(Integer[] ids);
 }

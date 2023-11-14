@@ -32,12 +32,11 @@ public class SpecialtyRestController {
 
     @GetMapping
     public ResponseEntity<List<Specialty>> findAll(@RaFilter SpecialtyListFilter filter, RaRange range, RaSort sort) {
-
-        /*if (filter.id() != null) {
-            Page<Specialty> page = specialtyRepository.findByIdIn(filter.id(), range.toPageable(sort));
-            return raProtocolUtil.convertToResponseEntity(page, "specialty");
+        if (filter.id() != null) { // getMany
+            List<Specialty> entityList = specialtyRepository.findByIdIn(filter.id());
+            return ResponseEntity.ok(entityList);
         }
-        if (filter.vetId() != null) {
+        /*if (filter.vetId() != null) {
             Page<Specialty> page = specialtyRepository.findByVetId(filter.vetId(), range.toPageable(sort));
             return raProtocolUtil.convertToResponseEntity(page, "specialty");
         }*/
@@ -51,11 +50,6 @@ public class SpecialtyRestController {
     private Specification<Specialty> convertToSpecification(SpecialtyListFilter filter) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
-
-            // getMany()
-            if (filter.id() != null) {
-                predicates.add(root.get("id").in((Object[]) filter.id()));
-            }
 
             // getManyReference() in VetList
             // custom condition
@@ -72,7 +66,6 @@ public class SpecialtyRestController {
     }
 
     public record SpecialtyListFilter(
-            @SpecFilterCondition(operator = SpecFilterOperator.IN)
             Integer[] id,
             // custom
             Integer vetId

@@ -56,7 +56,7 @@ public interface VetRepository extends Repository<Vet, Integer> {
 	@Cacheable("vets")
 	Page<Vet> findAll(Pageable pageable) throws DataAccessException;
 
-	Page<Vet> findByIdIn(Integer[] ids, Pageable pageable);
+	List<Vet> findByIdIn(Integer[] ids);
 
 	List<Vet> findBySpecialties_IdIn(Collection<Integer> ids);
 }

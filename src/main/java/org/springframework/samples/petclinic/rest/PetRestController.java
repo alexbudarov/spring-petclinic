@@ -4,7 +4,10 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.owner.*;
-import org.springframework.samples.petclinic.rest.rasupport.*;
+import org.springframework.samples.petclinic.rest.rasupport.RaFilter;
+import org.springframework.samples.petclinic.rest.rasupport.RaPatchUtil;
+import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
+import org.springframework.samples.petclinic.rest.rasupport.RaSort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -43,6 +46,12 @@ public class PetRestController {
 	@GetMapping
 	public ResponseEntity<List<PetDto>> petList(@RaFilter PetFilter filter,
 												RaSort sort) { // only sort, as example
+		if (filter.id() != null) { // getMany
+			List<Pet> entities = petRepository.findByIdIn(filter.id());
+			var dtoList = entities.stream().map(petMapper::toDto).toList();
+			return ResponseEntity.ok(dtoList);
+		}
+
 		/* custom logic */
 		if (!sort.isSpecified()) { // default sorting
 			sort = new RaSort("name", Sort.Direction.ASC, true);
@@ -54,9 +63,7 @@ public class PetRestController {
 		/* end of custom logic */
 
 		List<Pet> list;
-		if (filter.id() != null) {
-			list = petRepository.findByIdIn(filter.id(), sort.toSort());
-		} else if (filter.ownerId() != null) {
+		if (filter.ownerId() != null) {
 			list = petRepository.loadByOwnerId(filter.ownerId(), sort.toSort());
 		} else {
 			list = petRepository.findAll(sort.toSort());
