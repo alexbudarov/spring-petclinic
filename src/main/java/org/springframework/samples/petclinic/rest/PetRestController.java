@@ -1,5 +1,6 @@
 package org.springframework.samples.petclinic.rest;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -63,7 +64,9 @@ public class PetRestController {
 		/* end of custom logic */
 
 		List<Pet> list;
-		if (filter.ownerId() != null) {
+		if (filter.searchString() != null) {
+			list = petRepository.findByNameStartsWithIgnoreCase(filter.searchString(), sort.toSort());
+		} else if (filter.ownerId() != null) {
 			list = petRepository.loadByOwnerId(filter.ownerId(), sort.toSort());
 		} else {
 			list = petRepository.findAll(sort.toSort());
@@ -136,5 +139,5 @@ public class PetRestController {
 		return ResponseEntity.ok(petMapper.toDto(pet));
 	}
 
-	public record PetFilter(Integer[] id, Integer ownerId) {}
+	public record PetFilter(Integer[] id, @JsonProperty("q") String searchString, Integer ownerId) {}
 }

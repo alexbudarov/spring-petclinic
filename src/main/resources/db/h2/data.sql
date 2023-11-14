@@ -8,6 +8,35 @@ INSERT INTO vets VALUES (default, 'Sharon', 'Jenkins');
 INSERT INTO specialties VALUES (default, 'radiology');
 INSERT INTO specialties VALUES (default, 'surgery');
 INSERT INTO specialties VALUES (default, 'dentistry');
+INSERT INTO specialties VALUES (default, 'anesthesiology');
+INSERT INTO specialties VALUES (default, 'allergy and immunology');
+INSERT INTO specialties VALUES (default, 'pathology');
+INSERT INTO specialties VALUES (default, 'neurology');
+INSERT INTO specialties VALUES (default, 'plastic surgery');
+INSERT INTO specialties VALUES (default, 'dermatology');
+INSERT INTO specialties VALUES (default, 'radiology');
+
+INSERT INTO specialties VALUES (default, 'emergency medicine');
+INSERT INTO specialties VALUES (default, 'endocrinology, diabetes, and metabolism');
+INSERT INTO specialties VALUES (default, 'family medicine/family practice');
+INSERT INTO specialties VALUES (default, 'gastroenterology');
+INSERT INTO specialties VALUES (default, 'geriatric medicine');
+INSERT INTO specialties VALUES (default, 'gynecology');
+INSERT INTO specialties VALUES (default, 'hematology');
+INSERT INTO specialties VALUES (default, 'infectious disease');
+INSERT INTO specialties VALUES (default, 'laboratory genetics and genomics');
+INSERT INTO specialties VALUES (default, 'molecular genetic pathology');
+
+INSERT INTO specialties VALUES (default, 'microsurgery');
+INSERT INTO specialties VALUES (default, 'oncology');
+INSERT INTO specialties VALUES (default, 'toxicology');
+INSERT INTO specialties VALUES (default, 'movement disorders');
+INSERT INTO specialties VALUES (default, 'neonatal-perinatal medicine');
+INSERT INTO specialties VALUES (default, 'ophthalmology');
+INSERT INTO specialties VALUES (default, 'nephrology');
+INSERT INTO specialties VALUES (default, 'orthopaedic surgery');
+INSERT INTO specialties VALUES (default, 'pediatrics');
+INSERT INTO specialties VALUES (default, 'rhinology/nasal and sinus care');
 
 INSERT INTO vet_specialties VALUES (2, 1);
 INSERT INTO vet_specialties VALUES (3, 2);

@@ -1,5 +1,6 @@
 package org.springframework.samples.petclinic.rest;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
@@ -36,7 +37,11 @@ public class SpecialtyRestController {
             List<Specialty> entityList = specialtyRepository.findByIdIn(filter.id());
             return ResponseEntity.ok(entityList);
         }
-        /*if (filter.vetId() != null) {
+        /*if (filter.searchString() != null) {
+            Page<Specialty> page = specialtyRepository.findByNameStartsWithIgnoreCase(filter.searchString(), range.toPageable(sort));
+            return raProtocolUtil.convertToResponseEntity(page);
+        }
+        if (filter.vetId() != null) {
             Page<Specialty> page = specialtyRepository.findByVetId(filter.vetId(), range.toPageable(sort));
             return raProtocolUtil.convertToResponseEntity(page, "specialty");
         }*/
@@ -50,6 +55,13 @@ public class SpecialtyRestController {
     private Specification<Specialty> convertToSpecification(SpecialtyListFilter filter) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
+
+            if (filter.searchString() != null) {
+                predicates.add(criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("name")),
+                        filter.searchString().toLowerCase() + "%" // starts with
+                ));
+            }
 
             // getManyReference() in VetList
             // custom condition
@@ -67,6 +79,7 @@ public class SpecialtyRestController {
 
     public record SpecialtyListFilter(
             Integer[] id,
+            @JsonProperty("q") String searchString,
             // custom
             Integer vetId
     ) {

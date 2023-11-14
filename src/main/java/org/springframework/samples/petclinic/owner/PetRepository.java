@@ -17,4 +17,6 @@ public interface PetRepository extends JpaRepository<Pet, Integer> {
     List<Pet> loadByOwnerId(int ownerId, Sort sort);
 
 	List<Pet> findByIdIn(Integer[] ids);
+
+    List<Pet> findByNameStartsWithIgnoreCase(String name, Sort sort);
 }
