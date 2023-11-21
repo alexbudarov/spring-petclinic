@@ -8,7 +8,7 @@ import org.springframework.lang.Nullable;
  * Represents "range" (pagination) argument of getList() operation.
  * The argument will be resolved using conventions of the React Admin ra-data-simple-rest data provider.
  *
- * @see RaRangeArgumentResolver
+ * @see RaRangeSortArgumentResolver
  */
 public class RaRange {
     private final int rangeStart;
@@ -52,7 +52,7 @@ public class RaRange {
      * @param sort additional sorting information to be included into Pageable object
      */
     public Pageable toPageable(RaSort sort) {
-        return toPageable(sort, globalDefaultPageSize);
+        return toPageable(sort, globalDefaultPageSize, false);
     }
 
     /**
@@ -60,17 +60,18 @@ public class RaRange {
      * @param defaultPageSize default page size if range argument is missing
      */
     public Pageable toPageable(int defaultPageSize) {
-        return toPageable(null, defaultPageSize);
+        return toPageable(null, defaultPageSize, false);
     }
 
     /**
      * Convert to Pageable object for passing to Spring Data repository.
      * @param sort additional sorting information to be included into Pageable object
      * @param defaultPageSize default page size if range argument is missing
+     * @param allowUnpaged if true then missing range argument means request to load data without paging
      */
-    public Pageable toPageable(@Nullable RaSort sort, int defaultPageSize) {
+    public Pageable toPageable(@Nullable RaSort sort, int defaultPageSize, boolean allowUnpaged) {
         if (!specified) {
-            return createDefaultPageRequest(sort, defaultPageSize);
+            return createDefaultPageRequest(sort, defaultPageSize, allowUnpaged);
         }
 
         int pageSize = calculatePageSize();
@@ -91,19 +92,19 @@ public class RaRange {
         return rangeStart / pageSize;
     }
 
-    private Pageable createDefaultPageRequest(@Nullable RaSort raSort, int defaultPageSize) {
+    private Pageable createDefaultPageRequest(@Nullable RaSort raSort, int defaultPageSize, boolean allowUnpaged) {
         if (raSort != null && raSort.isSpecified()) {
-            /*if (allowUnpaged) { // todo remove
+            if (allowUnpaged) {
                 return new UnpagedWithSort(raSort.toSort());
-            } else {*/
+            } else {
                 return PageRequest.of(0, defaultPageSize, raSort.getDirection(), raSort.getProperty());
-            //}
+            }
         } else {
-            /*if (allowUnpaged) {
+            if (allowUnpaged) {
                 return Pageable.unpaged();
-            } else {*/
+            } else {
                 return PageRequest.of(0, defaultPageSize);
-            //}
+            }
         }
     }
 }

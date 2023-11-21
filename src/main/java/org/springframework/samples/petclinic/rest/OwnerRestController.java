@@ -2,6 +2,7 @@ package org.springframework.samples.petclinic.rest;
 
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,7 +46,7 @@ public class OwnerRestController {
 
 	@GetMapping
 	public ResponseEntity<List<OwnerDto>> ownerList(@RaFilter OwnerListFilter filter,
-													RaRange range, RaSort sort) {
+													@RaRangeParam @RaSortParam Pageable pageable) {
 
 		if (filter.id() != null) { // getMany
 			var dtoList = ownerRepository.findByIdIn(filter.id())
@@ -54,7 +55,7 @@ public class OwnerRestController {
 			return ResponseEntity.ok(dtoList);
 		}
 		Specification<Owner> specification = convertToSpecification(filter);
-		Page<Owner> page = ownerRepository.findAll(specification, range.toPageable(sort));
+		Page<Owner> page = ownerRepository.findAll(specification, pageable);
 
 		return raProtocolUtil.convertToResponseEntity(page, ownerMapper::toDto);
 	}

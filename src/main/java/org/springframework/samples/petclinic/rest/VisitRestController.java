@@ -3,6 +3,7 @@ package org.springframework.samples.petclinic.rest;
 import jakarta.persistence.criteria.From;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.owner.*;
@@ -24,19 +25,22 @@ public class VisitRestController {
 	private final VisitMapper visitMapper;
 	private final SpecificationFilterConverter specificationFilterConverter;
 	private final RaPatchUtil raPatchUtil;
+	private final RaRangeSortConverter raRangeSortConverter;
 
 	public VisitRestController(VisitRepository visitRepository,
 							   PetRepository petRepository,
 							   RaProtocolUtil raProtocolUtil,
 							   VisitMapper visitMapper,
 							   SpecificationFilterConverter specificationFilterConverter,
-							   RaPatchUtil raPatchUtil) {
+							   RaPatchUtil raPatchUtil,
+							   RaRangeSortConverter raRangeSortConverter) {
 		this.visitRepository = visitRepository;
 		this.petRepository = petRepository;
 		this.raProtocolUtil = raProtocolUtil;
 		this.visitMapper = visitMapper;
 		this.specificationFilterConverter = specificationFilterConverter;
 		this.raPatchUtil = raPatchUtil;
+		this.raRangeSortConverter = raRangeSortConverter;
 	}
 
 	@PostMapping
@@ -108,9 +112,11 @@ public class VisitRestController {
 	}
 
 	@GetMapping
-	public ResponseEntity<List<VisitDto>> visitList(@RaFilter VisitListFilter filter, RaRange range, RaSort sort) {
+	public ResponseEntity<List<VisitDto>> visitList(@RaFilter VisitListFilter filter, @RequestParam(required = false) String range,
+													@RequestParam(required = false) String sort) {
 		Specification<Visit> specification = convertToSpecification(filter);
-		Page<Visit> page = visitRepository.findAll(specification, range.toPageable(sort));
+		Pageable pageable = raRangeSortConverter.convertToPageable(range, sort);
+		Page<Visit> page = visitRepository.findAll(specification, pageable);
 		return raProtocolUtil.convertToResponseEntity(page,
 				visitMapper::toDto
 		);

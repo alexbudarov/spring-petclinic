@@ -5,10 +5,7 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.owner.*;
-import org.springframework.samples.petclinic.rest.rasupport.RaFilter;
-import org.springframework.samples.petclinic.rest.rasupport.RaPatchUtil;
-import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
-import org.springframework.samples.petclinic.rest.rasupport.RaSort;
+import org.springframework.samples.petclinic.rest.rasupport.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -46,7 +43,7 @@ public class PetRestController {
 
 	@GetMapping
 	public ResponseEntity<List<PetDto>> petList(@RaFilter PetFilter filter,
-												RaSort sort) { // only sort, as example
+												@RaSortParam Sort sort) { // only sort, as example
 		if (filter.id() != null) { // getMany
 			List<Pet> entities = petRepository.findByIdIn(filter.id());
 			var dtoList = entities.stream().map(petMapper::toDto).toList();
@@ -54,22 +51,23 @@ public class PetRestController {
 		}
 
 		/* custom logic */
-		if (!sort.isSpecified()) { // default sorting
-			sort = new RaSort("name", Sort.Direction.ASC, true);
+		if (sort.isEmpty()) { // default sorting
+			sort = Sort.by(Sort.Direction.ASC, "name");
 		}
-		Sort.Direction directionByNameLength = "namelength".equals(sort.getProperty()) ? sort.getDirection() : null;
-		if ("namelength".equals(sort.getProperty())) {
-			sort = RaSort.empty();
+		Sort.Order namelengthOrder = sort.getOrderFor("namelength");
+		Sort.Direction directionByNameLength = namelengthOrder != null ? namelengthOrder.getDirection() : null;
+		if (directionByNameLength != null) {
+			sort = Sort.unsorted();
 		}
 		/* end of custom logic */
 
 		List<Pet> list;
 		if (filter.searchString() != null) {
-			list = petRepository.findByNameStartsWithIgnoreCase(filter.searchString(), sort.toSort());
+			list = petRepository.findByNameStartsWithIgnoreCase(filter.searchString(), sort);
 		} else if (filter.ownerId() != null) {
-			list = petRepository.loadByOwnerId(filter.ownerId(), sort.toSort());
+			list = petRepository.loadByOwnerId(filter.ownerId(), sort);
 		} else {
-			list = petRepository.findAll(sort.toSort());
+			list = petRepository.findAll(sort);
 		}
 
 		/* custom logic */

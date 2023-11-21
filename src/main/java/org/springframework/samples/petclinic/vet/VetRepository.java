@@ -19,6 +19,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,4 +60,6 @@ public interface VetRepository extends Repository<Vet, Integer> {
 	List<Vet> findByIdIn(Integer[] ids);
 
 	List<Vet> findBySpecialties_IdIn(Collection<Integer> ids);
+
+	List<Vet> findAll(Sort sort);
 }

@@ -10,5 +10,5 @@ public interface PetTypeRepository extends JpaRepository<PetType, Integer> {
 
     List<PetType> findByIdIn(Integer[] ids);
 
-    Page<PetType> findByNameStartsWithIgnoreCase(String name, Pageable pageable);
+    Page<PetType> findByNameStartsWithIgnoreCaseOrderByName(String name, Pageable pageable);
 }

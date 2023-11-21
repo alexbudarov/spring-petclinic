@@ -5,6 +5,8 @@ import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.rest.rasupport.*;
@@ -13,6 +15,7 @@ import org.springframework.samples.petclinic.vet.SpecialtyRepository;
 import org.springframework.samples.petclinic.vet.Vet;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -24,15 +27,19 @@ public class SpecialtyRestController {
 
     private final SpecialtyRepository specialtyRepository;
     private final RaProtocolUtil raProtocolUtil;
+    private final RaRangeSortConverter raRangeSortConverter;
 
     public SpecialtyRestController(SpecialtyRepository specialtyRepository,
-                                   RaProtocolUtil raProtocolUtil) {
+                                   RaProtocolUtil raProtocolUtil,
+                                   RaRangeSortConverter raRangeSortConverter) {
         this.specialtyRepository = specialtyRepository;
         this.raProtocolUtil = raProtocolUtil;
+        this.raRangeSortConverter = raRangeSortConverter;
     }
 
     @GetMapping
-    public ResponseEntity<List<Specialty>> findAll(@RaFilter SpecialtyListFilter filter, RaRange range, RaSort sort) {
+    public ResponseEntity<List<Specialty>> findAll(@RaFilter SpecialtyListFilter filter,
+                                                   @RequestParam(required = false) String range) {
         if (filter.id() != null) { // getMany
             List<Specialty> entityList = specialtyRepository.findByIdIn(filter.id());
             return ResponseEntity.ok(entityList);
@@ -47,7 +54,8 @@ public class SpecialtyRestController {
         }*/
 
         Specification<Specialty> specification = convertToSpecification(filter);
-        Page<Specialty> page = specialtyRepository.findAll(specification, range.toPageable(sort));
+        Pageable pageable = raRangeSortConverter.convertToPageable(range);
+        Page<Specialty> page = specialtyRepository.findAll(specification, pageable);
         var response = raProtocolUtil.convertToResponseEntity(page);
         return response;
     }

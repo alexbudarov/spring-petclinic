@@ -2,12 +2,10 @@ package org.springframework.samples.petclinic.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.owner.*;
-import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
-import org.springframework.samples.petclinic.rest.rasupport.RaFilter;
-import org.springframework.samples.petclinic.rest.rasupport.RaRange;
-import org.springframework.samples.petclinic.rest.rasupport.RaSort;
+import org.springframework.samples.petclinic.rest.rasupport.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,7 +32,7 @@ public class PetTypeRestController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PetTypeDto>> findPetTypes(@RaFilter PetTypeListFilter filter, RaRange range, RaSort sort) {
+    public ResponseEntity<List<PetTypeDto>> findPetTypes(@RaFilter PetTypeListFilter filter, @RaRangeParam Pageable pageable) {
         if (filter.id() != null) { // getMany
             List<PetTypeDto> list = petTypeRepository.findByIdIn(filter.id())
                     .stream()
@@ -44,7 +42,7 @@ public class PetTypeRestController {
         }
 
         if (filter.searchString() != null) {
-            Page<PetType> page = petTypeRepository.findByNameStartsWithIgnoreCase(filter.searchString(), range.toPageable(sort));
+            Page<PetType> page = petTypeRepository.findByNameStartsWithIgnoreCaseOrderByName(filter.searchString(), pageable);
             var response = raProtocolUtil.convertToResponseEntity(page, petTypeMapper::toDto);
             return response;
         }
