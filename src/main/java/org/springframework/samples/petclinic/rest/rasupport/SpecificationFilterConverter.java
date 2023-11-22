@@ -2,6 +2,7 @@ package org.springframework.samples.petclinic.rest.rasupport;
 
 import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
@@ -19,7 +20,11 @@ public class SpecificationFilterConverter {
      * Convert static filter object to JPA specification.
      * Use {@link SpecFilterCondition} annotations as declaration of filter conditions.
      */
-    public <T> Specification<T> convert(Object filter) {
+    public <T> Specification<T> convert(@Nullable Object filter) {
+        if (filter == null) {
+            return (root, query, criteriaBuilder) -> criteriaBuilder.and();
+        }
+
         Map<Field, SpecFilterCondition> conditions = getDeclaredConditions(filter.getClass());
         List<PredicateFactory> predicateFactories = new ArrayList<>();
         for (Map.Entry<Field, SpecFilterCondition> entry: conditions.entrySet()) {

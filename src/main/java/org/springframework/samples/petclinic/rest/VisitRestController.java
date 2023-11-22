@@ -1,7 +1,12 @@
 package org.springframework.samples.petclinic.rest;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.Explode;
+import io.swagger.v3.oas.annotations.enums.ParameterStyle;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import jakarta.persistence.criteria.From;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -112,8 +117,13 @@ public class VisitRestController {
 	}
 
 	@GetMapping
-	public ResponseEntity<List<VisitDto>> visitList(@RaFilter VisitListFilter filter, @RequestParam(required = false) String range,
-													@RequestParam(required = false) String sort) {
+	public ResponseEntity<List<VisitDto>> visitList(
+			/*@Parameter(required = false, explode = Explode.FALSE, style = ParameterStyle.MATRIX)*/
+			// @RequestParam(required = false)
+			@RaFilter VisitListFilter filter,
+			@Parameter(example = "\"[0,4]\"") @RequestParam(required = false) String range,
+			@Parameter(example = "[\"date\", \"DESC\"]") @RequestParam(required = false) String sort
+	) {
 		Specification<Visit> specification = convertToSpecification(filter);
 		Pageable pageable = raRangeSortConverter.convertToPageable(range, sort);
 		Page<Visit> page = visitRepository.findAll(specification, pageable);
@@ -126,7 +136,7 @@ public class VisitRestController {
 		Specification<Visit> specification = specificationFilterConverter.convert(filter);
 
 		// add custom conditions
-		if (filter.petId() != null) {
+		if (filter != null && filter.petId() != null) {
 			specification = specification.and((root, query, criteriaBuilder) -> {
 				From<Pet, Pet> petFrom = query.from(Pet.class);
 				return criteriaBuilder.and(
