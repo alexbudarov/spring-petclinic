@@ -84,3 +84,7 @@ INSERT INTO visits VALUES (default, 7, '2013-01-04', 'spayed');
 insert into medicine values (default, 'Aspirin', true);
 insert into medicine values (default, 'Maxigan', true);
 insert into medicine values (default, 'Prozak', false);
+insert into medicine values (default, 'Tylenol', true);
+insert into medicine values (default, 'Gabapentin', true);
+insert into medicine values (default, 'Neosporin', false);
+insert into medicine values (default, 'Xylitol', false);

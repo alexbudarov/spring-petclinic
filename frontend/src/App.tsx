@@ -17,6 +17,7 @@ import { PetEdit } from "./app/resources/pet/PetEdit";
 import { VisitCreate } from "./app/resources/visit/VisitCreate";
 import { VisitList } from "./app/resources/visit/VisitList";
 import { vetRecordRepresentation } from "./app/functions/vetRecordRepresentation";
+import { MedicineList } from "./app/resources/medicine/MedicineList";
 
 export const App = () => (
   <Admin dataProvider={dataProvider}>
@@ -51,6 +52,11 @@ export const App = () => (
     <Resource
       name="specialty"
       recordRepresentation="name"
+    />
+    <Resource
+      name="medicine"
+      recordRepresentation="name"
+      list={MedicineList}
     />
   </Admin>
 );
