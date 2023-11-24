@@ -66,7 +66,7 @@ const VisitListInternal = () => {
 
     return (
         <Grid container spacing={2}>
-        <Grid item xs={8}>
+        <Grid item md={8} sm={12}>
           <Datagrid bulkActionButtons={<BulkActionButtons />} rowClick={onRowClick}>
             <TextField source="id" />
             <DateField source="date" options={{dateStyle: 'medium'}} />
@@ -75,7 +75,7 @@ const VisitListInternal = () => {
             <DeleteButton/>
           </Datagrid>
         </Grid>
-        <Grid item xs={4}>
+        <Grid item md={4} sm={12}>
           <Typography variant="h6">Pet details</Typography>
           {selectedVisit && <PetDetails visit={selectedVisit} />}
         </Grid>
