@@ -1,5 +1,6 @@
-import { Fragment } from "react";
-import { AutocompleteInput, BulkUpdateButton, Datagrid, DateField, DateInput, DeleteButton, List, ReferenceField, ReferenceInput, TextField, TextInput } from "react-admin"
+import { Grid, Typography, CircularProgress } from "@mui/material";
+import { Fragment, useCallback, useState } from "react";
+import { AutocompleteInput, BulkUpdateButton, Datagrid, DateField, DateInput, DeleteButton, Identifier, List, RaRecord, RecordContextProvider, ReferenceField, ReferenceInput, RowClickFunction, SimpleShowLayout, TextField, TextInput, useGetOne, useListContext } from "react-admin"
 
 const filters = [
     <TextInput label="Description" source="description" />,
@@ -45,14 +46,56 @@ function getTomorrow(): Date {
     return date;
 }
 
-export const VisitList = () => (
-    <List filters={filters}>
-        <Datagrid bulkActionButtons={<BulkActionButtons />}>
+export const VisitList = () => {
+    return (
+      <List filters={filters}>
+        <VisitListInternal/>
+      </List>
+    )
+}
+
+const VisitListInternal = () => {
+    const { data } = useListContext();
+    const [selectedVisit, setSelectedVisit] = useState<RaRecord | null>(null);
+
+    const onRowClick: RowClickFunction = useCallback((id: Identifier) => {
+        const visit = (data || []).find(v => v.id === id);
+        setSelectedVisit(visit);
+        return false;
+    }, [data, setSelectedVisit]);
+
+    return (
+        <Grid container spacing={2}>
+        <Grid item xs={8}>
+          <Datagrid bulkActionButtons={<BulkActionButtons />} rowClick={onRowClick}>
             <TextField source="id" />
             <DateField source="date" options={{dateStyle: 'medium'}} />
             <TextField source="description"/>
             <ReferenceField source="petId" reference="pet" sortable={false}/>
             <DeleteButton/>
-        </Datagrid>
-    </List>
-)
+          </Datagrid>
+        </Grid>
+        <Grid item xs={4}>
+          <Typography variant="h6">Pet details</Typography>
+          {selectedVisit && <PetDetails visit={selectedVisit} />}
+        </Grid>
+      </Grid>
+    )
+}
+
+const PetDetails = ({visit} : {visit: RaRecord}) => {
+    const petId = visit.petId;
+    const { data: pet, isLoading, error } = useGetOne('pet', { id: petId });
+    if (isLoading) {
+        return <CircularProgress />
+    }
+    return (
+      <RecordContextProvider value={pet}>
+        <SimpleShowLayout>
+          <TextField source="name"/>
+          <DateField source="birthDate" options={{dateStyle: 'long'}} />
+          <ReferenceField source="typeId" reference="pet-type"/>
+        </SimpleShowLayout>
+      </RecordContextProvider>
+    )
+}
