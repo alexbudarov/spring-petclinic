@@ -1,5 +1,8 @@
 package org.springframework.samples.petclinic.rest.rasupport.springdoc;
 
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.introspect.AnnotatedConstructor;
+import com.fasterxml.jackson.databind.introspect.ClassIntrospector;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -13,6 +16,7 @@ import org.springframework.samples.petclinic.rest.rasupport.RaSortParam;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
@@ -23,8 +27,11 @@ public class RaArgumentsOperationCustomizer implements OperationCustomizer {
 
     private final StringSchema stringSchema = new StringSchema();
 
-    public RaArgumentsOperationCustomizer(SpringDocParameterNameDiscoverer parameterNameDiscoverer) {
+    private final ObjectMapper objectMapper;
+
+    public RaArgumentsOperationCustomizer(SpringDocParameterNameDiscoverer parameterNameDiscoverer, ObjectMapper objectMapper) {
         this.parameterNameDiscoverer = parameterNameDiscoverer;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -89,7 +96,7 @@ public class RaArgumentsOperationCustomizer implements OperationCustomizer {
         }
         parameter.setSchema(stringSchema);
         parameter.setRequired(false);
-        parameter.setExample("{}"); // todo proper sample
+        parameter.setExample(createExample(methodParam.getParameterType()));
     }
 
     private Parameter findParameterByMethodParam(Operation operation, MethodParameter parameter) {
@@ -122,4 +129,49 @@ public class RaArgumentsOperationCustomizer implements OperationCustomizer {
         }
         return paramName;
     }
+
+    private Object createExample(Class<?> parameterType) {
+        // todo use some existing method from swagger / springdoc-openapi instead
+        BeanDescription beanDescription = getBeanDescription(parameterType);
+        AnnotatedConstructor constructor = beanDescription.getConstructors().get(0);
+        Object[] args = new Object[constructor.getParameterCount()];
+        for (int i = 0; i < constructor.getParameterCount(); i++) {
+            JavaType type = constructor.getParameterType(i);
+            if (type.isPrimitive()) {
+                args[i] = getPrimitive(type);
+            } else if (type.isArrayType()) {
+                Object array = Array.newInstance(type.getContentType().getRawClass(), 1);
+                Object arrayElement = getPrimitive(type.getContentType());
+                Array.set(array, 0, arrayElement);
+                args[i] = array;
+            }
+        }
+        try {
+            Object exampleObject = constructor.call(args);
+            ObjectWriter writer = objectMapper.writer();
+            return writer.writeValueAsString(exampleObject);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Object getPrimitive(JavaType type) {
+        if (String.class.isAssignableFrom(type.getRawClass())) {
+            return "string";
+        } else if (Number.class.isAssignableFrom(type.getRawClass())) {
+            return 0;
+        } else if (Boolean.class.isAssignableFrom(type.getRawClass())) {
+            return false;
+        }
+        return null;
+    }
+
+    private BeanDescription getBeanDescription(Class<?> targetClass) {
+        DeserializationConfig config = objectMapper.getDeserializationConfig();
+        ClassIntrospector introspector = config.getClassIntrospector();
+        BeanDescription description = introspector.forDeserialization(config, objectMapper.constructType(targetClass),
+                config);
+        return description;
+    }
+
 }
