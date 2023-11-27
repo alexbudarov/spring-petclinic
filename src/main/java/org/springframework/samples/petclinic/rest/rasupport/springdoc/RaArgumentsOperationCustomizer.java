@@ -10,9 +10,7 @@ import org.springdoc.core.customizers.OperationCustomizer;
 import org.springdoc.core.discoverer.SpringDocParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.samples.petclinic.rest.rasupport.RaFilter;
-import org.springframework.samples.petclinic.rest.rasupport.RaRangeParam;
-import org.springframework.samples.petclinic.rest.rasupport.RaSortParam;
+import org.springframework.samples.petclinic.rest.rasupport.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 
@@ -46,11 +44,13 @@ public class RaArgumentsOperationCustomizer implements OperationCustomizer {
                 if (mp.getParameterAnnotation(RaSortParam.class) != null) {
                     addSort(operation, mp);
                 }
-            }
-            if (mp.getParameterAnnotation(RaSortParam.class) != null) {
+            } else if (mp.getParameterAnnotation(RaSortParam.class) != null) {
+                customizeSort(operation, mp);
+            } else if (RaRange.class.isAssignableFrom(mp.getParameterType())) {
+                customizeRange(operation, mp);
+            } else if (RaSort.class.isAssignableFrom(mp.getParameterType())) {
                 customizeSort(operation, mp);
             }
-            // todo support RaSort, RaRange
         }
         return operation;
     }
