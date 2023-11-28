@@ -59,8 +59,7 @@ public class Owner extends Person {
 	@Digits(fraction = 0, integer = 10)
 	private String telephone;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn(name = "owner_id")
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "owner")
 	@OrderBy("name")
 	private List<Pet> pets = new ArrayList<>();
 
@@ -95,6 +94,7 @@ public class Owner extends Person {
 	public void addPet(Pet pet) {
 		if (pet.isNew()) {
 			getPets().add(pet);
+			pet.setOwner(this);
 		}
 	}
 

@@ -15,10 +15,14 @@
  */
 package org.springframework.samples.petclinic.vet;
 
+import jakarta.persistence.ManyToMany;
 import org.springframework.samples.petclinic.model.NamedEntity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Models a {@link Vet Vet's} specialty (for example, dentistry).
@@ -29,4 +33,14 @@ import jakarta.persistence.Table;
 @Table(name = "specialties")
 public class Specialty extends NamedEntity {
 
+    @ManyToMany(mappedBy = "specialties")
+    private Set<Vet> vets = new LinkedHashSet<>();
+
+    public Set<Vet> getVets() {
+        return vets;
+    }
+
+    public void setVets(Set<Vet> vets) {
+        this.vets = vets;
+    }
 }
