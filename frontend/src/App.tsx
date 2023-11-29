@@ -1,7 +1,6 @@
 import {
   Admin,
   Resource,
-  ListGuesser,
   EditGuesser,
   ShowGuesser,
 } from "react-admin";
@@ -9,6 +8,7 @@ import { dataProvider } from "./dataProvider";
 import { vetRecordRepresentation } from "./app/functions/vetRecordRepresentation";
 import { VetList } from "./app/functions/resources/vet/VetList";
 import { ownerRecordRepresentation } from "./app/functions/resources/ownerRecordRepresentation";
+import { OwnerList } from "./app/resources/owner/OwnerList";
 
 export const App = () => (
   <Admin dataProvider={dataProvider}>
@@ -19,7 +19,7 @@ export const App = () => (
     />
     <Resource
       name="owner"
-      list={ListGuesser}
+      list={OwnerList}
       show={ShowGuesser}
       edit={EditGuesser}
       recordRepresentation={ownerRecordRepresentation}
