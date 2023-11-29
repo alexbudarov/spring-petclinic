@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "petclinic",
   "private": true,
   "scripts": {
     "dev": "vite",
