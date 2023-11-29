@@ -19,26 +19,32 @@ public class SpecialtyRestController {
     private final SpecialtyRepository specialtyRepository;
     private final RaProtocolUtil raProtocolUtil;
     private final SpecificationFilterConverter specificationFilterConverter;
+    private final SpecialtyMapper specialtyMapper;
 
     public SpecialtyRestController(SpecialtyRepository specialtyRepository,
                                    RaProtocolUtil raProtocolUtil,
-                                   SpecificationFilterConverter specificationFilterConverter) {
+                                   SpecificationFilterConverter specificationFilterConverter,
+                                   SpecialtyMapper specialtyMapper) {
         this.specialtyRepository = specialtyRepository;
         this.raProtocolUtil = raProtocolUtil;
         this.specificationFilterConverter = specificationFilterConverter;
+        this.specialtyMapper = specialtyMapper;
     }
 
     @GetMapping
-    public ResponseEntity<List<Specialty>> findAll(@RaFilter SpecialtyListFilter filter,
+    public ResponseEntity<List<SpecialtyDto>> findAll(@RaFilter SpecialtyListFilter filter,
                                                    @RaRangeParam @RaSortParam Pageable pageable) {
         if (filter.id() != null) { // getMany
-            List<Specialty> entityList = specialtyRepository.findAllById(Arrays.stream(filter.id()).toList());
+            List<SpecialtyDto> entityList = specialtyRepository.findAllById(Arrays.stream(filter.id()).toList())
+                    .stream()
+                    .map(specialtyMapper::toDto)
+                    .toList();
             return ResponseEntity.ok(entityList);
         }
 
         Specification<Specialty> specification = specificationFilterConverter.convert(filter);
         Page<Specialty> page = specialtyRepository.findAll(specification, pageable);
-        var response = raProtocolUtil.convertToResponseEntity(page);
+        var response = raProtocolUtil.convertToResponseEntity(page, specialtyMapper::toDto);
         return response;
     }
 
