@@ -1,4 +1,4 @@
-import { AutocompleteInput, BulkDeleteButton, ChipField, Datagrid, List, ReferenceArrayField, ReferenceInput, ReferenceManyField, SingleFieldList, TextField, TextInput } from "react-admin"
+import { ChipField, Datagrid, List, ReferenceManyField, SingleFieldList, TextField } from "react-admin"
 
 export const VetList = () => (
     <List>
