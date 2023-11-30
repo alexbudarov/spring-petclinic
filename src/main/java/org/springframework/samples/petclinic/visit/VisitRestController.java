@@ -5,16 +5,19 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
-import org.springframework.samples.petclinic.owner.Pet;
-import org.springframework.samples.petclinic.owner.PetRepository;
-import org.springframework.samples.petclinic.owner.Visit;
+import org.springframework.samples.petclinic.owner.*;
+import org.springframework.samples.petclinic.rest.rasupport.*;
 import org.springframework.samples.petclinic.vet.SpecialtyRepository;
 import org.springframework.samples.petclinic.vet.Vet;
 import org.springframework.samples.petclinic.vet.VetRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -24,14 +27,42 @@ public class VisitRestController {
     private final VisitService visitService;
     private final VetRepository vetRepository;
     private final PetRepository petRepository;
+    private final VisitRepository visitRepository;
+    private final VisitMapper visitMapper;
+    private final RaProtocolUtil raProtocolUtil;
+    private final SpecificationFilterConverter specificationFilterConverter;
 
     public VisitRestController(VisitService visitService,
                                VetRepository vetRepository,
                                SpecialtyRepository specialtyRepository,
-                               PetRepository petRepository) {
+                               PetRepository petRepository,
+                               VisitRepository visitRepository,
+                               VisitMapper visitMapper,
+                               RaProtocolUtil raProtocolUtil,
+                               SpecificationFilterConverter specificationFilterConverter) {
         this.visitService = visitService;
         this.vetRepository = vetRepository;
         this.petRepository = petRepository;
+        this.visitRepository = visitRepository;
+        this.visitMapper = visitMapper;
+        this.raProtocolUtil = raProtocolUtil;
+        this.specificationFilterConverter = specificationFilterConverter;
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<VisitDto> findById(@PathVariable Integer id) {
+        Optional<Visit> petOptional = visitRepository.findById(id);
+        return ResponseEntity.of(petOptional.map(visitMapper::toDto));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<VisitDto>> visitList(
+            @RaFilter VisitListFilter filter,
+            @RaRangeParam @RaSortParam Pageable pageable
+    ) {
+        Specification<Visit> specification = specificationFilterConverter.convert(filter);
+        Page<Visit> page = visitRepository.findAll(specification, pageable);
+        return raProtocolUtil.convertToResponseEntity(page, visitMapper::toDto);
     }
 
     @GetMapping("/check-availability")
@@ -99,6 +130,21 @@ public class VisitRestController {
         public static RequestVisitResponse fail(String errorMessage) {
             return new RequestVisitResponse(false, null, errorMessage);
         }
+    }
+
+    public record VisitListFilter(
+            @SpecFilterCondition(operator = SpecFilterOperator.CONTAINS, ignoreCase = true)
+            String description,
+
+            @SpecFilterCondition(property = "date", operator = SpecFilterOperator.LESS_OR_EQUALS)
+            LocalDate dateBefore,
+
+            @SpecFilterCondition(property = "date", operator = SpecFilterOperator.GREATER_OR_EQUALS)
+            LocalDate dateAfter,
+
+            @SpecFilterCondition(property = "assignedVet.id", operator = SpecFilterOperator.EQUALS)
+            Integer assignedVetId
+            ) {
     }
 }
 
