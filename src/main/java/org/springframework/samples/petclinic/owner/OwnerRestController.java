@@ -1,5 +1,6 @@
 package org.springframework.samples.petclinic.owner;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -51,9 +52,34 @@ public class OwnerRestController {
 			return ResponseEntity.ok(dtoList);
 		}
 		Specification<Owner> specification = specificationFilterConverter.convert(filter);
+
+		// handle custom searchString
+		if (filter.searchString() != null) {
+			specification = addSearchStringCondition(filter, specification);
+		}
+
 		Page<Owner> page = ownerRepository.findAll(specification, pageable);
 
 		return raProtocolUtil.convertToResponseEntity(page, ownerMapper::toDto);
+	}
+
+	private Specification<Owner> addSearchStringCondition(OwnerListFilter filter,
+																 Specification<Owner> specification) {
+		specification = specification.and(
+				(root, query, criteriaBuilder) -> {
+					return criteriaBuilder.or(
+							criteriaBuilder.like(
+									criteriaBuilder.lower(root.get("firstName")),
+									filter.searchString().toLowerCase() + "%"
+							),
+							criteriaBuilder.like(
+									criteriaBuilder.lower(root.get("lastName")),
+									filter.searchString().toLowerCase() + "%"
+							)
+					);
+				}
+		);
+		return specification;
 	}
 
 	@PostMapping
@@ -98,6 +124,9 @@ public class OwnerRestController {
 
 	public record OwnerListFilter(
 		List<Integer> id,
+
+		@JsonProperty("q")
+		String searchString,
 
 		@SpecFilterCondition(operator = SpecFilterOperator.CONTAINS, ignoreCase = true)
 		String lastName,
