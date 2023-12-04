@@ -1,5 +1,7 @@
-import { AutocompleteInput, ReferenceInput, SimpleForm, TextInput, Title, required } from "react-admin"
+import { AutocompleteInput, ReferenceInput, SimpleForm, TextInput, Title, required, useCheckForApplicationUpdate } from "react-admin"
 import { Typography } from "@mui/material"
+import { useFormState, useFormContext } from "react-hook-form"
+import { useEffect } from "react";
 
 export const VisitRequest = () => {
     return <>
@@ -9,6 +11,7 @@ export const VisitRequest = () => {
           Enter visit details
         </Typography>
         <OwnerDropdown />
+        <PetDropdown />
       </SimpleForm>
     </>
 };
@@ -22,4 +25,27 @@ const OwnerDropdown = () => {
           <AutocompleteInput filterToQuery={ownerFilterToQuery} optionText={ownerOptionRenderer} fullWidth={true} validate={required()}/>
         </ReferenceInput>
     )
+}
+
+const PetDropdown = () => {
+    const { watch, resetField } = useFormContext();    
+    const ownerIdValue = watch('ownerId', null);
+
+    // filter list of pets by owner
+    const petFilter = ownerIdValue ? {'ownerId': ownerIdValue} : {};
+
+    // reset pet if owner changes
+    useEffect(() => {
+        resetField('petId');
+    }, [ownerIdValue]);
+
+    return (
+        <ReferenceInput 
+            source="petId" 
+            reference="pet"
+            filter={petFilter}
+        >
+          <AutocompleteInput fullWidth={true} validate={required()} />
+        </ReferenceInput>
+    );
 }
