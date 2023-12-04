@@ -1,4 +1,4 @@
-import { AutocompleteInput, ReferenceInput, SimpleForm, TextInput, Title, required, useCheckForApplicationUpdate } from "react-admin"
+import { AutocompleteInput, DateInput, ReferenceInput, SimpleForm, TextInput, Title, minValue, required, useCheckForApplicationUpdate } from "react-admin"
 import { Typography } from "@mui/material"
 import { useFormState, useFormContext } from "react-hook-form"
 import { useEffect } from "react";
@@ -12,6 +12,7 @@ export const VisitRequest = () => {
         </Typography>
         <OwnerDropdown />
         <PetDropdown />
+        <DateInput source="date" validate={[required(), minValue(tomorrowDate())]} />
       </SimpleForm>
     </>
 };
@@ -48,4 +49,13 @@ const PetDropdown = () => {
           <AutocompleteInput fullWidth={true} validate={required()} />
         </ReferenceInput>
     );
+}
+
+const tomorrowDate = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const isoString = tomorrow.toISOString();
+    const dateString = isoString.substring(0, isoString.indexOf('T')); // strip away time part
+    return dateString;
 }
