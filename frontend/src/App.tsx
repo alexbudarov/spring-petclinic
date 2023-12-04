@@ -1,5 +1,6 @@
 import {
   Admin,
+  CustomRoutes,
   Resource,
 } from "react-admin";
 import { dataProvider } from "./dataProvider";
@@ -15,9 +16,12 @@ import { PetEdit } from "./app/resources/pet/PetEdit";
 import { PetCreate } from "./app/resources/pet/PetCreate";
 import { VisitList } from "./app/resources/visit/VisitList";
 import { VisitShow } from "./app/resources/visit/VisitShow";
+import { VisitRequest } from "./app/resources/visit/VisitRequest";
+import { Route } from "react-router-dom";
+import { AppLayout } from "./AppLayout";
 
 export const App = () => (
-  <Admin dataProvider={dataProvider}>
+  <Admin dataProvider={dataProvider} layout={AppLayout}>
     <Resource
       name="vet"
       list={VetList}
@@ -47,5 +51,8 @@ export const App = () => (
       list={VisitList}
       show={VisitShow}
     />
+    <CustomRoutes>
+      <Route path="/visit/request" element={<VisitRequest />} />
+    </CustomRoutes>
   </Admin>
 );
