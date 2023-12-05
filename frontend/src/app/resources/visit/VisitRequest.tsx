@@ -1,9 +1,11 @@
-import { AutocompleteInput, DateInput, ReferenceInput, SimpleForm, TextInput, Title, minValue, required } from "react-admin"
+import { AutocompleteInput, DateInput, ReferenceInput, SimpleForm, TextInput, Title, minValue, required, useDataProvider } from "react-admin"
 import { Typography, Chip, Stack, Tooltip } from "@mui/material"
 import { useFormContext } from "react-hook-form"
 import { useEffect, useState } from "react";
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import EventBusyIcon from '@mui/icons-material/EventBusy';
+import { CheckAvailabilityArguments, CustomDataProvider } from "../../../dataProvider";
+import { useMutation } from 'react-query';
 
 export const VisitRequest = () => {
     return <>
@@ -109,32 +111,59 @@ const VetDropdown = () => {
 
 function DateBlock() {
     const { watch } = useFormContext();
-    const specialtyIdValue = watch('specialtyId', null);
+    const vetIdValue = watch('vetId', null);
     const dateValue = watch('date', null);
 
-    const [available, setAvailable] = useState<boolean>(false);
-    const [unavailable, setUnavailable] = useState<boolean>(false);
+    const [checkStatus, setCheckStatus] = useState<'available' | 'unavailable' | null>(null);
 
+    const dataProvider = useDataProvider<CustomDataProvider>();
+    const { mutate: doCheckAvailability } = useMutation(
+        (args: CheckAvailabilityArguments) => { return dataProvider.checkAvailability(args).then(a => a); },
+        {
+            onSuccess: (result) => {
+                setCheckStatus(result ? 'available' : 'unavailable');
+            },
+            onError: () => {
+                setCheckStatus(null);
+            }
+        }
+    );
+    
     useEffect(() => {
-        // todo use proper logic
-        const newAvailable: boolean = specialtyIdValue && dateValue;
-        setAvailable(newAvailable);
-    }, [specialtyIdValue, dateValue, setAvailable]);
+        if (vetIdValue && dateValue) {
+            const parsedDate = parseDate(dateValue);
+            if (parsedDate) {
+                doCheckAvailability({vetId: vetIdValue, date: parsedDate})
+            }
+        } else {
+            setCheckStatus(null);
+        }
+    }, [vetIdValue, dateValue, setCheckStatus]);
 
     return (
       <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
         <DateInput source="date" validate={[required(), minValue(tomorrowDate())]} />
-        {available && 
-          <Tooltip title="Vets are available">
+        {checkStatus === 'available' && 
+          <Tooltip title="Doctor is available">
             <CheckBoxIcon color="success" />
           </Tooltip>
         }
         
-        {unavailable && 
-          <Tooltip title="No vets available for this date">
+        {checkStatus === 'unavailable' && 
+          <Tooltip title="Doctor isn't available for this date">
             <EventBusyIcon color="warning" />
           </Tooltip>
         }
        </Stack>
     );
+}
+
+function parseDate(dateStr: string) {
+    const timestamp = Date.parse(dateStr);
+    if (isNaN(timestamp)) {
+        return null;
+    }
+    const date = new Date();
+    date.setTime(timestamp);
+    return date;
 }
