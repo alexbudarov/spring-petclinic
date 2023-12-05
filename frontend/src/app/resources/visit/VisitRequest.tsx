@@ -41,7 +41,7 @@ const PetDropdown = () => {
     // reset pet if owner changes
     useEffect(() => {
         resetField('petId');
-    }, [ownerIdValue]);
+    }, [ownerIdValue, resetField]);
 
     return (
         <ReferenceInput
@@ -72,7 +72,7 @@ function SpecialtyDropdown() {
         if (vetIdValue) {
             resetField('specialtyId');
         }
-    }, [vetIdValue]);
+    }, [vetIdValue, resetField]);
 
     return (
       <ReferenceInput source="specialtyId" reference="specialty">
@@ -93,7 +93,7 @@ const VetDropdown = () => {
         if (specialtyIdValue) {
             resetField('vetId');
         }
-    }, [specialtyIdValue]);
+    }, [specialtyIdValue, resetField]);
 
     return (
         <ReferenceInput
