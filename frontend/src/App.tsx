@@ -51,6 +51,10 @@ export const App = () => (
       list={VisitList}
       show={VisitShow}
     />
+    <Resource
+      name="specialty"
+      recordRepresentation="name"
+    />
     <CustomRoutes>
       <Route path="/visit/request" element={<VisitRequest />} />
     </CustomRoutes>
