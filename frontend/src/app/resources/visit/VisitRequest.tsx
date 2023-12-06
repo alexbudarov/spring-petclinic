@@ -1,7 +1,7 @@
-import { AutocompleteInput, DateInput, ReferenceInput, SimpleForm, TextInput, Title, minValue, required, useDataProvider } from "react-admin"
+import { AutocompleteInput, Button, DateInput, ReferenceInput, SaveButton, SimpleForm, TextInput, Title, Toolbar, minValue, required, useDataProvider } from "react-admin"
 import { Typography, Chip, Stack, Tooltip } from "@mui/material"
 import { useFormContext } from "react-hook-form"
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import EventBusyIcon from '@mui/icons-material/EventBusy';
 import { CheckAvailabilityArguments, CustomDataProvider } from "../../../dataProvider";
@@ -10,7 +10,7 @@ import { useMutation } from 'react-query';
 export const VisitRequest = () => {
     return <>
         <Title title="Request Visit" />
-        <SimpleForm onSubmit={() => { }} maxWidth="30em">
+        <SimpleForm onSubmit={() => { }} maxWidth="30em" toolbar={<CustomToolbar />}>
             <Typography variant="h6">
                 Enter visit details
             </Typography>
@@ -44,7 +44,9 @@ const PetDropdown = () => {
 
     // reset pet if owner changes
     useEffect(() => {
-        resetField('petId');
+        if (ownerIdValue) {
+          resetField('petId');
+        }
     }, [ownerIdValue, resetField]);
 
     return (
@@ -167,3 +169,27 @@ function parseDate(dateStr: string) {
     date.setTime(timestamp);
     return date;
 }
+
+const CustomToolbar = () => {
+    const { resetField } = useFormContext();
+
+    const resetAllValues = useCallback(() => {
+        ['ownerId', 'petId', 'specialtyId', 'vetId', 'date', 'description'].forEach(element => {
+            resetField(element);
+        });
+    }, [resetField]);
+
+    return (
+        <Toolbar>
+            <SaveButton label="Submit" />
+            <Button 
+              label="Reset" 
+              size="medium" 
+              sx={{marginLeft: "1em"}} 
+              variant="outlined"
+              onClick={resetAllValues}
+              />
+        </Toolbar>
+     );
+}
+ 
