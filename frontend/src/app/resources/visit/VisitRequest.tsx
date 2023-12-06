@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import EventBusyIcon from '@mui/icons-material/EventBusy';
 import { CheckAvailabilityArguments, CustomDataProvider, httpClient } from "../../../dataProvider";
-import { useMutation } from 'react-query';
+import { useMutation, useQuery } from 'react-query';
 import {Link} from "react-router-dom";
 
 type NewVisitRequest = {
@@ -182,32 +182,50 @@ function DateBlock() {
     const { watch } = useFormContext();
     const vetIdValue = watch('vetId', null);
     const dateValue = watch('date', null);
+    const parsedDate = dateValue ? parseDate(dateValue) : null;
 
     const [checkStatus, setCheckStatus] = useState<'available' | 'unavailable' | null>(null);
 
     const dataProvider = useDataProvider<CustomDataProvider>();
-    const { mutate: doCheckAvailability } = useMutation(
-        (args: CheckAvailabilityArguments) => { return dataProvider.checkAvailability(args).then(a => a); },
-        {
-            onSuccess: (result) => {
-                setCheckStatus(result ? 'available' : 'unavailable');
-            },
-            onError: () => {
-                setCheckStatus(null);
-            }
-        }
-    );
-    
-    useEffect(() => {
-        if (vetIdValue && dateValue) {
-            const parsedDate = parseDate(dateValue);
-            if (parsedDate) {
-                doCheckAvailability({vetId: vetIdValue, date: parsedDate})
-            }
-        } else {
+
+    // const { mutate: doCheckAvailability } = useMutation(
+    //     (args: CheckAvailabilityArguments) => { return dataProvider.checkAvailability(args).then(a => a); },
+    //     {
+    //         onSuccess: (result) => {
+    //             setCheckStatus(result ? 'available' : 'unavailable');
+    //         },
+    //         onError: () => {
+    //             setCheckStatus(null);
+    //         }
+    //     }
+    // );
+
+    useQuery({
+        queryKey: ['checkAvailability', vetIdValue, parsedDate],
+        queryFn: async () => {
+            return await dataProvider.checkAvailability({vetId: vetIdValue, date: parsedDate!!});
+        },
+
+        enabled: vetIdValue !== null && parsedDate !== null,
+
+        onSuccess: (result) => {
+            setCheckStatus(result ? 'available' : 'unavailable');
+        },
+        onError: () => {
             setCheckStatus(null);
         }
-    }, [vetIdValue, dateValue, setCheckStatus]);
+});
+    
+    // useEffect(() => {
+    //     if (vetIdValue && dateValue) {
+            
+    //         if (parsedDate) {
+    //             doCheckAvailability({vetId: vetIdValue, date: parsedDate})
+    //         }
+    //     } else {
+    //         setCheckStatus(null);
+    //     }
+    // }, [vetIdValue, dateValue, setCheckStatus]);
 
     return (
       <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
