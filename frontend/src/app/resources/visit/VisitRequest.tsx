@@ -1,11 +1,12 @@
-import { AutocompleteInput, Button, DateInput, ReferenceInput, SaveButton, SimpleForm, TextInput, Title, Toolbar, minValue, required, useDataProvider } from "react-admin"
-import { Typography, Chip, Stack, Tooltip } from "@mui/material"
+import { AutocompleteInput, Button, DateInput, Identifier, ReferenceInput, SaveButton, SimpleForm, TextInput, Title, Toolbar, minValue, required, useCreatePath, useDataProvider } from "react-admin"
+import { Typography, Chip, Stack, Tooltip, Alert } from "@mui/material"
 import { useFormContext } from "react-hook-form"
 import { useCallback, useEffect, useState } from "react";
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import EventBusyIcon from '@mui/icons-material/EventBusy';
 import { CheckAvailabilityArguments, CustomDataProvider } from "../../../dataProvider";
 import { useMutation } from 'react-query';
+import {Link, To} from "react-router-dom";
 
 export const VisitRequest = () => {
     return <>
@@ -170,6 +171,13 @@ function parseDate(dateStr: string) {
     return date;
 }
 
+type VisitCreationResult = {
+    success: boolean;
+    error: boolean;
+    createdVisitId: Identifier | null;
+    errorMessage: string | null;
+}
+
 const CustomToolbar = () => {
     const { resetField } = useFormContext();
 
@@ -178,6 +186,10 @@ const CustomToolbar = () => {
             resetField(element);
         });
     }, [resetField]);
+
+    const [creationResult, setCreationResult] = useState<VisitCreationResult>(
+        {success: false, error: false, createdVisitId: null, errorMessage: null}
+    );
 
     return (
         <Toolbar>
@@ -189,7 +201,23 @@ const CustomToolbar = () => {
               variant="outlined"
               onClick={resetAllValues}
               />
+              <RequestResultPanel {...creationResult} />
         </Toolbar>
      );
 }
  
+const RequestResultPanel = ({success, error, createdVisitId, errorMessage} : VisitCreationResult) => {
+    const createPath = useCreatePath();
+    
+    const visitUrl = createPath({resource: 'visit', type: 'show', id: createdVisitId || 0});
+    return <>
+        {success && createdVisitId && 
+            <Alert severity="success">Visit created. Click <Link to={{pathname: visitUrl}}>here</Link> to view.</Alert>
+        }
+        {error && 
+            <Alert severity="error">{errorMessage || "Error"}</Alert>
+        }
+    </>
+}
+ 
+export default VisitCreationResult;
