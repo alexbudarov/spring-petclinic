@@ -6,7 +6,7 @@ const baseDataProvider = simpleRestProvider(
 );
 
 const apiUrl = import.meta.env.VITE_SIMPLE_REST_URL;
-const httpClient = fetchUtils.fetchJson;
+export const httpClient = fetchUtils.fetchJson;
 
 export interface CheckAvailabilityArguments {
   vetId: number, 

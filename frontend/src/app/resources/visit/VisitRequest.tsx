@@ -1,17 +1,75 @@
-import { AutocompleteInput, Button, DateInput, Identifier, ReferenceInput, SaveButton, SimpleForm, TextInput, Title, Toolbar, minValue, required, useCreatePath, useDataProvider } from "react-admin"
-import { Typography, Chip, Stack, Tooltip, Alert } from "@mui/material"
+import { AutocompleteInput, Button, DateInput, Identifier, ReferenceInput, SaveButton, SimpleForm, TextInput, Title, Toolbar, minValue, required, useCreatePath, useDataProvider, useNotify } from "react-admin"
+import { Typography, Stack, Tooltip, Alert } from "@mui/material"
 import { useFormContext } from "react-hook-form"
 import { useCallback, useEffect, useState } from "react";
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import EventBusyIcon from '@mui/icons-material/EventBusy';
-import { CheckAvailabilityArguments, CustomDataProvider } from "../../../dataProvider";
+import { CheckAvailabilityArguments, CustomDataProvider, httpClient } from "../../../dataProvider";
 import { useMutation } from 'react-query';
-import {Link, To} from "react-router-dom";
+import {Link} from "react-router-dom";
+
+type NewVisitRequest = {
+    petId: number;
+    specialtyId: number | null;
+    vetId: number | null;
+    date: string;
+    description: string;
+}
 
 export const VisitRequest = () => {
+    const [creationResult, setCreationResult] = useState<VisitCreationResult>(
+        {success: false, createdVisitId: null}
+    );
+    const notify = useNotify();
+
+    const { mutate: invokeRequestNewVisit } = useMutation(
+        (request: NewVisitRequest) => { 
+            return httpClient(`/rest/visit/request`, {
+                method: "POST",
+                body: JSON.stringify(request)
+            })
+            .then(({ json }) => (json));
+        },
+        {
+            onSuccess: (result) => {                
+                setCreationResult({
+                    success: result.success,
+                    createdVisitId: result.visitId
+                });
+                if (!result.success) {
+                    notify(result.errorMessage || 'Error', { type: "warning" });
+                }
+                // reset form would be great
+            },
+            onError: (error: any) => {                
+                setCreationResult({
+                    success: false,
+                    createdVisitId: null
+                });
+                notify('Error', { type: "error" });
+            }
+        }
+    );
+
+    const onSubmitForm = useCallback((data: Record<string, any>) => {
+        const req: NewVisitRequest = {
+            petId: data.petId,
+            specialtyId: data.specialtyId,
+            vetId: data.vetId,
+            date: data.date, // date format is the same
+            description: data.description
+        }
+        
+        invokeRequestNewVisit(req);
+    }, [invokeRequestNewVisit]);
+
     return <>
         <Title title="Request Visit" />
-        <SimpleForm onSubmit={() => { }} maxWidth="30em" toolbar={<CustomToolbar />}>
+        <SimpleForm 
+            onSubmit={onSubmitForm} 
+            maxWidth="30em" 
+            toolbar={<CustomToolbar {...creationResult} />}
+            >
             <Typography variant="h6">
                 Enter visit details
             </Typography>
@@ -74,6 +132,13 @@ function SpecialtyDropdown() {
     const { watch, resetField } = useFormContext();
     const vetIdValue = watch('vetId', null);
 
+    const additionalValidation = (specialtyId: any, allValues: any) => {
+        if (!specialtyId && !allValues.vetId) {
+            return "Either Specialty or Specific Vet should be selected";
+        }
+        return undefined;
+    };
+
     // reset specialty if vet becomes set
     useEffect(() => {
         if (vetIdValue) {
@@ -86,6 +151,7 @@ function SpecialtyDropdown() {
             <AutocompleteInput
                 fullWidth
                 helperText="If selected: request any available vet with this specialty"
+                validate={additionalValidation}
             />
         </ReferenceInput>
     );
@@ -173,12 +239,10 @@ function parseDate(dateStr: string) {
 
 type VisitCreationResult = {
     success: boolean;
-    error: boolean;
     createdVisitId: Identifier | null;
-    errorMessage: string | null;
 }
 
-const CustomToolbar = () => {
+const CustomToolbar = (creationResult: VisitCreationResult) => {
     const { resetField } = useFormContext();
 
     const resetAllValues = useCallback(() => {
@@ -187,13 +251,11 @@ const CustomToolbar = () => {
         });
     }, [resetField]);
 
-    const [creationResult, setCreationResult] = useState<VisitCreationResult>(
-        {success: false, error: false, createdVisitId: null, errorMessage: null}
-    );
-
     return (
         <Toolbar>
-            <SaveButton label="Submit" />
+            <SaveButton 
+              label="Submit"
+            />
             <Button 
               label="Reset" 
               size="medium" 
@@ -206,16 +268,13 @@ const CustomToolbar = () => {
      );
 }
  
-const RequestResultPanel = ({success, error, createdVisitId, errorMessage} : VisitCreationResult) => {
+const RequestResultPanel = ({success, createdVisitId} : VisitCreationResult) => {
     const createPath = useCreatePath();
     
     const visitUrl = createPath({resource: 'visit', type: 'show', id: createdVisitId || 0});
     return <>
         {success && createdVisitId && 
-            <Alert severity="success">Visit created. Click <Link to={{pathname: visitUrl}}>here</Link> to view.</Alert>
-        }
-        {error && 
-            <Alert severity="error">{errorMessage || "Error"}</Alert>
+            <Alert severity="success">Visit #{createdVisitId} created, <Link to={{pathname: visitUrl}}>click to view.</Link></Alert>
         }
     </>
 }
