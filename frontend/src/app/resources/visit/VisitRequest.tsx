@@ -237,13 +237,11 @@ type VisitCreationResult = {
 }
 
 const CustomToolbar = (creationResult: VisitCreationResult) => {
-    const { resetField } = useFormContext();
+    const { reset } = useFormContext();
 
     const resetAllValues = useCallback(() => {
-        ['ownerId', 'petId', 'specialtyId', 'vetId', 'date', 'description'].forEach(element => {
-            resetField(element);
-        });
-    }, [resetField]);
+        reset();
+    }, [reset]);
 
     return (
         <Toolbar>
