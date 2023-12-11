@@ -1,13 +1,10 @@
 import { AutocompleteInput, Button, DateInput, Identifier, ReferenceInput, SaveButton, SimpleForm, TextInput, Title, Toolbar, minValue, required, useCreatePath, useDataProvider, useNotify } from "react-admin"
-import { Typography, Stack, Tooltip, Alert, Chip } from "@mui/material"
+import { Typography, Stack, Alert, Chip } from "@mui/material"
 import { useFormContext } from "react-hook-form"
 import { useCallback, useEffect, useState } from "react";
-import CheckBoxIcon from '@mui/icons-material/CheckBox';
-import EventBusyIcon from '@mui/icons-material/EventBusy';
 import { CustomDataProvider, httpClient } from "../../../dataProvider";
 import { useMutation } from 'react-query';
 import { Link } from "react-router-dom";
-import TFieldValues from "react-hook-form/dist/types/form";
 
 type NewVisitRequest = {
     petId: number;
@@ -214,15 +211,11 @@ function DateBlock() {
         <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
             <DateInput source="date" validate={[required(), minValue(tomorrowDate())]} />
             {checkStatus === 'available' &&
-                <Tooltip title="Doctor is available">
-                    <CheckBoxIcon color="success" />
-                </Tooltip>
+                <Chip label="Doctor is available" color="success"/>
             }
 
             {checkStatus === 'unavailable' &&
-                <Tooltip title="Doctor isn't available for this date">
-                    <EventBusyIcon color="warning" />
-                </Tooltip>
+                <Chip label="Doctor isn't available for this date" color="warning"/>
             }
         </Stack>
     );
