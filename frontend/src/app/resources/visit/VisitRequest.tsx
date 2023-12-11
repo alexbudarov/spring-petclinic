@@ -188,44 +188,23 @@ function DateBlock() {
 
     const dataProvider = useDataProvider<CustomDataProvider>();
 
-    // const { mutate: doCheckAvailability } = useMutation(
-    //     (args: CheckAvailabilityArguments) => { return dataProvider.checkAvailability(args).then(a => a); },
-    //     {
-    //         onSuccess: (result) => {
-    //             setCheckStatus(result ? 'available' : 'unavailable');
-    //         },
-    //         onError: () => {
-    //             setCheckStatus(null);
-    //         }
-    //     }
-    // );
-
     useQuery({
         queryKey: ['checkAvailability', vetIdValue, parsedDate],
         queryFn: async () => {
-            return await dataProvider.checkAvailability({vetId: vetIdValue, date: parsedDate!!});
+            if (vetIdValue && parsedDate) {
+                return await dataProvider.checkAvailability({vetId: vetIdValue, date: parsedDate!!});
+            } else {
+                return null;
+            }
         },
 
-        enabled: vetIdValue !== null && parsedDate !== null,
-
         onSuccess: (result) => {
-            setCheckStatus(result ? 'available' : 'unavailable');
+            setCheckStatus(result === null ? null : (result ? 'available' : 'unavailable'));
         },
         onError: () => {
             setCheckStatus(null);
         }
-});
-    
-    // useEffect(() => {
-    //     if (vetIdValue && dateValue) {
-            
-    //         if (parsedDate) {
-    //             doCheckAvailability({vetId: vetIdValue, date: parsedDate})
-    //         }
-    //     } else {
-    //         setCheckStatus(null);
-    //     }
-    // }, [vetIdValue, dateValue, setCheckStatus]);
+    });
 
     return (
       <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
