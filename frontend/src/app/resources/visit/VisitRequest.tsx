@@ -1,12 +1,13 @@
 import { AutocompleteInput, Button, DateInput, Identifier, ReferenceInput, SaveButton, SimpleForm, TextInput, Title, Toolbar, minValue, required, useCreatePath, useDataProvider, useNotify } from "react-admin"
-import { Typography, Stack, Tooltip, Alert } from "@mui/material"
+import { Typography, Stack, Tooltip, Alert, Chip } from "@mui/material"
 import { useFormContext } from "react-hook-form"
 import { useCallback, useEffect, useState } from "react";
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import EventBusyIcon from '@mui/icons-material/EventBusy';
-import { CheckAvailabilityArguments, CustomDataProvider, httpClient } from "../../../dataProvider";
+import { CustomDataProvider, httpClient } from "../../../dataProvider";
 import { useMutation } from 'react-query';
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
+import TFieldValues from "react-hook-form/dist/types/form";
 
 type NewVisitRequest = {
     petId: number;
@@ -18,20 +19,20 @@ type NewVisitRequest = {
 
 export const VisitRequest = () => {
     const [creationResult, setCreationResult] = useState<VisitCreationResult>(
-        {success: false, createdVisitId: null}
+        { success: false, createdVisitId: null }
     );
     const notify = useNotify();
 
     const { mutate: invokeRequestNewVisit } = useMutation(
-        (request: NewVisitRequest) => { 
+        (request: NewVisitRequest) => {
             return httpClient(`/rest/visit/request`, {
                 method: "POST",
                 body: JSON.stringify(request)
             })
-            .then(({ json }) => (json));
+                .then(({ json }) => (json));
         },
         {
-            onSuccess: (result) => {                
+            onSuccess: (result) => {
                 setCreationResult({
                     success: result.success,
                     createdVisitId: result.visitId
@@ -41,7 +42,7 @@ export const VisitRequest = () => {
                 }
                 // reset form would be great
             },
-            onError: (error: any) => {                
+            onError: (error: any) => {
                 setCreationResult({
                     success: false,
                     createdVisitId: null
@@ -59,7 +60,7 @@ export const VisitRequest = () => {
             date: data.date, // date format is the same
             description: data.description
         }
-        
+
         invokeRequestNewVisit(req);
     }, [invokeRequestNewVisit]);
 
@@ -104,7 +105,7 @@ const PetDropdown = () => {
     // reset pet if owner changes
     useEffect(() => {
         if (ownerIdValue) {
-          resetField('petId');
+            resetField('petId');
         }
     }, [ownerIdValue, resetField]);
 
@@ -187,7 +188,7 @@ function DateBlock() {
 
     const dataProvider = useDataProvider<CustomDataProvider>();
     const { mutate: doCheckAvailability } = useMutation(
-        (args: CheckAvailabilityArguments) => { return dataProvider.checkAvailability(args).then(a => a); },
+        (args: {vetId: number, date: Date}) => { return dataProvider.checkAvailability(args.vetId, args.date).then(a => a); },
         {
             onSuccess: (result) => {
                 setCheckStatus(result ? 'available' : 'unavailable');
@@ -197,12 +198,12 @@ function DateBlock() {
             }
         }
     );
-    
+
     useEffect(() => {
         if (vetIdValue && dateValue) {
             const parsedDate = parseDate(dateValue);
             if (parsedDate) {
-                doCheckAvailability({vetId: vetIdValue, date: parsedDate})
+                doCheckAvailability({ vetId: vetIdValue, date: parsedDate })
             }
         } else {
             setCheckStatus(null);
@@ -210,20 +211,20 @@ function DateBlock() {
     }, [vetIdValue, dateValue, setCheckStatus]);
 
     return (
-      <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
-        <DateInput source="date" validate={[required(), minValue(tomorrowDate())]} />
-        {checkStatus === 'available' && 
-          <Tooltip title="Doctor is available">
-            <CheckBoxIcon color="success" />
-          </Tooltip>
-        }
-        
-        {checkStatus === 'unavailable' && 
-          <Tooltip title="Doctor isn't available for this date">
-            <EventBusyIcon color="warning" />
-          </Tooltip>
-        }
-       </Stack>
+        <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
+            <DateInput source="date" validate={[required(), minValue(tomorrowDate())]} />
+            {checkStatus === 'available' &&
+                <Tooltip title="Doctor is available">
+                    <CheckBoxIcon color="success" />
+                </Tooltip>
+            }
+
+            {checkStatus === 'unavailable' &&
+                <Tooltip title="Doctor isn't available for this date">
+                    <EventBusyIcon color="warning" />
+                </Tooltip>
+            }
+        </Stack>
     );
 }
 
@@ -253,30 +254,30 @@ const CustomToolbar = (creationResult: VisitCreationResult) => {
 
     return (
         <Toolbar>
-            <SaveButton 
-              label="Submit"
+            <SaveButton
+                label="Submit"
             />
-            <Button 
-              label="Reset" 
-              size="medium" 
-              sx={{marginLeft: "1em"}} 
-              variant="outlined"
-              onClick={resetAllValues}
-              />
-              <RequestResultPanel {...creationResult} />
+            <Button
+                label="Reset"
+                size="medium"
+                sx={{ marginLeft: "1em" }}
+                variant="outlined"
+                onClick={resetAllValues}
+            />
+            <RequestResultPanel {...creationResult} />
         </Toolbar>
-     );
+    );
 }
- 
-const RequestResultPanel = ({success, createdVisitId} : VisitCreationResult) => {
+
+const RequestResultPanel = ({ success, createdVisitId }: VisitCreationResult) => {
     const createPath = useCreatePath();
-    
-    const visitUrl = createPath({resource: 'visit', type: 'show', id: createdVisitId || 0});
+
+    const visitUrl = createPath({ resource: 'visit', type: 'show', id: createdVisitId || 0 });
     return <>
-        {success && createdVisitId && 
-            <Alert severity="success">Visit #{createdVisitId} created, <Link to={{pathname: visitUrl}}>click to view.</Link></Alert>
+        {success && createdVisitId &&
+            <Alert severity="success">Visit #{createdVisitId} created, <Link to={{ pathname: visitUrl }}>click to view.</Link></Alert>
         }
     </>
 }
- 
+
 export default VisitCreationResult;
