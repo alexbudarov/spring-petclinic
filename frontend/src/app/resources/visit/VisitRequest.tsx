@@ -3,7 +3,7 @@ import { Typography, Stack, Alert, Chip } from "@mui/material"
 import { useFormContext } from "react-hook-form"
 import { useCallback, useEffect, useState } from "react";
 import { CustomDataProvider, httpClient } from "../../../dataProvider";
-import { useMutation } from 'react-query';
+import { useMutation, useQuery } from 'react-query';
 import { Link } from "react-router-dom";
 
 type NewVisitRequest = {
@@ -180,32 +180,29 @@ function DateBlock() {
     const { watch } = useFormContext();
     const vetIdValue = watch('vetId', null);
     const dateValue = watch('date', null);
+    const parsedDate = dateValue ? parseDate(dateValue) : null;
 
     const [checkStatus, setCheckStatus] = useState<'available' | 'unavailable' | null>(null);
 
     const dataProvider = useDataProvider<CustomDataProvider>();
-    const { mutate: doCheckAvailability } = useMutation(
-        (args: {vetId: number, date: Date}) => { return dataProvider.checkAvailability(args.vetId, args.date).then(a => a); },
-        {
-            onSuccess: (result) => {
-                setCheckStatus(result ? 'available' : 'unavailable');
-            },
-            onError: () => {
-                setCheckStatus(null);
-            }
-        }
-    );
 
-    useEffect(() => {
-        if (vetIdValue && dateValue) {
-            const parsedDate = parseDate(dateValue);
-            if (parsedDate) {
-                doCheckAvailability({ vetId: vetIdValue, date: parsedDate })
+    useQuery({
+        queryKey: ['checkAvailability', vetIdValue, parsedDate],
+        queryFn: async () => {
+            if (vetIdValue && parsedDate) {
+                return await dataProvider.checkAvailability(vetIdValue, parsedDate!!);
+            } else {
+                return null;
             }
-        } else {
+        },
+
+        onSuccess: (result) => {
+            setCheckStatus(result === null ? null : (result ? 'available' : 'unavailable'));
+        },
+        onError: () => {
             setCheckStatus(null);
         }
-    }, [vetIdValue, dateValue, setCheckStatus]);
+    });
 
     return (
         <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
