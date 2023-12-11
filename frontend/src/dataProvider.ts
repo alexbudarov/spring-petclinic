@@ -17,7 +17,7 @@ export const dataProvider: CustomDataProvider = {
   ...baseDataProvider,
 
   checkAvailability: function (vetId: number, date: Date): Promise<boolean> {
-    return httpClient(`${apiUrl}/visit/check-availability?vetId=${vetId}&date=${formatDate(date)}`)
+    return httpClient(`/rest/visit/check-availability?vetId=${vetId}&date=${formatDate(date)}`)
       .then(({ json }) => (json));
   }
 };
