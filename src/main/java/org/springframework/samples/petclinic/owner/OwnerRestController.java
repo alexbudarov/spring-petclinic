@@ -57,6 +57,9 @@ public class OwnerRestController {
 		if (filter.searchString() != null) {
 			specification = addSearchStringCondition(filter, specification);
 		}
+		if (filter.visitId() != null) {
+			specification = addVisitIdCondition(filter.visitId(), specification);
+		}
 
 		Page<Owner> page = ownerRepository.findAll(specification, pageable);
 
@@ -77,6 +80,18 @@ public class OwnerRestController {
 									filter.searchString().toLowerCase() + "%"
 							)
 					);
+				}
+		);
+		return specification;
+	}
+
+	private Specification<Owner> addVisitIdCondition(Integer visitId, Specification<Owner> specification) {
+		specification = specification.and(
+				(root, query, criteriaBuilder) -> {
+						return criteriaBuilder.equal(
+								root.join("pets").join("visits").get("id"),
+								visitId
+						);
 				}
 		);
 		return specification;
@@ -132,7 +147,9 @@ public class OwnerRestController {
 		String lastName,
 
 		@SpecFilterCondition(operator = SpecFilterOperator.STARTS_WITH)
-		String telephone
+		String telephone,
+
+		Integer visitId
 	) {
 	}
 

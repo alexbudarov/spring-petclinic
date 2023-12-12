@@ -1,5 +1,6 @@
-import { Datagrid, DateField, DateInput, List, ReferenceField, ReferenceInput, ShowButton, TextField, TextInput } from "react-admin"
+import { Datagrid, DateField, DateInput, FunctionField, List, ReferenceField, ReferenceInput, ReferenceOneField, ShowButton, TextField, TextInput } from "react-admin"
 import { VisitOwnerTelephoneField } from "./VisitOwnerTelephoneField";
+import { ownerRecordRepresentation } from "../../functions/resources/ownerRecordRepresentation";
 
 const filters = [
   <TextInput label="Description" source="description" />,
@@ -17,8 +18,12 @@ export const VisitList = () => {
           <DateField source="date" options={{ dateStyle: 'medium' }} />
           <TextField source="description" />
           <ReferenceField source="assignedVetId" reference="vet" sortBy="assignedVet.firstName" />
-          <ReferenceField label="Owner name" source="petOwnerId" reference="owner" sortable={false} link={false} />
-          <VisitOwnerTelephoneField />
+          <ReferenceOneField label="Owner name" reference="owner" target="visitId" sortable={false}>
+            <FunctionField render={ownerRecordRepresentation} />
+          </ReferenceOneField>
+          <ReferenceOneField label="Owner telephone" reference="owner" target="visitId" sortable={false}>
+            <TextField source="telephone" />
+          </ReferenceOneField>
           <ShowButton />
         </Datagrid>
       </List>
