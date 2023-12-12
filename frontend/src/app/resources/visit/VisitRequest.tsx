@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { CustomDataProvider, httpClient } from "../../../dataProvider";
 import { useMutation, useQuery } from 'react-query';
 import { Link } from "react-router-dom";
+import dayjs, { Dayjs } from "dayjs";
 
 type NewVisitRequest = {
     petId: number;
@@ -117,13 +118,10 @@ const PetDropdown = () => {
     );
 }
 
-const tomorrowDate = () => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    const isoString = tomorrow.toISOString();
-    const dateString = isoString.substring(0, isoString.indexOf('T')); // strip away time part
-    return dateString;
+const tomorrowDateStr = () => {
+    const now = dayjs();
+    const tomorrow = now.add(1, 'day');
+    return tomorrow.format("YYYY-MM-DD");
 }
 
 function SpecialtyDropdown() {
@@ -206,7 +204,7 @@ function DateBlock() {
 
     return (
         <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-            <DateInput source="date" validate={[required(), minValue(tomorrowDate())]} />
+            <DateInput source="date" validate={[required(), minValue(tomorrowDateStr(), "Must be in the future")]} />
             {checkStatus === 'available' &&
                 <Chip label="Doctor is available" color="success"/>
             }
@@ -219,13 +217,7 @@ function DateBlock() {
 }
 
 function parseDate(dateStr: string) {
-    const timestamp = Date.parse(dateStr);
-    if (isNaN(timestamp)) {
-        return null;
-    }
-    const date = new Date();
-    date.setTime(timestamp);
-    return date;
+    return dayjs(dateStr);
 }
 
 type VisitCreationResult = {
