@@ -57,4 +57,6 @@ public interface VetRepository extends Repository<Vet, Integer> {
 	Page<Vet> findAll(Pageable pageable) throws DataAccessException;
 
 	List<Vet> findBySpecialties_IdOrderByIdAsc(Integer id);
+
+	List<Vet> findAllById(Iterable<Integer> ids);
 }
