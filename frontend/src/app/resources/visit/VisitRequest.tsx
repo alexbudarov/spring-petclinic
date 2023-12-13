@@ -1,7 +1,8 @@
-import { AutocompleteInput, ReferenceInput, SimpleForm, Title, required } from "react-admin"
+import { AutocompleteInput, DateInput, ReferenceInput, SimpleForm, TextInput, Title, minValue, required } from "react-admin"
 import { Typography } from "@mui/material"
 import { useFormContext } from "react-hook-form";
 import { useEffect } from "react";
+import dayjs from "dayjs";
 
 export const VisitRequest = () => {
     return <>
@@ -15,6 +16,7 @@ export const VisitRequest = () => {
             </Typography>
             <OwnerDropdown />
             <PetDropdown />
+            <DateInput source="date" validate={[required(), minValue(tomorrowDateStr(), "Must be in the future")]} />
         </SimpleForm>
     </>
 };
@@ -56,4 +58,10 @@ const PetDropdown = () => {
             <AutocompleteInput fullWidth validate={required()} />
         </ReferenceInput>
     );
+}
+
+const tomorrowDateStr = () => {
+    const now = dayjs();
+    const tomorrow = now.add(1, 'day');
+    return tomorrow.format("YYYY-MM-DD");
 }
