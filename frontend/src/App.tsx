@@ -2,14 +2,14 @@ import {
   Admin,
   Resource,
   ListGuesser,
-  EditGuesser,
-  ShowGuesser,
 } from "react-admin";
 import { dataProvider } from "./dataProvider";
 import { ownerRecordRepresentation } from "./app/functions/ownerRecordRepresentation";
 import { PetList } from "./app/resources/pet/PetList";
 import { PetEdit } from "./app/resources/pet/PetEdit";
 import { PetCreate } from "./app/resources/pet/PetCreate";
+import { VisitList } from "./app/resources/visit/VisitList";
+import { VisitShow } from "./app/resources/visit/VisitShow";
 
 export const App = () => (
   <Admin dataProvider={dataProvider}>
@@ -29,6 +29,11 @@ export const App = () => (
       edit={PetEdit}
       create={PetCreate}
       recordRepresentation="name"
+    />
+    <Resource
+      name="visit"
+      list={VisitList}
+      show={VisitShow}
     />
   </Admin>
 );
