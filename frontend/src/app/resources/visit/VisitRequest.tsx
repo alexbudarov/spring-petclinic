@@ -1,5 +1,5 @@
 import { AutocompleteInput, DateInput, ReferenceInput, SimpleForm, TextInput, Title, minValue, required } from "react-admin"
-import { Typography } from "@mui/material"
+import { Typography, Stack, Chip } from "@mui/material"
 import { useFormContext } from "react-hook-form";
 import { useEffect } from "react";
 import dayjs from "dayjs";
@@ -7,9 +7,9 @@ import dayjs from "dayjs";
 export const VisitRequest = () => {
     return <>
         <Title title="Request Visit" />
-        <SimpleForm 
-          maxWidth="30em" 
-          onSubmit={() => {}}
+        <SimpleForm
+            maxWidth="30em"
+            onSubmit={() => { }}
         >
             <Typography variant="h6">
                 Enter visit details
@@ -21,11 +21,11 @@ export const VisitRequest = () => {
                     fullWidth
                     validate={required()}
                 />
-            </ReferenceInput>            
-            <DateInput source="date" validate={[required(), minValue(tomorrowDateStr(), "Must be in the future")]} />
+            </ReferenceInput>
+            <DateBlock />
             <TextInput source="description" helperText="e.g. Vaccination" fullWidth validate={required()} />
         </SimpleForm>
-    </>
+    </>;
 };
 
 const OwnerDropdown = () => {
@@ -34,11 +34,11 @@ const OwnerDropdown = () => {
 
     return (
         <ReferenceInput source="ownerId" reference="owner">
-            <AutocompleteInput 
-              filterToQuery={ownerFilterToQuery} 
-              optionText={ownerOptionRenderer} 
-              validate={required()}
-              fullWidth
+            <AutocompleteInput
+                filterToQuery={ownerFilterToQuery}
+                optionText={ownerOptionRenderer}
+                validate={required()}
+                fullWidth
             />
         </ReferenceInput>
     )
@@ -71,4 +71,17 @@ const tomorrowDateStr = () => {
     const now = dayjs();
     const tomorrow = now.add(1, 'day');
     return tomorrow.format("YYYY-MM-DD");
+}
+
+function DateBlock() {
+    return (
+        <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
+            <DateInput 
+                source="date" 
+                validate={[required(), minValue(tomorrowDateStr(), "Must be in the future")]} 
+            />
+            <Chip label="Doctor is available" color="success"/>
+            <Chip label="Doctor isn't available for this date" color="warning"/>
+        </Stack>
+    );
 }
