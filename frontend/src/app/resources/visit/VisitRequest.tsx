@@ -1,10 +1,10 @@
-import { AutocompleteInput, DateInput, Identifier, ReferenceInput, SaveButton, SimpleForm, TextInput, Title, Toolbar, minValue, required, useCreatePath, useDataProvider } from "react-admin"
+import { AutocompleteInput, DateInput, Identifier, ReferenceInput, SaveButton, SimpleForm, TextInput, Title, Toolbar, minValue, required, useCreatePath, useDataProvider, useNotify } from "react-admin"
 import { Typography, Stack, Chip, Alert } from "@mui/material"
 import { useFormContext } from "react-hook-form";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { CustomDataProvider } from "../../../dataProvider";
-import { useQuery } from 'react-query';
+import { useQuery, useMutation } from 'react-query';
 import { Link } from "react-router-dom";
 
 type VisitCreationResult = {
@@ -17,11 +17,45 @@ export const VisitRequest = () => {
         { success: false, createdVisitId: null }
     );
 
+    const notify = useNotify();
+    const dataProvider = useDataProvider<CustomDataProvider>();
+
+    const { mutate: invokeRequestNewVisit } = useMutation(
+        dataProvider.requestVisit,
+        {
+            onSuccess: (result) => {
+                setCreationResult({
+                    success: result.success,
+                    createdVisitId: result.visitId
+                });
+                if (!result.success) {
+                    notify(result.errorMessage || 'Error', { type: "warning" });
+                }
+            },
+            onError: (error: any) => {
+                setCreationResult({
+                    success: false,
+                    createdVisitId: null
+                });
+                notify('Error', { type: "error" });
+            }
+        }
+    );    
+
+    function doSubmitForm(data: Record<string, any>) {
+        invokeRequestNewVisit({
+                petId: data.petId,
+                specialtyId: data.specialtyId,
+                date: data.date, // date format is the same
+                description: data.description
+        });
+    }
+
     return <>
         <Title title="Request Visit" />
         <SimpleForm
             maxWidth="30em"
-            onSubmit={() => { }}
+            onSubmit={doSubmitForm}
             toolbar={<CustomToolbar {...creationResult} />}
         >
             <Typography variant="h6">
@@ -157,3 +191,4 @@ const RequestResultPanel = ({ success, createdVisitId }: VisitCreationResult) =>
         }
     </>
 }
+
