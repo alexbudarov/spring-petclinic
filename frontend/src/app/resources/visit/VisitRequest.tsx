@@ -1,10 +1,11 @@
-import { AutocompleteInput, DateInput, ReferenceInput, SimpleForm, TextInput, Title, minValue, required, useDataProvider } from "react-admin"
-import { Typography, Stack, Chip } from "@mui/material"
+import { AutocompleteInput, DateInput, ReferenceInput, SaveButton, SimpleForm, TextInput, Title, Toolbar, minValue, required, useCreatePath, useDataProvider } from "react-admin"
+import { Typography, Stack, Chip, Alert } from "@mui/material"
 import { useFormContext } from "react-hook-form";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { CustomDataProvider } from "../../../dataProvider";
 import { useQuery } from 'react-query';
+import { Link } from "react-router-dom";
 
 export const VisitRequest = () => {
     return <>
@@ -12,6 +13,7 @@ export const VisitRequest = () => {
         <SimpleForm
             maxWidth="30em"
             onSubmit={() => { }}
+            toolbar={<CustomToolbar />}
         >
             <Typography variant="h6">
                 Enter visit details
@@ -121,4 +123,27 @@ function DateBlock() {
 
 function parseDate(dateStr: string) {
     return dayjs(dateStr);
+}
+
+const CustomToolbar = () => {
+    return (
+        <Toolbar>
+            <SaveButton
+                label="Submit"
+            />
+            <RequestResultPanel />
+        </Toolbar>
+    );
+}
+
+const RequestResultPanel = () => {
+    const createdVisitId = 12345;
+    const createPath = useCreatePath();
+
+    const visitUrl = createPath({ resource: 'visit', type: 'show', id: createdVisitId || 0 });
+    return <>
+        <Alert severity="success">
+            Visit #{createdVisitId} created, <Link to={{ pathname: visitUrl }}>click to view.</Link>
+        </Alert>
+    </>
 }
