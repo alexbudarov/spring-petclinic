@@ -85,4 +85,6 @@ public interface OwnerRepository extends Repository<Owner, Integer>/*, ListCrudR
 			select o from Owner o
 			where upper(o.firstName) like upper(concat(?1, '%')) or upper(o.lastName) like upper(concat(?1, '%'))""")
 	Page<Owner> findByFirstOrLastName(String name, Pageable pageable);
+
+	Page<Owner> findByTelephoneStartsWith(String telephone, Pageable pageable);
 }
