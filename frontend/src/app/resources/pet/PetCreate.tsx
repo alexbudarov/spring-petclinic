@@ -1,4 +1,4 @@
-import { Create, DateInput, NumberInput, SimpleForm, TextInput } from "react-admin"
+import { AutocompleteInput, Create, DateInput, ReferenceInput, SimpleForm, TextInput, required } from "react-admin"
 
 export const PetCreate = () => {
   return (
@@ -6,8 +6,12 @@ export const PetCreate = () => {
       <SimpleForm>
         <TextInput source="name" required autoFocus/>
         <DateInput source="birthDate"/>
-        <NumberInput source="typeId" required />
-        <NumberInput source="ownerId" required />
+        <ReferenceInput source="typeId" reference="pet-type">
+          <AutocompleteInput validate={required()} />
+        </ReferenceInput>
+        <ReferenceInput source="ownerId" reference="owner">
+          <AutocompleteInput validate={required()} />
+        </ReferenceInput>
       </SimpleForm>
     </Create>
   )
