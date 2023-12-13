@@ -17,6 +17,7 @@ export const VisitRequest = () => {
             <OwnerDropdown />
             <PetDropdown />
             <DateInput source="date" validate={[required(), minValue(tomorrowDateStr(), "Must be in the future")]} />
+            <TextInput source="description" helperText="e.g. Vaccination" fullWidth validate={required()} />
         </SimpleForm>
     </>
 };
