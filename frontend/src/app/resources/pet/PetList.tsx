@@ -1,4 +1,4 @@
-import { Datagrid, DateField, DeleteButton, EditButton, List, NumberField, TextField } from "react-admin"
+import { Datagrid, DateField, DeleteButton, EditButton, List, NumberField, ReferenceField, TextField } from "react-admin"
 
 export const PetList = () => {
   return (
@@ -6,8 +6,8 @@ export const PetList = () => {
       <Datagrid bulkActionButtons={false}>
         <TextField source="name" sortable={false} />
         <DateField source="birthDate" sortable={false} />
-        <NumberField source="typeId" sortable={false} />
-        <NumberField source="ownerId" sortable={false} />
+        <ReferenceField source="typeId" reference="pet-type" sortable={false} />
+        <ReferenceField source="ownerId" reference="owner" sortable={false} />
         <EditButton />
         <DeleteButton mutationMode="pessimistic"/>
      </Datagrid>
