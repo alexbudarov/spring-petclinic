@@ -14,6 +14,7 @@ export const VisitList = () => {
           <DateField source="date" options={{ dateStyle: 'medium' }} />
           <TextField source="description" />
           <ReferenceField source="assignedVetId" reference="vet" sortBy="assignedVet.firstName"/>
+          <ReferenceField label="Owner name" source="petOwnerId" reference="owner" sortable={false} link={false} />
           <ShowButton />
         </Datagrid>
       </List>
