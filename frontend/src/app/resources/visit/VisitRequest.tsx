@@ -1,8 +1,15 @@
-import { Title } from "react-admin"
+import { SimpleForm, Title } from "react-admin"
+import { Typography } from "@mui/material"
 
 export const VisitRequest = () => {
     return <>
         <Title title="Request Visit" />
-        <div>Request visit</div>
+        <SimpleForm 
+          onSubmit={() => {}}
+        >
+            <Typography variant="h6">
+                Enter visit details
+            </Typography>
+        </SimpleForm>
     </>
 };
