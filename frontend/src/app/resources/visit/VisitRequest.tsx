@@ -1,4 +1,4 @@
-import { AutocompleteInput, DateInput, ReferenceInput, SaveButton, SimpleForm, TextInput, Title, Toolbar, minValue, required, useCreatePath, useDataProvider } from "react-admin"
+import { AutocompleteInput, DateInput, Identifier, ReferenceInput, SaveButton, SimpleForm, TextInput, Title, Toolbar, minValue, required, useCreatePath, useDataProvider } from "react-admin"
 import { Typography, Stack, Chip, Alert } from "@mui/material"
 import { useFormContext } from "react-hook-form";
 import { useEffect, useState } from "react";
@@ -7,13 +7,22 @@ import { CustomDataProvider } from "../../../dataProvider";
 import { useQuery } from 'react-query';
 import { Link } from "react-router-dom";
 
+type VisitCreationResult = {
+    success: boolean;
+    createdVisitId: Identifier | null;
+}
+
 export const VisitRequest = () => {
+    const [creationResult, setCreationResult] = useState<VisitCreationResult>(
+        { success: false, createdVisitId: null }
+    );
+
     return <>
         <Title title="Request Visit" />
         <SimpleForm
             maxWidth="30em"
             onSubmit={() => { }}
-            toolbar={<CustomToolbar />}
+            toolbar={<CustomToolbar {...creationResult} />}
         >
             <Typography variant="h6">
                 Enter visit details
@@ -125,25 +134,26 @@ function parseDate(dateStr: string) {
     return dayjs(dateStr);
 }
 
-const CustomToolbar = () => {
+const CustomToolbar = (creationResult: VisitCreationResult) => {
     return (
         <Toolbar>
             <SaveButton
                 label="Submit"
             />
-            <RequestResultPanel />
+            <RequestResultPanel {...creationResult} />
         </Toolbar>
     );
 }
 
-const RequestResultPanel = () => {
-    const createdVisitId = 12345;
+const RequestResultPanel = ({ success, createdVisitId }: VisitCreationResult) => {
     const createPath = useCreatePath();
 
     const visitUrl = createPath({ resource: 'visit', type: 'show', id: createdVisitId || 0 });
     return <>
-        <Alert severity="success">
-            Visit #{createdVisitId} created, <Link to={{ pathname: visitUrl }}>click to view.</Link>
-        </Alert>
+        {success && createdVisitId &&
+            <Alert severity="success">
+                Visit #{createdVisitId} created, <Link to={{ pathname: visitUrl }}>click to view.</Link>
+            </Alert>
+        }
     </>
 }
