@@ -9,5 +9,5 @@ import java.time.LocalDate;
  * DTO for {@link Visit}
  */
 public record VisitDto(Integer id, LocalDate date, @NotBlank String description, Integer petId,
-                       Integer assignedVetId)/* implements Serializable*/ {
+                       Integer assignedVetId, Integer petOwnerId)/* implements Serializable*/ {
 }

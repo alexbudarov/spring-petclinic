@@ -9,6 +9,7 @@ public interface VisitMapper {
     Visit toEntity(VisitDto visitDto);
 
     @InheritInverseConfiguration(name = "toEntity")
+    @Mapping(source = "pet.owner.id", target = "petOwnerId")
     VisitDto toDto(Visit visit);
 
     @InheritConfiguration(name = "toEntity")
