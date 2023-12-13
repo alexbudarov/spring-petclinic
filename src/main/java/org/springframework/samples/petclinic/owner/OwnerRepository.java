@@ -15,14 +15,14 @@
  */
 package org.springframework.samples.petclinic.owner;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * Repository class for <code>Owner</code> domain objects All method names are compliant
@@ -35,7 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Sam Brannen
  * @author Michael Isvy
  */
-public interface OwnerRepository extends Repository<Owner, Integer> {
+public interface OwnerRepository extends Repository<Owner, Integer>/*, ListCrudRepository<Owner, Integer>*/ {
 
 	/**
 	 * Retrieve all {@link PetType}s from the data store.
@@ -79,4 +79,5 @@ public interface OwnerRepository extends Repository<Owner, Integer> {
 	@Transactional(readOnly = true)
 	Page<Owner> findAll(Pageable pageable);
 
+	List<Owner> findAllById(Iterable<Integer> ids);
 }
