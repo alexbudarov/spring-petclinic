@@ -80,4 +80,9 @@ public interface OwnerRepository extends Repository<Owner, Integer>/*, ListCrudR
 	Page<Owner> findAll(Pageable pageable);
 
 	List<Owner> findAllById(Iterable<Integer> ids);
+
+	@Query("""
+			select o from Owner o
+			where upper(o.firstName) like upper(concat(?1, '%')) or upper(o.lastName) like upper(concat(?1, '%'))""")
+	Page<Owner> findByFirstOrLastName(String name, Pageable pageable);
 }

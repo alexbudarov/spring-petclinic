@@ -1,5 +1,6 @@
 package org.springframework.samples.petclinic.owner;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -40,12 +41,21 @@ public class OwnerRestController {
 			return ResponseEntity.ok(dtoList);
 		}
 
+		// handle custom searchString
+		if (filter.searchString() != null) {
+			Page<Owner> page = ownerRepository.findByFirstOrLastName(filter.searchString(), pageable);
+			return raProtocolUtil.convertToResponseEntity(page, ownerMapper::toDto);
+		}
+
 		Page<Owner> page = ownerRepository.findAll(pageable);
 		return raProtocolUtil.convertToResponseEntity(page, ownerMapper::toDto);
 	}
 
 	public record OwnerListFilter(
-		List<Integer> id
+		List<Integer> id,
+
+		@JsonProperty("q")
+		String searchString
 	) {
 	}
 }
