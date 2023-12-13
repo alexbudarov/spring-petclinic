@@ -1,8 +1,10 @@
-import { AutocompleteInput, DateInput, ReferenceInput, SimpleForm, TextInput, Title, minValue, required } from "react-admin"
+import { AutocompleteInput, DateInput, ReferenceInput, SimpleForm, TextInput, Title, minValue, required, useDataProvider } from "react-admin"
 import { Typography, Stack, Chip } from "@mui/material"
 import { useFormContext } from "react-hook-form";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
+import { CustomDataProvider } from "../../../dataProvider";
+import { useQuery } from 'react-query';
 
 export const VisitRequest = () => {
     return <>
@@ -74,7 +76,32 @@ const tomorrowDateStr = () => {
 }
 
 function DateBlock() {
+    const { watch } = useFormContext();
+    const specialtyIdValue = watch('specialtyId', null);
+    const dateValue = watch('date', null);
+    const parsedDate = dateValue ? parseDate(dateValue) : null;
+
     const [checkStatus, setCheckStatus] = useState<'available' | 'unavailable' | null>(null);
+
+    const dataProvider = useDataProvider<CustomDataProvider>();
+
+    useQuery({
+        queryKey: ['checkAvailability', specialtyIdValue, parsedDate],
+        queryFn: async () => {
+            if (specialtyIdValue && parsedDate) {
+                return await dataProvider.checkAvailability(specialtyIdValue, parsedDate!!);
+            } else {
+                return null;
+            }
+        },
+
+        onSuccess: (result) => {
+            setCheckStatus(result === null ? null : (result ? 'available' : 'unavailable'));
+        },
+        onError: () => {
+            setCheckStatus(null);
+        }
+    });
     
     return (
         <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
@@ -90,4 +117,8 @@ function DateBlock() {
             }
         </Stack>
     );
+}
+
+function parseDate(dateStr: string) {
+    return dayjs(dateStr);
 }
