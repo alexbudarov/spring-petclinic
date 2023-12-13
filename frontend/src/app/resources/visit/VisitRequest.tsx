@@ -1,7 +1,7 @@
 import { AutocompleteInput, DateInput, ReferenceInput, SimpleForm, TextInput, Title, minValue, required } from "react-admin"
 import { Typography, Stack, Chip } from "@mui/material"
 import { useFormContext } from "react-hook-form";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 
 export const VisitRequest = () => {
@@ -74,14 +74,20 @@ const tomorrowDateStr = () => {
 }
 
 function DateBlock() {
+    const [checkStatus, setCheckStatus] = useState<'available' | 'unavailable' | null>(null);
+    
     return (
         <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
             <DateInput 
                 source="date" 
                 validate={[required(), minValue(tomorrowDateStr(), "Must be in the future")]} 
             />
-            <Chip label="Doctor is available" color="success"/>
-            <Chip label="Doctor isn't available for this date" color="warning"/>
+            {checkStatus === 'available' &&
+                <Chip label="Doctor is available" color="success"/>
+            }
+            {checkStatus === 'unavailable' &&
+                <Chip label="Doctor isn't available for this date" color="warning"/>
+            }
         </Stack>
     );
 }
