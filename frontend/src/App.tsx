@@ -2,6 +2,7 @@ import {
   Admin,
   Resource,
   ListGuesser,
+  CustomRoutes,
 } from "react-admin";
 import { dataProvider } from "./dataProvider";
 import { ownerRecordRepresentation } from "./app/functions/ownerRecordRepresentation";
@@ -11,9 +12,12 @@ import { PetCreate } from "./app/resources/pet/PetCreate";
 import { VisitList } from "./app/resources/visit/VisitList";
 import { VisitShow } from "./app/resources/visit/VisitShow";
 import { vetRecordRepresentation } from "./app/functions/vetRecordRepresentation";
+import { Route } from "react-router-dom";
+import { AppLayout } from "./AppLayout";
+import { VisitRequest } from "./app/resources/visit/VisitRequest";
 
 export const App = () => (
-  <Admin dataProvider={dataProvider}>
+  <Admin dataProvider={dataProvider} layout={AppLayout}>
     <Resource
       name="pet-type"
       list={ListGuesser}
@@ -40,5 +44,8 @@ export const App = () => (
       name="vet"
       recordRepresentation={vetRecordRepresentation}
     />    
+    <CustomRoutes>
+      <Route path="/visit/request" element={<VisitRequest />} />
+    </CustomRoutes>
   </Admin>
 );
