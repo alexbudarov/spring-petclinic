@@ -15,6 +15,9 @@ export const VisitList = () => {
           <TextField source="description" />
           <ReferenceField source="assignedVetId" reference="vet" sortBy="assignedVet.firstName"/>
           <ReferenceField label="Owner name" source="petOwnerId" reference="owner" sortable={false} link={false} />
+          <ReferenceField label="Owner telephone" source="petOwnerId" reference="owner" sortable={false} link={false}>
+            <TextField source="telephone" />
+          </ReferenceField>
           <ShowButton />
         </Datagrid>
       </List>
