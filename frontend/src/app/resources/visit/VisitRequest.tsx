@@ -16,6 +16,12 @@ export const VisitRequest = () => {
             </Typography>
             <OwnerDropdown />
             <PetDropdown />
+            <ReferenceInput source="specialtyId" reference="specialty">
+                <AutocompleteInput
+                    fullWidth
+                    validate={required()}
+                />
+            </ReferenceInput>            
             <DateInput source="date" validate={[required(), minValue(tomorrowDateStr(), "Must be in the future")]} />
             <TextInput source="description" helperText="e.g. Vaccination" fullWidth validate={required()} />
         </SimpleForm>
