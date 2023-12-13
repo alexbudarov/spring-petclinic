@@ -1,4 +1,4 @@
-import { Datagrid, DateField, DateInput, FunctionField, List, NumberField, ReferenceField, ReferenceInput, ReferenceOneField, ShowButton, TextField, TextInput } from "react-admin"
+import { Datagrid, DateField, DateInput, List, NumberField, ReferenceField, ShowButton, TextField, TextInput } from "react-admin"
 
 const filters = [
   <TextInput label="Description" source="description" />,
@@ -10,8 +10,8 @@ export const VisitList = () => {
   return (
       <List filters={filters}>
         <Datagrid bulkActionButtons={false}>
-          <NumberField source="petId" />
-          <DateField source="date" />
+          <ReferenceField source="petId" reference="pet" sortBy="pet.name"/>
+          <DateField source="date" options={{ dateStyle: 'medium' }} />
           <TextField source="description" />
           <NumberField source="assignedVetId" />
           <ShowButton />
