@@ -10,15 +10,15 @@ const apiUrl = import.meta.env.VITE_SIMPLE_REST_URL;
 const httpClient = fetchUtils.fetchJson;
 
 export interface CustomDataProvider extends DataProvider {
-  checkAvailability: (vetId: number, date: Dayjs) => Promise<boolean>;
+  checkAvailability: (specialtyId: number, date: Dayjs) => Promise<boolean>;
     // custom endpoints 
 }
 
 export const dataProvider: CustomDataProvider = {
     ...baseDataProvider,
 
-    checkAvailability: function (vetId: number, date: Dayjs): Promise<boolean> {
-      return httpClient(`/rest/visit/check-availability?vetId=${vetId}&date=${formatDate(date)}`)
+    checkAvailability: function (specialtyId: number, date: Dayjs): Promise<boolean> {
+      return httpClient(`/rest/visit/check-availability?specialtyId=${specialtyId}&date=${formatDate(date)}`)
         .then(({ json }) => (json));
     }
 
