@@ -6,7 +6,7 @@ export const VisitShow = () => (
       <ReferenceField source="petId" reference="pet"/>
       <DateField source="date" options={{dateStyle: 'long'}} />
       <TextField source="description" />
-      <NumberField source="assignedVetId" />
+      <ReferenceField source="assignedVetId" reference="vet" />
     </SimpleShowLayout>
   </Show>
 );

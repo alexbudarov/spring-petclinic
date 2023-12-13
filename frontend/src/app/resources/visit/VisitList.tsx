@@ -13,7 +13,7 @@ export const VisitList = () => {
           <ReferenceField source="petId" reference="pet" sortBy="pet.name"/>
           <DateField source="date" options={{ dateStyle: 'medium' }} />
           <TextField source="description" />
-          <NumberField source="assignedVetId" />
+          <ReferenceField source="assignedVetId" reference="vet" sortBy="assignedVet.firstName"/>
           <ShowButton />
         </Datagrid>
       </List>
