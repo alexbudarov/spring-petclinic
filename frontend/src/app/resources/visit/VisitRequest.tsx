@@ -1,7 +1,7 @@
-import { AutocompleteInput, DateInput, Identifier, ReferenceInput, SaveButton, SimpleForm, TextInput, Title, Toolbar, minValue, required, useCreatePath, useDataProvider, useNotify } from "react-admin"
+import { AutocompleteInput, Button, DateInput, Identifier, ReferenceInput, SaveButton, SimpleForm, TextInput, Title, Toolbar, minValue, required, useCreatePath, useDataProvider, useNotify } from "react-admin"
 import { Typography, Stack, Chip, Alert } from "@mui/material"
 import { useFormContext } from "react-hook-form";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { CustomDataProvider } from "../../../dataProvider";
 import { useQuery, useMutation } from 'react-query';
@@ -169,10 +169,24 @@ function parseDate(dateStr: string) {
 }
 
 const CustomToolbar = (creationResult: VisitCreationResult) => {
+    const { reset } = useFormContext();
+
+    // stack size exceeded if not wrapped into useCallback
+     const resetAllValues = useCallback(() => {
+         reset();
+     }, [reset]);
+
     return (
         <Toolbar>
             <SaveButton
                 label="Submit"
+            />
+            <Button
+                label="Reset"
+                size="medium"
+                sx={{ marginLeft: "1em" }}
+                variant="outlined"
+                onClick={resetAllValues}
             />
             <RequestResultPanel {...creationResult} />
         </Toolbar>
