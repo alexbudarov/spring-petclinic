@@ -1,12 +1,12 @@
 package org.springframework.samples.petclinic.owner;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
-import org.springframework.samples.petclinic.rest.rasupport.*;
+import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
+import org.springframework.samples.petclinic.rest.rasupport.SpecificationFilterConverter;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -16,52 +16,41 @@ import java.util.List;
 public class OwnerRestController {
 
 	private final OwnerRepository ownerRepository;
-	private final RaProtocolUtil raProtocolUtil;
 	private final OwnerMapper ownerMapper;
 
-	private final SpecificationFilterConverter specificationFilterConverter;
-
 	public OwnerRestController(OwnerRepository ownerRepository,
-                               RaProtocolUtil raProtocolUtil,
-                               OwnerMapper ownerMapper,
-							   SpecificationFilterConverter specificationFilterConverter) {
+                               OwnerMapper ownerMapper) {
 		this.ownerRepository = ownerRepository;
-		this.raProtocolUtil = raProtocolUtil;
 		this.ownerMapper = ownerMapper;
-		this.specificationFilterConverter = specificationFilterConverter;
 	}
 
-	@GetMapping
-	public ResponseEntity<List<OwnerDto>> ownerList(@RaFilter OwnerListFilter filter,
-													@RaRangeParam @RaSortParam Pageable pageable) {
+	@GetMapping(path="/by"/*, params = "id"*/)
+	public List<OwnerDto> ownerListById(@RequestParam List<Integer> ids) {
+		var dtoList = ownerRepository.findAllById(ids)
+			.stream().map(ownerMapper::toDto)
+			.toList();
+		return dtoList;
+	}
 
-		if (filter.id() != null) { // getMany
-			var dtoList = ownerRepository.findAllById(filter.id())
-					.stream().map(ownerMapper::toDto)
-					.toList();
-			return ResponseEntity.ok(dtoList);
-		}
-
-		// handle custom searchString
-		if (filter.searchString() != null) {
-			Page<Owner> page = ownerRepository.findByFirstOrLastName(filter.searchString(), pageable);
-			return raProtocolUtil.convertToResponseEntity(page, ownerMapper::toDto);
+	@GetMapping/*(params="!id")*/
+	public Page<OwnerDto> ownerList(OwnerListFilter filter, Pageable pageable) {
+		// handle custom search string
+		if (filter.q() != null) {
+			Page<Owner> page = ownerRepository.findByFirstOrLastName(filter.q(), pageable);
+			return page.map(ownerMapper::toDto);
 		}
 
 		if (filter.telephone() != null) {
 			Page<Owner> page = ownerRepository.findByTelephoneStartsWith(filter.telephone(), pageable);
-			return raProtocolUtil.convertToResponseEntity(page, ownerMapper::toDto);
+			return page.map(ownerMapper::toDto);
 		}
 
 		Page<Owner> page = ownerRepository.findAll(pageable);
-		return raProtocolUtil.convertToResponseEntity(page, ownerMapper::toDto);
+		return page.map(ownerMapper::toDto);
 	}
 
 	public record OwnerListFilter(
-		List<Integer> id,
-
-		@JsonProperty("q")
-		String searchString,
+		String q,
 
 		String telephone
 	) {
