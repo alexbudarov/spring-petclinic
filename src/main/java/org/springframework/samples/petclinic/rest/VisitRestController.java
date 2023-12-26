@@ -10,7 +10,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.owner.*;
-import org.springframework.samples.petclinic.rest.rasupport.*;
+import org.springframework.samples.petclinic.rest.rasupport.SpecFilterCondition;
+import org.springframework.samples.petclinic.rest.rasupport.SpecFilterOperator;
+import org.springframework.samples.petclinic.rest.rasupport.SpecificationFilterConverter;
 import org.springframework.samples.petclinic.vet.Specialty;
 import org.springframework.samples.petclinic.vet.SpecialtyRepository;
 import org.springframework.samples.petclinic.vet.Vet;
@@ -18,7 +20,6 @@ import org.springframework.samples.petclinic.vet.VetRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -36,16 +37,13 @@ public class VisitRestController {
 
     private final SpecificationFilterConverter specificationFilterConverter;
 
-    private final RaProtocolUtil raProtocolUtil;
-
     public VisitRestController(VisitService visitService,
                                VetRepository vetRepository,
                                PetRepository petRepository,
                                SpecialtyRepository specialtyRepository,
                                VisitRepository visitRepository,
                                VisitMapper visitMapper,
-                               SpecificationFilterConverter specificationFilterConverter,
-                               RaProtocolUtil raProtocolUtil) {
+                               SpecificationFilterConverter specificationFilterConverter) {
         this.visitService = visitService;
         this.vetRepository = vetRepository;
         this.petRepository = petRepository;
@@ -53,7 +51,6 @@ public class VisitRestController {
         this.visitRepository = visitRepository;
         this.visitMapper = visitMapper;
         this.specificationFilterConverter = specificationFilterConverter;
-        this.raProtocolUtil = raProtocolUtil;
     }
 
     @GetMapping("/{id}")
@@ -63,13 +60,10 @@ public class VisitRestController {
     }
 
     @GetMapping
-    public ResponseEntity<List<VisitDto>> visitList(
-            @RaFilter VisitListFilter filter,
-            @RaRangeParam @RaSortParam Pageable pageable
-    ) {
+    public Page<VisitDto> visitList(@ModelAttribute VisitListFilter filter, Pageable pageable) {
         Specification<Visit> specification = specificationFilterConverter.convert(filter);
         Page<Visit> page = visitRepository.findAll(specification, pageable);
-        return raProtocolUtil.convertToResponseEntity(page, visitMapper::toDto);
+        return page.map(visitMapper::toDto);
     }
 
     @GetMapping("/check-availability")

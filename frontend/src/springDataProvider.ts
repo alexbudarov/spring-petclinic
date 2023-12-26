@@ -45,7 +45,7 @@ export default (
 
     getMany: (resource, params) => {
         const ids = params.ids.join(",");
-        const url = `${apiUrl}/${resource}/by?ids=${ids}`;
+        const url = `${apiUrl}/${resource}/by-ids?ids=${ids}`;
         return httpClient(url).then(({ json }) => ({ data: json }));
     },
 

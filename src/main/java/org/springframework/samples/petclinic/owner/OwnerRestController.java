@@ -24,7 +24,7 @@ public class OwnerRestController {
 		this.ownerMapper = ownerMapper;
 	}
 
-	@GetMapping(path="/by"/*, params = "id"*/)
+	@GetMapping(path="/by-ids"/*, params = "id"*/)
 	public List<OwnerDto> ownerListById(@RequestParam List<Integer> ids) {
 		var dtoList = ownerRepository.findAllById(ids)
 			.stream().map(ownerMapper::toDto)

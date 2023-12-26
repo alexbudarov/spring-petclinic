@@ -1,6 +1,5 @@
 package org.springframework.samples.petclinic.owner;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,17 +17,14 @@ public class PetRestController {
 
 	private final PetRepository petRepository;
 	private final PetMapper petMapper;
-	private final RaProtocolUtil raProtocolUtil;
 	private final RaPatchUtil raPatchUtil;
 	private final SpecificationFilterConverter specificationFilterConverter;
 
 	public PetRestController(PetRepository petRepository,
-                             RaProtocolUtil raProtocolUtil,
                              PetMapper petMapper,
                              RaPatchUtil raPatchUtil,
                              SpecificationFilterConverter specificationFilterConverter) {
 		this.petRepository = petRepository;
-		this.raProtocolUtil = raProtocolUtil;
 		this.petMapper = petMapper;
 		this.raPatchUtil = raPatchUtil;
 		this.specificationFilterConverter = specificationFilterConverter;
@@ -40,21 +36,19 @@ public class PetRestController {
 		return ResponseEntity.of(petOptional.map(petMapper::toDto));
 	}
 
-	@GetMapping
-	public ResponseEntity<List<PetDto>> petList(@RaFilter PetFilter filter,
-												@RaRangeParam Pageable pageable) { // only paging, as example
-		if (filter.id() != null) { // getMany
-			var dtoList = petRepository.findAllById(filter.id())
-					.stream()
-					.map(petMapper::toDto)
-					.toList();
-			return ResponseEntity.ok(dtoList);
-		}
+	@GetMapping(path="/by-ids")
+	public List<PetDto> petListByIds(@RequestParam List<Integer> ids) {
+        return petRepository.findAllById(ids)
+			.stream()
+			.map(petMapper::toDto)
+			.toList();
+	}
 
+	@GetMapping
+	public Page<PetDto> petList(PetFilter filter, Pageable pageable) { // I would like to skip paging, but it has it
 		Specification<Pet> specification = specificationFilterConverter.convert(filter);
 		Page<Pet> page = petRepository.findAll(specification, pageable);
-
-		return raProtocolUtil.convertToResponseEntity(page, petMapper::toDto);
+		return page.map(petMapper::toDto);
 	}
 
 	@PostMapping
@@ -100,11 +94,8 @@ public class PetRestController {
 	}
 
 	public record PetFilter(
-			List<Integer> id,
-
-			@JsonProperty("q")
 			@SpecFilterCondition(property = "name", operator = SpecFilterOperator.STARTS_WITH, ignoreCase = true)
-			String searchString,
+			String q,
 
 			@SpecFilterCondition(property = "owner.id", operator = SpecFilterOperator.EQUALS)
 			Integer ownerId

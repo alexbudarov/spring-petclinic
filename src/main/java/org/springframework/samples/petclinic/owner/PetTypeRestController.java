@@ -25,8 +25,8 @@ public class PetTypeRestController {
         this.specificationFilterConverter = specificationFilterConverter;
     }
 
-	@GetMapping(path="/by")
-	public List<PetType> getListById(List<Integer> ids) {
+	@GetMapping(path="/by-ids")
+	public List<PetType> getListById(@RequestParam List<Integer> ids) {
 		List<PetType> list = petTypeRepository.findAllById(ids);
 		return list;
 	}
