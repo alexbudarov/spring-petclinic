@@ -10,9 +10,6 @@ export default (
         const { page, perPage } = params.pagination;
         const { field, order } = params.sort;
 
-        const rangeStart = (page - 1) * perPage;
-        const rangeEnd = page * perPage - 1;
-
         const query = {
             sort: field + "," + order,
             page: page - 1,
@@ -20,17 +17,7 @@ export default (
             ...params.filter
         };
         const url = `${apiUrl}/${resource}?${stringify(query)}`;
-        const options =
-            countHeader === 'Content-Range'
-                ? {
-                      // Chrome doesn't return `Content-Range` header if no `Range` is provided in the request.
-                      headers: new Headers({
-                          Range: `${resource}=${rangeStart}-${rangeEnd}`,
-                      }),
-                  }
-                : {};
-
-        return httpClient(url, options).then(({ json }) => {
+        return httpClient(url).then(({ json }) => {
             return {
                 data: json.content,
                 total: json.totalElements
@@ -53,43 +40,18 @@ export default (
         const { page, perPage } = params.pagination;
         const { field, order } = params.sort;
 
-        const rangeStart = (page - 1) * perPage;
-        const rangeEnd = page * perPage - 1;
-
         const query = {
-            sort: JSON.stringify([field, order]),
-            range: JSON.stringify([(page - 1) * perPage, page * perPage - 1]),
-            filter: JSON.stringify({
-                ...params.filter,
-                [params.target]: params.id,
-            }),
+            sort: field + "," + order,
+            page: page - 1,
+            size: perPage,
+            ...params.filter,
+            [params.target]: params.id
         };
         const url = `${apiUrl}/${resource}?${stringify(query)}`;
-        const options =
-            countHeader === 'Content-Range'
-                ? {
-                      // Chrome doesn't return `Content-Range` header if no `Range` is provided in the request.
-                      headers: new Headers({
-                          Range: `${resource}=${rangeStart}-${rangeEnd}`,
-                      }),
-                  }
-                : {};
-
-        return httpClient(url, options).then(({ headers, json }) => {
-            if (!headers.has(countHeader)) {
-                throw new Error(
-                    `The ${countHeader} header is missing in the HTTP Response. The simple REST data provider expects responses for lists of resources to contain this header with the total number of results to build the pagination. If you are using CORS, did you declare ${countHeader} in the Access-Control-Expose-Headers header?`
-                );
-            }
+        return httpClient(url).then(({ json }) => {
             return {
-                data: json,
-                total:
-                    countHeader === 'Content-Range'
-                        ? parseInt(
-                              headers.get('content-range')?.split('/').pop() || '',
-                              10
-                          )
-                        : parseInt(headers.get(countHeader.toLowerCase()) || ''),
+                data: json.content,
+                total: json.totalElements
             };
         });
     },
