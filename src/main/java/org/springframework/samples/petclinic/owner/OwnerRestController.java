@@ -2,12 +2,7 @@ package org.springframework.samples.petclinic.owner;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.samples.petclinic.rest.rasupport.RaProtocolUtil;
-import org.springframework.samples.petclinic.rest.rasupport.SpecificationFilterConverter;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -33,7 +28,7 @@ public class OwnerRestController {
 	}
 
 	@GetMapping/*(params="!id")*/
-	public Page<OwnerDto> ownerList(OwnerListFilter filter, Pageable pageable) {
+	public Page<OwnerDto> ownerList(@ModelAttribute OwnerListFilter filter, Pageable pageable) {
 		// handle custom search string
 		if (filter.q() != null) {
 			Page<Owner> page = ownerRepository.findByFirstOrLastName(filter.q(), pageable);
@@ -45,6 +40,11 @@ public class OwnerRestController {
 			return page.map(ownerMapper::toDto);
 		}
 
+		/*if (filter.visitId() != null) {
+			Page<Owner> page = ownerRepository.findByVisitId(filter.visitId(), pageable);
+			return page.map(ownerMapper::toDto);
+		}*/
+
 		Page<Owner> page = ownerRepository.findAll(pageable);
 		return page.map(ownerMapper::toDto);
 	}
@@ -53,6 +53,7 @@ public class OwnerRestController {
 		String q,
 
 		String telephone
+		/*,Long visitId*/
 	) {
 	}
 }

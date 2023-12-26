@@ -45,7 +45,7 @@ public class PetRestController {
 	}
 
 	@GetMapping
-	public Page<PetDto> petList(PetFilter filter, Pageable pageable) { // I would like to skip paging, but it has it
+	public Page<PetDto> petList(@ModelAttribute PetFilter filter, Pageable pageable) { // I would like to skip paging, but it has it
 		Specification<Pet> specification = specificationFilterConverter.convert(filter);
 		Page<Pet> page = petRepository.findAll(specification, pageable);
 		return page.map(petMapper::toDto);

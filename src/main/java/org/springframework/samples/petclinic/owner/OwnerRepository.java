@@ -87,4 +87,12 @@ public interface OwnerRepository extends Repository<Owner, Integer>/*, ListCrudR
 	Page<Owner> findByFirstOrLastName(String name, Pageable pageable);
 
 	Page<Owner> findByTelephoneStartsWith(String telephone, Pageable pageable);
+
+	/*@Query("""
+			select o from Owner o
+			join o.pets p
+			join p.visits v
+			where v.id = :visitId""")
+	Page<Owner> findByVisitId(Long visitId, Pageable pageable);*/
+
 }
