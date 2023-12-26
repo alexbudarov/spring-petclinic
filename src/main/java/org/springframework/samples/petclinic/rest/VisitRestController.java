@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.owner.*;
+import org.springframework.samples.petclinic.rest.rasupport.RaPatchUtil;
 import org.springframework.samples.petclinic.rest.rasupport.SpecFilterCondition;
 import org.springframework.samples.petclinic.rest.rasupport.SpecFilterOperator;
 import org.springframework.samples.petclinic.rest.rasupport.SpecificationFilterConverter;
@@ -20,6 +21,8 @@ import org.springframework.samples.petclinic.vet.VetRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -37,13 +40,16 @@ public class VisitRestController {
 
     private final SpecificationFilterConverter specificationFilterConverter;
 
-    public VisitRestController(VisitService visitService,
+	private final RaPatchUtil raPatchUtil;
+
+	public VisitRestController(VisitService visitService,
                                VetRepository vetRepository,
                                PetRepository petRepository,
                                SpecialtyRepository specialtyRepository,
                                VisitRepository visitRepository,
                                VisitMapper visitMapper,
-                               SpecificationFilterConverter specificationFilterConverter) {
+                               SpecificationFilterConverter specificationFilterConverter,
+							   RaPatchUtil raPatchUtil) {
         this.visitService = visitService;
         this.vetRepository = vetRepository;
         this.petRepository = petRepository;
@@ -51,7 +57,8 @@ public class VisitRestController {
         this.visitRepository = visitRepository;
         this.visitMapper = visitMapper;
         this.specificationFilterConverter = specificationFilterConverter;
-    }
+		this.raPatchUtil = raPatchUtil;
+	}
 
     @GetMapping("/{id}")
     public ResponseEntity<VisitDto> findById(@PathVariable Integer id) {
@@ -65,6 +72,42 @@ public class VisitRestController {
         Page<Visit> page = visitRepository.findAll(specification, pageable);
         return page.map(visitMapper::toDto);
     }
+
+	@PutMapping
+	public ResponseEntity<List<Integer>> update(@RequestParam List<Integer> ids, @RequestBody String patchJson) {
+		List<Visit> updatedEntities = new ArrayList<>();
+		for (Integer id: ids) {
+			Visit entity = visitRepository.findById(id).orElse(null);
+			if (entity == null) {
+				continue;
+			}
+
+			VisitDto dto = visitMapper.toDto(entity);
+			dto = raPatchUtil.patchAndValidate(dto, patchJson);
+
+			if (dto.id() != null && !dto.id().equals(id)) { // attempt to change entity id
+				return ResponseEntity.badRequest().build();
+			}
+
+			visitMapper.update(dto, entity);
+
+			// fix for mapper problem
+			if (entity.getAssignedVet() != null && entity.getAssignedVet().getId() == null) {
+				entity.setAssignedVet(null);
+			}
+			if (entity.getPet() != null && entity.getPet().getId() == null) {
+				entity.setPet(null);
+			}
+			// end of fix
+
+			updatedEntities.add(entity);
+		}
+
+		visitRepository.saveAll(updatedEntities);
+
+		List<Integer> updatedIds = updatedEntities.stream().map(e -> e.getId()).toList();
+		return ResponseEntity.ok(updatedIds);
+	}
 
     @GetMapping("/check-availability")
     public ResponseEntity<Boolean> isDateAvailable(@RequestParam("specialtyId") Integer specialtyId,

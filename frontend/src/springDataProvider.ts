@@ -62,16 +62,13 @@ export default (
             body: JSON.stringify(params.data),
         }).then(({ json }) => ({ data: json })),
 
-    // simple-rest doesn't handle provide an updateMany route, so we fallback to calling update n times instead
-    updateMany: (resource, params) =>
-        Promise.all(
-            params.ids.map(id =>
-                httpClient(`${apiUrl}/${resource}/${id}`, {
-                    method: 'PUT',
-                    body: JSON.stringify(params.data),
-                })
-            )
-        ).then(responses => ({ data: responses.map(({ json }) => json.id) })),
+    updateMany: (resource, params) => {
+        const idsValue = params.ids.join(",");
+        return httpClient(`${apiUrl}/${resource}?ids=${idsValue}`, {
+            method: 'PUT',
+            body: JSON.stringify(params.data),
+        }).then(({ json }) => ({ data: json }))
+    },
 
     create: (resource, params) =>
         httpClient(`${apiUrl}/${resource}`, {

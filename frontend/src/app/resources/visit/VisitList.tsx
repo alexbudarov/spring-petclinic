@@ -1,4 +1,4 @@
-import { Datagrid, DateField, DateInput, List, NumberField, ReferenceField, ReferenceManyField, ReferenceOneField, ShowButton, TextField, TextInput } from "react-admin"
+import { BulkUpdateButton, Datagrid, DateField, DateInput, List, NumberField, ReferenceField, ReferenceManyField, ReferenceOneField, ShowButton, TextField, TextInput } from "react-admin"
 
 const filters = [
   <TextInput label="Description" source="description" />,
@@ -6,10 +6,40 @@ const filters = [
   <DateInput label="Date before" source="dateBefore" />,
 ]
 
+const BulkActionButtons = () => {
+    return <>
+        <BulkUpdateButton label="Postpone Tomorrow"
+            mutationMode="pessimistic"
+            confirmTitle="Postpone Visits"
+            confirmContent="Selected visits will be postponed till tomorrow."
+            data={{
+                date: getTomorrow()
+            }}
+        />
+        <BulkUpdateButton label="Clear Date"
+            mutationMode="pessimistic"
+            confirmTitle="Clear Date"
+            confirmContent="Date for selected visits will be cleared"
+            data={{
+                date: null
+            }}
+        />
+        <BulkUpdateButton label="Change description"
+            mutationMode="pessimistic"
+            confirmTitle="Change Description"
+            confirmContent="Description for selected visits will be changed"
+            data={{
+                description: ("Description " + new Date().toTimeString())
+            }}
+        />
+    </>
+}
+
 export const VisitList = () => {
   return (
       <List filters={filters}>
-        <Datagrid bulkActionButtons={false}>
+        <Datagrid bulkActionButtons={<BulkActionButtons />}>
+          <TextField source="id" />
           <ReferenceField source="petId" reference="pet" sortBy="pet.name"/>
           <DateField source="date" options={{ dateStyle: 'medium' }} />
           <TextField source="description" />
@@ -31,4 +61,10 @@ export const VisitList = () => {
         </Datagrid>
       </List>
   );
+}
+
+function getTomorrow(): Date {
+  let date = new Date();
+  date.setDate(date.getDate() + 1);
+  return date;
 }
