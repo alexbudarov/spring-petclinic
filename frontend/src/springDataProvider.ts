@@ -3,8 +3,7 @@ import { DataProvider, fetchUtils } from "react-admin";
 
 export default (
     apiUrl: string,
-    httpClient = fetchUtils.fetchJson,
-    countHeader: string = 'Content-Range'
+    httpClient = fetchUtils.fetchJson
 ): DataProvider => ({
     getList: (resource, params) => {
         const { page, perPage } = params.pagination;
