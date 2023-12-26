@@ -91,15 +91,6 @@ public class VisitRestController {
 
 			visitMapper.update(dto, entity);
 
-			// fix for mapper problem
-			if (entity.getAssignedVet() != null && entity.getAssignedVet().getId() == null) {
-				entity.setAssignedVet(null);
-			}
-			if (entity.getPet() != null && entity.getPet().getId() == null) {
-				entity.setPet(null);
-			}
-			// end of fix
-
 			updatedEntities.add(entity);
 		}
 
