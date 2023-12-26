@@ -87,18 +87,10 @@ export default (
             }),
         }).then(({ json }) => ({ data: json })),
 
-    // simple-rest doesn't handle filters on DELETE route, so we fallback to calling DELETE n times instead
-    deleteMany: (resource, params) =>
-        Promise.all(
-            params.ids.map(id =>
-                httpClient(`${apiUrl}/${resource}/${id}`, {
-                    method: 'DELETE',
-                    headers: new Headers({
-                        'Content-Type': 'text/plain',
-                    }),
-                })
-            )
-        ).then(responses => ({
-            data: responses.map(({ json }) => json.id),
-        })),
+    deleteMany: (resource, params) => {
+        const idsValue = params.ids.join(",");
+        return httpClient(`${apiUrl}/${resource}?ids=${idsValue}`, {
+            method: 'DELETE'
+        }).then(({ json }) => ({ data: json }))
+    }
 });

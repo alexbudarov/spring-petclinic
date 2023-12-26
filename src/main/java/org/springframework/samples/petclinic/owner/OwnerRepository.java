@@ -81,6 +81,8 @@ public interface OwnerRepository extends Repository<Owner, Integer>/*, ListCrudR
 
 	List<Owner> findAllById(Iterable<Integer> ids);
 
+	void deleteAllById(Iterable<Integer> ids);
+
 	@Query("""
 			select o from Owner o
 			where upper(o.firstName) like upper(concat(?1, '%')) or upper(o.lastName) like upper(concat(?1, '%'))""")

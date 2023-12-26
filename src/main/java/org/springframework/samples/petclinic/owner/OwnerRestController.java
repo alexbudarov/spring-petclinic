@@ -49,6 +49,15 @@ public class OwnerRestController {
 		return page.map(ownerMapper::toDto);
 	}
 
+	@DeleteMapping
+	public List<Integer> delete(@RequestParam List<Integer> ids) {
+		List<Owner> existingEntities = ownerRepository.findAllById(ids);
+
+		ownerRepository.deleteAllById(ids);
+
+		return existingEntities.stream().map(e -> e.getId()).toList();
+	}
+
 	public record OwnerListFilter(
 		String q,
 
