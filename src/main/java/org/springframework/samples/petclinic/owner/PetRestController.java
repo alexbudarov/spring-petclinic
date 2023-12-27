@@ -2,8 +2,10 @@ package org.springframework.samples.petclinic.owner;
 
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.rest.rasupport.RaPatchUtil;
 import org.springframework.samples.petclinic.rest.rasupport.SpecFilterCondition;
@@ -49,7 +51,9 @@ public class PetRestController {
 	}
 
 	@GetMapping
-	public Page<PetDto> petList(@ModelAttribute PetFilter filter, Pageable pageable) { // I would like to skip paging, but it has it
+	public Page<PetDto> petList(@ModelAttribute PetFilter filter, @PageableDefault(size = 5) Pageable pageable) { // no way to declare "no sorting"
+		pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize()); // clear possible sorting params
+
 		Specification<Pet> specification = specificationFilterConverter.convert(filter);
 		Page<Pet> page = petRepository.findAll(specification, pageable);
 		return page.map(petMapper::toDto);
