@@ -22,6 +22,14 @@ export default (
                     data: json.content,
                     total: json.totalElements
                 };
+            } else if (json.content !== undefined && json.first !== undefined && json.last !== undefined) { // Slice
+                return {
+                    data: json.content,
+                    pageInfo: {
+                        hasNextPage: !json.last,
+                        hasPreviousPage: !json.first
+                    }
+                }
             } else if (Array.isArray(json)) { // List
                 return {
                     data: json,
@@ -62,6 +70,14 @@ export default (
                     data: json.content,
                     total: json.totalElements
                 };
+            } else if (json.content !== undefined && json.first !== undefined && json.last !== undefined) { // Slice
+                return {
+                    data: json.content,
+                    pageInfo: {
+                        hasNextPage: !json.last,
+                        hasPreviousPage: !json.first
+                    }
+                }
             } else if (Array.isArray(json)) { // List
                 return {
                     data: json,

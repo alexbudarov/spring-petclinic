@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -51,11 +52,19 @@ public class PetRestController {
 	}
 
 	@GetMapping
-	public Page<PetDto> petList(@ModelAttribute PetFilter filter, @PageableDefault(size = 5) Pageable pageable) { // no way to declare "no sorting"
+	public Slice<PetDto> petList(@ModelAttribute PetFilter filter, @PageableDefault(size = 5) Pageable pageable) { // no way to declare "no sorting"
 		pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize()); // clear possible sorting params
 
-		Specification<Pet> specification = specificationFilterConverter.convert(filter);
-		Page<Pet> page = petRepository.findAll(specification, pageable);
+		/*Specification<Pet> specification = specificationFilterConverter.convert(filter);
+		Slice<Pet> page = petRepository.findAll(specification, pageable);*/
+		Slice<Pet> page;
+		if (filter.q() != null) {
+			page = petRepository.findByNameStartsWithIgnoreCase(filter.q(), pageable);
+		} else if (filter.ownerId() != null) {
+			page = petRepository.findByOwner_Id(filter.ownerId(), pageable);
+		} else {
+			page = petRepository.findSlicedBy(pageable);
+		}
 		return page.map(petMapper::toDto);
 	}
 

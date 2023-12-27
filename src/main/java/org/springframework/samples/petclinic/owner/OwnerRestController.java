@@ -2,6 +2,7 @@ package org.springframework.samples.petclinic.owner;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,15 +29,15 @@ public class OwnerRestController {
 	}
 
 	@GetMapping/*(params="!id")*/
-	public Page<OwnerDto> ownerList(@ModelAttribute OwnerListFilter filter, Pageable pageable) {
+	public Slice<OwnerDto> ownerList(@ModelAttribute OwnerListFilter filter, Pageable pageable) {
 		// handle custom search string
 		if (filter.q() != null) {
-			Page<Owner> page = ownerRepository.findByFirstOrLastName(filter.q(), pageable);
+			Slice<Owner> page = ownerRepository.findByFirstOrLastName(filter.q(), pageable);
 			return page.map(ownerMapper::toDto);
 		}
 
 		if (filter.telephone() != null) {
-			Page<Owner> page = ownerRepository.findByTelephoneStartsWith(filter.telephone(), pageable);
+			Slice<Owner> page = ownerRepository.findByTelephoneStartsWith(filter.telephone(), pageable);
 			return page.map(ownerMapper::toDto);
 		}
 
@@ -45,7 +46,7 @@ public class OwnerRestController {
 			return page.map(ownerMapper::toDto);
 		}*/
 
-		Page<Owner> page = ownerRepository.findAll(pageable);
+		Slice<Owner> page = ownerRepository.findSlicedBy(pageable);
 		return page.map(ownerMapper::toDto);
 	}
 

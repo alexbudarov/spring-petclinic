@@ -17,6 +17,7 @@ package org.springframework.samples.petclinic.owner;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
@@ -86,9 +87,11 @@ public interface OwnerRepository extends Repository<Owner, Integer>/*, ListCrudR
 	@Query("""
 			select o from Owner o
 			where upper(o.firstName) like upper(concat(?1, '%')) or upper(o.lastName) like upper(concat(?1, '%'))""")
-	Page<Owner> findByFirstOrLastName(String name, Pageable pageable);
+	Slice<Owner> findByFirstOrLastName(String name, Pageable pageable);
 
-	Page<Owner> findByTelephoneStartsWith(String telephone, Pageable pageable);
+	Slice<Owner> findByTelephoneStartsWith(String telephone, Pageable pageable);
+
+	Slice<Owner> findSlicedBy(Pageable pageable);
 
 	/*@Query("""
 			select o from Owner o
