@@ -13,18 +13,26 @@ public interface VisitMapper {
     @Mapping(source = "pet.owner.id", target = "petOwnerId")
     VisitDto toDto(Visit visit);
 
-    @InheritConfiguration(name = "toEntity")
+    // @InheritConfiguration(name = "toEntity")
+	@Mapping(source = "petId", target = "pet")
+	@Mapping(source = "assignedVetId", target = "assignedVet")
     Visit update(VisitDto visitDto, @MappingTarget Visit visit);
 
-	@AfterMapping
-	default void clearEmptyReferences(@MappingTarget Visit visit) {
-		// workaround for https://github.com/mapstruct/mapstruct/issues/1166
-		if (visit.getAssignedVet() != null && visit.getAssignedVet().getId() == null) {
-			visit.setAssignedVet(null);
+	default Pet visitPet(Integer petId) {
+		if (petId == null) {
+			return null;
 		}
-		if (visit.getPet() != null && visit.getPet().getId() == null) {
-			visit.setPet(null);
-		}
+		Pet pet = new Pet();
+		pet.setId(petId);
+		return pet;
 	}
 
+	default Vet visitAssignedVet(Integer assignedVetId) {
+		if (assignedVetId == null) {
+			return null;
+		}
+		Vet vet = new Vet();
+		vet.setId(assignedVetId);
+		return vet;
+	}
 }
