@@ -8,6 +8,7 @@ INSERT INTO vets VALUES (default, 'Sharon', 'Jenkins');
 INSERT INTO specialties VALUES (default, 'radiology');
 INSERT INTO specialties VALUES (default, 'surgery');
 INSERT INTO specialties VALUES (default, 'dentistry');
+INSERT INTO specialties VALUES (default, 'pathology');
 
 INSERT INTO vet_specialties VALUES (2, 1);
 INSERT INTO vet_specialties VALUES (3, 2);

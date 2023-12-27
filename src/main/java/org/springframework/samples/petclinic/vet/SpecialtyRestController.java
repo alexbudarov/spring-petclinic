@@ -43,7 +43,10 @@ public class SpecialtyRestController {
 
     public record SpecialtyListFilter(
             @SpecFilterCondition(property = "name", operator = SpecFilterOperator.STARTS_WITH, ignoreCase = true)
-            String q
+            String q,
+
+			@SpecFilterCondition(property = "id", joinCollection = "vets")
+			Integer vetId
     ) {
     }
 }

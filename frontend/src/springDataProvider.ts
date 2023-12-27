@@ -17,10 +17,19 @@ export default (
         };
         const url = `${apiUrl}/${resource}?${stringify(query)}`;
         return httpClient(url).then(({ json }) => {
-            return {
-                data: json.content,
-                total: json.totalElements
-            };
+            if (json.content !== undefined && json.totalElements !== undefined) { // Page
+                return {
+                    data: json.content,
+                    total: json.totalElements
+                };
+            } else if (Array.isArray(json)) { // List
+                return {
+                    data: json,
+                    total: json.length
+                }
+            } else {
+                throw new Error("Unsupported getList() response: " + Object.keys(json));
+            }
         });
     },
 
@@ -48,10 +57,19 @@ export default (
         };
         const url = `${apiUrl}/${resource}?${stringify(query)}`;
         return httpClient(url).then(({ json }) => {
-            return {
-                data: json.content,
-                total: json.totalElements
-            };
+            if (json.content !== undefined && json.totalElements !== undefined) { // Page
+                return {
+                    data: json.content,
+                    total: json.totalElements
+                };
+            } else if (Array.isArray(json)) { // List
+                return {
+                    data: json,
+                    total: json.length
+                }
+            } else {
+                throw new Error("Unsupported getList() response: " + Object.keys(json));
+            }
         });
     },
 

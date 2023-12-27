@@ -15,6 +15,7 @@ import { vetRecordRepresentation } from "./app/functions/vetRecordRepresentation
 import { Route } from "react-router-dom";
 import { AppLayout } from "./AppLayout";
 import { VisitRequest } from "./app/resources/visit/VisitRequest";
+import { VetList } from "./app/resources/vet/VetList";
 
 export const App = () => (
   <Admin dataProvider={dataProvider} layout={AppLayout}>
@@ -43,6 +44,7 @@ export const App = () => (
     <Resource
       name="vet"
       recordRepresentation={vetRecordRepresentation}
+      list={VetList}
     />    
     <Resource
       name="specialty"
