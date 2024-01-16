@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.deser.SettableBeanProperty;
 import com.fasterxml.jackson.databind.deser.ValueInstantiator;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.introspect.ClassIntrospector;
+import com.fasterxml.jackson.databind.util.LRUMap;
 import com.google.errorprone.annotations.CheckReturnValue;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
@@ -23,12 +24,14 @@ public class RaPatchUtil {
 
     private final ObjectMapper objectMapper;
 	private final Validator validator;
+	private final LRUMap<Class<?>, BeanDescription> cachedDescriptions;
 
 	public RaPatchUtil(ObjectMapper objectMapper,
 					   Validator validator) {
         this.objectMapper = objectMapper;
 		this.validator = validator;
-	}
+        cachedDescriptions = new LRUMap<>(64, 2000);
+    }
 
 	/**
 	 * Patches passed object with properties from passed json.
@@ -65,8 +68,6 @@ public class RaPatchUtil {
         // 4. patch Map of properties - copy from DTO_2 only those that existed in json
         // 5. construct DTO_3 from patched properties.
         // 6. return DTO_3 as a result.
-
-        // todo cache beanDescription
 
         BeanDescription beanDescription = getBeanDescription(target.getClass());
         List<BeanPropertyDefinition> beanProperties = beanDescription.findProperties();
@@ -176,10 +177,17 @@ public class RaPatchUtil {
 	}
 
 	private BeanDescription getBeanDescription(Class<?> targetClass) {
+		BeanDescription description = cachedDescriptions.get(targetClass);
+		if (description != null) {
+			return description;
+		}
+
         DeserializationConfig config = objectMapper.getDeserializationConfig();
         ClassIntrospector introspector = config.getClassIntrospector();
-        BeanDescription description = introspector.forDeserialization(config, objectMapper.constructType(targetClass),
+        description = introspector.forDeserialization(config, objectMapper.constructType(targetClass),
                 config);
+
+		cachedDescriptions.put(targetClass, description);
         return description;
     }
 
