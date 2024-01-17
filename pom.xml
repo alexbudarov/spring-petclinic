@@ -69,6 +69,12 @@
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>com.haulmont.amplicode</groupId>
+      <artifactId>rest-utils-starter</artifactId>
+      <version>0.1.0-SNAPSHOT</version>
+    </dependency>
+
     <!-- Databases - Uses H2 by default -->
     <dependency>
       <groupId>com.h2database</groupId>

@@ -1,11 +1,10 @@
 package org.springframework.samples.petclinic.vet;
 
+import com.amplicode.restutils.filter.SpecFilterCondition;
+import com.amplicode.restutils.filter.SpecificationFilterConverter;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
-import org.springframework.samples.petclinic.rest.rasupport.SpecFilterCondition;
-import org.springframework.samples.petclinic.rest.rasupport.SpecFilterOperator;
-import org.springframework.samples.petclinic.rest.rasupport.SpecificationFilterConverter;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

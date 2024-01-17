@@ -1,5 +1,9 @@
 package org.springframework.samples.petclinic.owner;
 
+import com.amplicode.restutils.filter.SpecFilterCondition;
+import com.amplicode.restutils.filter.SpecFilterOperator;
+import com.amplicode.restutils.filter.SpecificationFilterConverter;
+import com.amplicode.restutils.patch.ObjectPatcher;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -7,10 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.samples.petclinic.rest.rasupport.RaPatchUtil;
-import org.springframework.samples.petclinic.rest.rasupport.SpecFilterCondition;
-import org.springframework.samples.petclinic.rest.rasupport.SpecFilterOperator;
-import org.springframework.samples.petclinic.rest.rasupport.SpecificationFilterConverter;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -23,16 +23,16 @@ public class PetRestController {
 
 	private final PetRepository petRepository;
 	private final PetMapper petMapper;
-	private final RaPatchUtil raPatchUtil;
+	private final ObjectPatcher objectPatcher;
 	private final SpecificationFilterConverter specificationFilterConverter;
 
 	public PetRestController(PetRepository petRepository,
                              PetMapper petMapper,
-                             RaPatchUtil raPatchUtil,
+                             ObjectPatcher objectPatcher,
                              SpecificationFilterConverter specificationFilterConverter) {
 		this.petRepository = petRepository;
 		this.petMapper = petMapper;
-		this.raPatchUtil = raPatchUtil;
+		this.objectPatcher = objectPatcher;
 		this.specificationFilterConverter = specificationFilterConverter;
 	}
 
@@ -78,7 +78,7 @@ public class PetRestController {
 		}
 
 		PetDto petDto = petMapper.toDto(pet);
-		petDto = raPatchUtil.patchAndValidate(petDto, petDtoPatch);
+		petDto = objectPatcher.patchAndValidate(petDto, petDtoPatch);
 
 		if (petDto.id() != null && !petDto.id().equals(id)) {
 			return ResponseEntity.badRequest().build();
@@ -100,7 +100,7 @@ public class PetRestController {
 			}
 
 			PetDto dto = petMapper.toDto(entity);
-			dto = raPatchUtil.patchAndValidate(dto, patchJson);
+			dto = objectPatcher.patchAndValidate(dto, patchJson);
 
 			if (dto.id() != null && !dto.id().equals(id)) { // attempt to change entity id
 				return ResponseEntity.badRequest().build();

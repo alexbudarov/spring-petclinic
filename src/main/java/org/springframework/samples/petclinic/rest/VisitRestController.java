@@ -1,5 +1,9 @@
 package org.springframework.samples.petclinic.rest;
 
+import com.amplicode.restutils.filter.SpecFilterCondition;
+import com.amplicode.restutils.filter.SpecFilterOperator;
+import com.amplicode.restutils.filter.SpecificationFilterConverter;
+import com.amplicode.restutils.patch.ObjectPatcher;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Future;
@@ -10,10 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.owner.*;
-import org.springframework.samples.petclinic.rest.rasupport.RaPatchUtil;
-import org.springframework.samples.petclinic.rest.rasupport.SpecFilterCondition;
-import org.springframework.samples.petclinic.rest.rasupport.SpecFilterOperator;
-import org.springframework.samples.petclinic.rest.rasupport.SpecificationFilterConverter;
 import org.springframework.samples.petclinic.vet.Specialty;
 import org.springframework.samples.petclinic.vet.SpecialtyRepository;
 import org.springframework.samples.petclinic.vet.Vet;
@@ -40,7 +40,7 @@ public class VisitRestController {
 
     private final SpecificationFilterConverter specificationFilterConverter;
 
-	private final RaPatchUtil raPatchUtil;
+	private final ObjectPatcher objectPatcher;
 
 	public VisitRestController(VisitService visitService,
                                VetRepository vetRepository,
@@ -49,7 +49,7 @@ public class VisitRestController {
                                VisitRepository visitRepository,
                                VisitMapper visitMapper,
                                SpecificationFilterConverter specificationFilterConverter,
-							   RaPatchUtil raPatchUtil) {
+							   ObjectPatcher objectPatcher) {
         this.visitService = visitService;
         this.vetRepository = vetRepository;
         this.petRepository = petRepository;
@@ -57,7 +57,7 @@ public class VisitRestController {
         this.visitRepository = visitRepository;
         this.visitMapper = visitMapper;
         this.specificationFilterConverter = specificationFilterConverter;
-		this.raPatchUtil = raPatchUtil;
+		this.objectPatcher = objectPatcher;
 	}
 
     @GetMapping("/{id}")
@@ -83,7 +83,7 @@ public class VisitRestController {
 			}
 
 			VisitDto dto = visitMapper.toDto(entity);
-			dto = raPatchUtil.patchAndValidate(dto, patchJson);
+			dto = objectPatcher.patchAndValidate(dto, patchJson);
 
 			if (dto.id() != null && !dto.id().equals(id)) { // attempt to change entity id
 				return ResponseEntity.badRequest().build();
