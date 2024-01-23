@@ -69,9 +69,17 @@
       <scope>test</scope>
     </dependency>
 
+    <!--
+      io.amplicode
+
+      (!!!) react-admin-utils-starter
+      ra-data-utils-starter
+      rest-utils-starter
+      amplicode-core-starter (too platform-ish)
+    -->
     <dependency>
-      <groupId>com.haulmont.amplicode</groupId>
-      <artifactId>rest-utils-starter</artifactId>
+      <groupId>io.amplicode</groupId>
+      <artifactId>react-admin-utils-starter</artifactId>
       <version>0.1.0-SNAPSHOT</version>
     </dependency>
 

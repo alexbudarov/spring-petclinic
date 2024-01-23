@@ -1,9 +1,9 @@
 package org.springframework.samples.petclinic.owner;
 
-import com.amplicode.restutils.filter.SpecFilterCondition;
-import com.amplicode.restutils.filter.SpecFilterOperator;
-import com.amplicode.restutils.filter.SpecificationFilterConverter;
-import com.amplicode.restutils.patch.ObjectPatcher;
+import io.amplicode.rautils.filter.SpecFilterCondition;
+import io.amplicode.rautils.filter.SpecFilterOperator;
+import io.amplicode.rautils.filter.SpecificationFilterConverter;
+import io.amplicode.rautils.patch.ObjectPatcher;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

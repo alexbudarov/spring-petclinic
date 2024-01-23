@@ -1,7 +1,7 @@
 package org.springframework.samples.petclinic.vet;
 
-import com.amplicode.restutils.filter.SpecFilterCondition;
-import com.amplicode.restutils.filter.SpecificationFilterConverter;
+import io.amplicode.rautils.filter.SpecFilterCondition;
+import io.amplicode.rautils.filter.SpecificationFilterConverter;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
