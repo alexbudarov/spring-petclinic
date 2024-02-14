@@ -1,8 +1,5 @@
 package org.springframework.samples.petclinic.rest;
 
-import io.amplicode.rautils.filter.SpecFilterCondition;
-import io.amplicode.rautils.filter.SpecFilterOperator;
-import io.amplicode.rautils.filter.SpecificationFilterConverter;
 import io.amplicode.rautils.patch.ObjectPatcher;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -38,8 +35,6 @@ public class VisitRestController {
 
     private final VisitMapper visitMapper;
 
-    private final SpecificationFilterConverter specificationFilterConverter;
-
 	private final ObjectPatcher objectPatcher;
 
 	public VisitRestController(VisitService visitService,
@@ -48,7 +43,6 @@ public class VisitRestController {
                                SpecialtyRepository specialtyRepository,
                                VisitRepository visitRepository,
                                VisitMapper visitMapper,
-                               SpecificationFilterConverter specificationFilterConverter,
 							   ObjectPatcher objectPatcher) {
         this.visitService = visitService;
         this.vetRepository = vetRepository;
@@ -56,7 +50,6 @@ public class VisitRestController {
         this.specialtyRepository = specialtyRepository;
         this.visitRepository = visitRepository;
         this.visitMapper = visitMapper;
-        this.specificationFilterConverter = specificationFilterConverter;
 		this.objectPatcher = objectPatcher;
 	}
 
@@ -67,8 +60,8 @@ public class VisitRestController {
     }
 
     @GetMapping
-    public Page<VisitDto> visitList(@ModelAttribute VisitListFilter filter, Pageable pageable) {
-        Specification<Visit> specification = specificationFilterConverter.convert(filter);
+    public Page<VisitDto> visitList(@ModelAttribute VisitFilter filter, Pageable pageable) {
+        Specification<Visit> specification = filter.toSpecification();
         Page<Visit> page = visitRepository.findAll(specification, pageable);
         return page.map(visitMapper::toDto);
     }
@@ -154,16 +147,5 @@ public class VisitRestController {
         }
     }
 
-    public record VisitListFilter(
-            @SpecFilterCondition(operator = SpecFilterOperator.CONTAINS, ignoreCase = true)
-            String description,
-
-            @SpecFilterCondition(property = "date", operator = SpecFilterOperator.LESS_OR_EQUALS)
-            LocalDate dateBefore,
-
-            @SpecFilterCondition(property = "date", operator = SpecFilterOperator.GREATER_OR_EQUALS)
-            LocalDate dateAfter
-    ) {
-    }
 }
 

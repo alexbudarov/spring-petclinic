@@ -1,8 +1,5 @@
 package org.springframework.samples.petclinic.owner;
 
-import io.amplicode.rautils.filter.SpecFilterCondition;
-import io.amplicode.rautils.filter.SpecFilterOperator;
-import io.amplicode.rautils.filter.SpecificationFilterConverter;
 import io.amplicode.rautils.patch.ObjectPatcher;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -24,16 +21,13 @@ public class PetRestController {
 	private final PetRepository petRepository;
 	private final PetMapper petMapper;
 	private final ObjectPatcher objectPatcher;
-	private final SpecificationFilterConverter specificationFilterConverter;
 
 	public PetRestController(PetRepository petRepository,
                              PetMapper petMapper,
-                             ObjectPatcher objectPatcher,
-                             SpecificationFilterConverter specificationFilterConverter) {
+                             ObjectPatcher objectPatcher) {
 		this.petRepository = petRepository;
 		this.petMapper = petMapper;
 		this.objectPatcher = objectPatcher;
-		this.specificationFilterConverter = specificationFilterConverter;
 	}
 
 	@GetMapping("/{id}")
@@ -54,7 +48,7 @@ public class PetRestController {
 	public Page<PetDto> petList(@ModelAttribute PetFilter filter, @PageableDefault(size = 5) Pageable pageable) { // no way to declare "no sorting"
 		pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize()); // clear possible sorting params
 
-		Specification<Pet> specification = specificationFilterConverter.convert(filter);
+		Specification<Pet> specification = filter.toSpecification();
 		Page<Pet> page = petRepository.findAll(specification, pageable);
 		return page.map(petMapper::toDto);
 	}
@@ -127,11 +121,4 @@ public class PetRestController {
 		return ResponseEntity.of(petDto);
 	}
 
-	public record PetFilter(
-			@SpecFilterCondition(property = "name", operator = SpecFilterOperator.STARTS_WITH, ignoreCase = true)
-			String q,
-
-			@SpecFilterCondition(property = "owner.id", operator = SpecFilterOperator.EQUALS)
-			Integer ownerId
-	) {}
 }

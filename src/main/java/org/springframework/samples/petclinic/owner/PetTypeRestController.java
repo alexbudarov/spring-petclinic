@@ -1,8 +1,5 @@
 package org.springframework.samples.petclinic.owner;
 
-import io.amplicode.rautils.filter.SpecFilterCondition;
-import io.amplicode.rautils.filter.SpecFilterOperator;
-import io.amplicode.rautils.filter.SpecificationFilterConverter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -15,12 +12,9 @@ import java.util.List;
 public class PetTypeRestController {
 
     private final PetTypeRepository petTypeRepository;
-    private final SpecificationFilterConverter specificationFilterConverter;
 
-    public PetTypeRestController(PetTypeRepository petTypeRepository,
-                                 SpecificationFilterConverter specificationFilterConverter) {
+    public PetTypeRestController(PetTypeRepository petTypeRepository) {
         this.petTypeRepository = petTypeRepository;
-        this.specificationFilterConverter = specificationFilterConverter;
     }
 
 	@GetMapping(path="/by-ids")
@@ -30,15 +24,9 @@ public class PetTypeRestController {
 	}
 
     @GetMapping
-    public Page<PetType> getList(@ModelAttribute PetTypeListFilter filter, Pageable pageable) {
-        Specification<PetType> specification = specificationFilterConverter.convert(filter);
+    public Page<PetType> getList(@ModelAttribute PetTypeFilter filter, Pageable pageable) {
+        Specification<PetType> specification = filter.toSpecification();
         return petTypeRepository.findAll(specification, pageable);
-    }
-
-    public record PetTypeListFilter(
-            @SpecFilterCondition(property = "name", operator = SpecFilterOperator.STARTS_WITH, ignoreCase = true)
-            String q
-    ) {
     }
 }
 

@@ -17,6 +17,7 @@ package org.springframework.samples.petclinic.owner;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
@@ -35,7 +36,7 @@ import java.util.List;
  * @author Sam Brannen
  * @author Michael Isvy
  */
-public interface OwnerRepository extends Repository<Owner, Integer>/*, ListCrudRepository<Owner, Integer>*/ {
+public interface OwnerRepository extends Repository<Owner, Integer>, JpaSpecificationExecutor<Owner> {
 
 	/**
 	 * Retrieve all {@link PetType}s from the data store.
@@ -82,13 +83,6 @@ public interface OwnerRepository extends Repository<Owner, Integer>/*, ListCrudR
 	List<Owner> findAllById(Iterable<Integer> ids);
 
 	void deleteAllById(Iterable<Integer> ids);
-
-	@Query("""
-			select o from Owner o
-			where upper(o.firstName) like upper(concat(?1, '%')) or upper(o.lastName) like upper(concat(?1, '%'))""")
-	Page<Owner> findByFirstOrLastName(String name, Pageable pageable);
-
-	Page<Owner> findByTelephoneStartsWith(String telephone, Pageable pageable);
 
 	/*@Query("""
 			select o from Owner o

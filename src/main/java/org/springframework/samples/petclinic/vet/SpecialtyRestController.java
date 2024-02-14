@@ -1,8 +1,5 @@
 package org.springframework.samples.petclinic.vet;
 
-import io.amplicode.rautils.filter.SpecFilterCondition;
-import io.amplicode.rautils.filter.SpecFilterOperator;
-import io.amplicode.rautils.filter.SpecificationFilterConverter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -14,14 +11,11 @@ import java.util.List;
 @RequestMapping("/rest/specialty")
 public class SpecialtyRestController {
     private final SpecialtyRepository specialtyRepository;
-    private final SpecificationFilterConverter specificationFilterConverter;
     private final SpecialtyMapper specialtyMapper;
 
     public SpecialtyRestController(SpecialtyRepository specialtyRepository,
-                                   SpecificationFilterConverter specificationFilterConverter,
                                    SpecialtyMapper specialtyMapper) {
         this.specialtyRepository = specialtyRepository;
-        this.specificationFilterConverter = specificationFilterConverter;
         this.specialtyMapper = specialtyMapper;
     }
 
@@ -35,19 +29,11 @@ public class SpecialtyRestController {
 	}
 
     @GetMapping
-    public Page<SpecialtyDto> getList(@ModelAttribute SpecialtyListFilter filter, Pageable pageable) {
-        Specification<Specialty> specification = specificationFilterConverter.convert(filter);
+    public Page<SpecialtyDto> getList(@ModelAttribute SpecialtyFilter filter, Pageable pageable) {
+        Specification<Specialty> specification = filter.toSpecification();
         Page<Specialty> page = specialtyRepository.findAll(specification, pageable);
         return page.map(specialtyMapper::toDto);
     }
 
-    public record SpecialtyListFilter(
-            @SpecFilterCondition(property = "name", operator = SpecFilterOperator.STARTS_WITH, ignoreCase = true)
-            String q,
-
-			@SpecFilterCondition(property = "id", joinCollection = "vets")
-			Integer vetId
-    ) {
-    }
 }
 
