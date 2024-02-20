@@ -75,14 +75,14 @@ export default (
 
     update: (resource, params) =>
         httpClient(`${apiUrl}/${resource}/${params.id}`, {
-            method: 'PUT',
+            method: 'PATCH',
             body: JSON.stringify(params.data),
         }).then(({ json }) => ({ data: json })),
 
     updateMany: (resource, params) => {
         const idsValue = params.ids.join(",");
         return httpClient(`${apiUrl}/${resource}?ids=${idsValue}`, {
-            method: 'PUT',
+            method: 'PATCH',
             body: JSON.stringify(params.data),
         }).then(({ json }) => ({ data: json }))
     },

@@ -66,7 +66,7 @@ public class VisitRestController {
         return page.map(visitMapper::toDto);
     }
 
-	@PutMapping
+	@PatchMapping
 	public ResponseEntity<List<Integer>> update(@RequestParam List<Integer> ids, @RequestBody String patchJson) {
 		List<Visit> updatedEntities = new ArrayList<>();
 		for (Integer id: ids) {

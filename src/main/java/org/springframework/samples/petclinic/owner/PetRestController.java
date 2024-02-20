@@ -64,7 +64,7 @@ public class PetRestController {
 		return ResponseEntity.ok(petMapper.toDto(pet));
 	}
 
-	@PutMapping("/{id}")
+	@PatchMapping("/{id}")
 	public ResponseEntity<PetDto> update(@PathVariable Integer id, @RequestBody String petDtoPatch) {
 		Pet pet = petRepository.findById(id).orElse(null);
 		if (pet == null) {
@@ -84,7 +84,7 @@ public class PetRestController {
 		return ResponseEntity.ok(petMapper.toDto(pet));
 	}
 
-	@PutMapping
+	@PatchMapping
 	public ResponseEntity<List<Integer>> update(@RequestParam List<Integer> ids, @RequestBody String patchJson) {
 		List<Pet> updatedEntities = new ArrayList<>();
 		for (Integer id: ids) {

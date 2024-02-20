@@ -70,7 +70,7 @@ public class OwnerRestController {
 		return ResponseEntity.ok(ownerMapper.toDto(owner));
 	}
 
-	@PutMapping("/{id}")
+	@PatchMapping("/{id}")
 	public ResponseEntity<OwnerDto> update(@PathVariable Integer id, @RequestBody JsonNode ownerDtoPatch) throws IOException, BindException {
 		Owner owner = ownerRepository.findById(id);
 		if (owner == null) {
