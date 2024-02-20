@@ -16,6 +16,9 @@ import { Route } from "react-router-dom";
 import { AppLayout } from "./AppLayout";
 import { VisitRequest } from "./app/resources/visit/VisitRequest";
 import { VetList } from "./app/resources/vet/VetList";
+import { OwnerList } from "./app/resources/owner/OwnerList";
+import { OwnerCreate } from "./app/resources/owner/OwnerCreate";
+import { OwnerEdit } from "./app/resources/owner/OwnerEdit";
 
 export const App = () => (
   <Admin dataProvider={dataProvider} layout={AppLayout}>
@@ -26,7 +29,9 @@ export const App = () => (
     />
     <Resource
       name="owner"
-      list={ListGuesser}
+      list={OwnerList}
+      create={OwnerCreate}
+      edit={OwnerEdit}
       recordRepresentation={ownerRecordRepresentation}
     />
     <Resource

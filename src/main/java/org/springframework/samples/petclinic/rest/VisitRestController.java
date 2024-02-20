@@ -78,7 +78,7 @@ public class VisitRestController {
 			VisitDto dto = visitMapper.toDto(entity);
 			dto = objectPatcher.patchAndValidate(dto, patchJson);
 
-			if (dto.id() != null && !dto.id().equals(id)) { // attempt to change entity id
+			if (dto.getId() != null && !dto.getId().equals(id)) { // attempt to change entity id
 				return ResponseEntity.badRequest().build();
 			}
 

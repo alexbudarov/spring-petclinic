@@ -4,11 +4,64 @@ import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * DTO for {@link Owner}
  */
-public record OwnerDto(Integer id, @NotBlank String firstName, @NotBlank String lastName, @NotBlank String address,
-                       @NotBlank String city,
-                       @Digits(integer = 10, fraction = 0) @NotBlank String telephone)/* implements Serializable*/ {
+public final class OwnerDto {
+    private Integer id;
+    private @NotBlank String firstName;
+    private @NotBlank String lastName;
+    private @NotBlank String address;
+    private @NotBlank String city;
+    private @Digits(integer = 10, fraction = 0) @NotBlank String telephone;
+
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+	public String getTelephone() {
+		return telephone;
+	}
+
+	public void setTelephone(String telephone) {
+		this.telephone = telephone;
+	}
 }
