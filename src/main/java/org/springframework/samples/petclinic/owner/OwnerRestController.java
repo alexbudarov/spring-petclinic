@@ -80,7 +80,7 @@ public class OwnerRestController {
 		OwnerDto ownerDto = ownerMapper.toDto(owner);
 
 		// can be used only for mutable DTOs
-		ownerDto = objectMapper.readerForUpdating(ownerDto).readValue(ownerDtoPatch);
+		objectMapper.readerForUpdating(ownerDto).readValue(ownerDtoPatch);
 		validate(ownerDto);
 
 		if (ownerDto.getId() != null && !ownerDto.getId().equals(id)) {
