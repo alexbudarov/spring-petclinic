@@ -1,5 +1,6 @@
 package org.springframework.samples.petclinic.rest;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.amplicode.rautils.patch.ObjectPatcher;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -67,7 +68,7 @@ public class VisitRestController {
     }
 
 	@PatchMapping
-	public ResponseEntity<List<Integer>> update(@RequestParam List<Integer> ids, @RequestBody String patchJson) {
+	public ResponseEntity<List<Integer>> update(@RequestParam List<Integer> ids, @RequestBody JsonNode patchJson) {
 		List<Visit> updatedEntities = new ArrayList<>();
 		for (Integer id: ids) {
 			Visit entity = visitRepository.findById(id).orElse(null);

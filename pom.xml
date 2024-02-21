@@ -69,18 +69,10 @@
       <scope>test</scope>
     </dependency>
 
-    <!--
-      io.amplicode
-
-      (!!!) react-admin-utils-starter
-      ra-data-utils-starter
-      rest-utils-starter
-      amplicode-core-starter (too platform-ish)
-    -->
     <dependency>
       <groupId>io.amplicode</groupId>
       <artifactId>react-admin-utils-starter</artifactId>
-      <version>0.1.0</version>
+      <version>0.2.0</version>
     </dependency>
 
     <!-- Databases - Uses H2 by default -->

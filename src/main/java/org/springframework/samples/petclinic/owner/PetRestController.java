@@ -1,5 +1,6 @@
 package org.springframework.samples.petclinic.owner;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.amplicode.rautils.patch.ObjectPatcher;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -65,7 +66,7 @@ public class PetRestController {
 	}
 
 	@PatchMapping("/{id}")
-	public ResponseEntity<PetDto> update(@PathVariable Integer id, @RequestBody String petDtoPatch) {
+	public ResponseEntity<PetDto> update(@PathVariable Integer id, @RequestBody JsonNode petDtoPatch) {
 		Pet pet = petRepository.findById(id).orElse(null);
 		if (pet == null) {
 			return ResponseEntity.notFound().build();
@@ -85,7 +86,7 @@ public class PetRestController {
 	}
 
 	@PatchMapping
-	public ResponseEntity<List<Integer>> update(@RequestParam List<Integer> ids, @RequestBody String patchJson) {
+	public ResponseEntity<List<Integer>> update(@RequestParam List<Integer> ids, @RequestBody JsonNode patchJson) {
 		List<Pet> updatedEntities = new ArrayList<>();
 		for (Integer id: ids) {
 			Pet entity = petRepository.findById(id).orElse(null);
