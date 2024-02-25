@@ -2,7 +2,7 @@ import { AutocompleteInput, DateInput, Edit, ReferenceInput, SimpleForm, TextInp
 
 export const OwnerEdit = () => {
   return (
-    <Edit>
+    <Edit mutationMode="pessimistic">
       <SimpleForm>
         <TextInput source="firstName" required autoFocus />
         <TextInput source="lastName" required />

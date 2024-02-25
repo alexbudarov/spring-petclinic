@@ -2,7 +2,7 @@ import { AutocompleteInput, DateInput, Edit, ReferenceInput, SimpleForm, TextInp
 
 export const PetEdit = () => {
   return (
-    <Edit>
+    <Edit mutationMode="pessimistic">
       <SimpleForm>
         <TextInput source="name" required autoFocus/>
         <DateInput source="birthDate"/>
